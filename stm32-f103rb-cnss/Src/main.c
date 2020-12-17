@@ -41,6 +41,7 @@ uint32_t i = 0;
 
 enum {OFF, ON} state;
 
+/*This program blinks led LD2 when button B1 is pushed*/
 int main(void)
 {
 

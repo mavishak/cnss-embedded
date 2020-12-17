@@ -106,7 +106,7 @@ Discarded input sections
  .debug_macro   0x0000000000000000       0x16 Src/event_queue.o
  .debug_macro   0x0000000000000000       0x29 Src/event_queue.o
  .debug_line    0x0000000000000000      0x66c Src/event_queue.o
- .debug_str     0x0000000000000000    0x5723e Src/event_queue.o
+ .debug_str     0x0000000000000000    0x57239 Src/event_queue.o
  .comment       0x0000000000000000       0x7c Src/event_queue.o
  .debug_frame   0x0000000000000000       0xb8 Src/event_queue.o
  .ARM.attributes
@@ -122,7 +122,7 @@ Discarded input sections
  .debug_macro   0x0000000000000000       0x11 Src/gpio_signal.o
  .debug_macro   0x0000000000000000      0xa66 Src/gpio_signal.o
  .debug_line    0x0000000000000000       0x35 Src/gpio_signal.o
- .debug_str     0x0000000000000000     0x2cea Src/gpio_signal.o
+ .debug_str     0x0000000000000000     0x2ce5 Src/gpio_signal.o
  .comment       0x0000000000000000       0x7c Src/gpio_signal.o
  .ARM.attributes
                 0x0000000000000000       0x33 Src/gpio_signal.o
@@ -311,7 +311,7 @@ Discarded input sections
  .debug_macro   0x0000000000000000       0x16 Src/syscalls.o
  .debug_macro   0x0000000000000000       0x88 Src/syscalls.o
  .debug_line    0x0000000000000000      0x739 Src/syscalls.o
- .debug_str     0x0000000000000000     0x888a Src/syscalls.o
+ .debug_str     0x0000000000000000     0x8885 Src/syscalls.o
  .comment       0x0000000000000000       0x7c Src/syscalls.o
  .debug_frame   0x0000000000000000      0x2ac Src/syscalls.o
  .ARM.attributes
@@ -393,7 +393,7 @@ Discarded input sections
  .debug_macro   0x0000000000000000       0x16 Src/sysmem.o
  .debug_macro   0x0000000000000000      0x145 Src/sysmem.o
  .debug_line    0x0000000000000000      0x559 Src/sysmem.o
- .debug_str     0x0000000000000000     0x7ae3 Src/sysmem.o
+ .debug_str     0x0000000000000000     0x7ade Src/sysmem.o
  .comment       0x0000000000000000       0x7c Src/sysmem.o
  .debug_frame   0x0000000000000000       0x34 Src/sysmem.o
  .ARM.attributes
@@ -749,11 +749,10 @@ OUTPUT(stm32-f103rb-cnss.elf elf32-littlearm)
  .debug_line    0x0000000000000000      0x701 Src/main.o
  .debug_line    0x0000000000000701       0x84 Startup/startup_stm32f103rbtx.o
 
-.debug_str      0x0000000000000000    0x572a7
- .debug_str     0x0000000000000000    0x57276 Src/main.o
-                                      0x57626 (size before relaxing)
- .debug_str     0x0000000000057276       0x31 Startup/startup_stm32f103rbtx.o
-                                         0x75 (size before relaxing)
+.debug_str      0x0000000000000000    0x572e6
+ .debug_str     0x0000000000000000    0x57271 Src/main.o
+                                      0x57621 (size before relaxing)
+ .debug_str     0x0000000000057271       0x75 Startup/startup_stm32f103rbtx.o
 
 .comment        0x0000000000000000       0x7b
  .comment       0x0000000000000000       0x7b Src/main.o
