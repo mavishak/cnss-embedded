@@ -3,6 +3,10 @@
  *
  *  Created on: 21 December  2020
  *      Author: Mayan and Naomi
+ *
+ *  Notes:
+ *  21.12.2020: Sensor works using D6 interrupt and LD2 as response.
+ *  			TBD: Change D6 to D5 (PB4) and change response to UART, and play with sensor.
  */
 
 
