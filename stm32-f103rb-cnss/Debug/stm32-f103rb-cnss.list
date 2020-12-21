@@ -39,11 +39,11 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY, DEBUGGING
  17 .debug_line   00001171  00000000  00000000  00012439  2**0
                   CONTENTS, READONLY, DEBUGGING
- 18 .debug_str    0005737d  00000000  00000000  000135aa  2**0
+ 18 .debug_str    000573ad  00000000  00000000  000135aa  2**0
                   CONTENTS, READONLY, DEBUGGING
- 19 .comment      0000007b  00000000  00000000  0006a927  2**0
+ 19 .comment      0000007b  00000000  00000000  0006a957  2**0
                   CONTENTS, READONLY
- 20 .debug_frame  000001f8  00000000  00000000  0006a9a4  2**2
+ 20 .debug_frame  000001f8  00000000  00000000  0006a9d4  2**2
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -112,7 +112,7 @@ __STATIC_INLINE void __NVIC_EnableIRQ(IRQn_Type IRQn)
  80001a4:	e000e100 	.word	0xe000e100
 
 080001a8 <init_sensor_with_interrupt>:
-#include "stm32f103xb.h"
+#include "hc-sr501pir_sensor.h"
 #include "cmsis_gcc.h"/*for __disable/enable_irq()*/
 #include "core_cm3.h" /*for NVIC_enableIRQ()*/
 

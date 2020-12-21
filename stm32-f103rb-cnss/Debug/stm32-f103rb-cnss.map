@@ -819,14 +819,14 @@ OUTPUT(stm32-f103rb-cnss.elf elf32-littlearm)
  .debug_line    0x0000000000000aa0      0x64d Src/main.o
  .debug_line    0x00000000000010ed       0x84 Startup/startup_stm32f103rbtx.o
 
-.debug_str      0x0000000000000000    0x5737d
- .debug_str     0x0000000000000000    0x53ff7 Src/gpio_signal.o
-                                      0x542c0 (size before relaxing)
- .debug_str     0x0000000000053ff7       0x72 Src/hc-sr501pir_sensor.o
-                                      0x542d0 (size before relaxing)
- .debug_str     0x0000000000054069     0x329f Src/main.o
-                                      0x5720e (size before relaxing)
- .debug_str     0x0000000000057308       0x75 Startup/startup_stm32f103rbtx.o
+.debug_str      0x0000000000000000    0x573ad
+ .debug_str     0x0000000000000000    0x54027 Src/gpio_signal.o
+                                      0x542f0 (size before relaxing)
+ .debug_str     0x0000000000054027       0x72 Src/hc-sr501pir_sensor.o
+                                      0x54300 (size before relaxing)
+ .debug_str     0x0000000000054099     0x329f Src/main.o
+                                      0x5723e (size before relaxing)
+ .debug_str     0x0000000000057338       0x75 Startup/startup_stm32f103rbtx.o
 
 .comment        0x0000000000000000       0x7b
  .comment       0x0000000000000000       0x7b Src/gpio_signal.o

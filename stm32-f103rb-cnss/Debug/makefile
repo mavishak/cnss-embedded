@@ -39,8 +39,8 @@ stm32-f103rb-cnss.bin \
 all: stm32-f103rb-cnss.elf secondary-outputs
 
 # Tool invocations
-stm32-f103rb-cnss.elf: $(OBJS) $(USER_OBJS) C:\Mayan\Repository\ cnss\cnss-embedded\stm32-f103rb-cnss\STM32F103RBTX_FLASH.ld
-	arm-none-eabi-gcc -o "stm32-f103rb-cnss.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m3 -T"C:\Mayan\Repository cnss\cnss-embedded\stm32-f103rb-cnss\STM32F103RBTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="stm32-f103rb-cnss.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+stm32-f103rb-cnss.elf: $(OBJS) $(USER_OBJS) C:\Users\Owner\Angular\ Work\ Space\collaborative\ network\ \ security\ system\cnss-embedded\stm32-f103rb-cnss\STM32F103RBTX_FLASH.ld
+	arm-none-eabi-gcc -o "stm32-f103rb-cnss.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m3 -T"C:\Users\Owner\Angular Work Space\collaborative network  security system\cnss-embedded\stm32-f103rb-cnss\STM32F103RBTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="stm32-f103rb-cnss.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
