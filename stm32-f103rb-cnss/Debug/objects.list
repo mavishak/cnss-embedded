@@ -1,5 +1,6 @@
 "Src/event_queue.o"
 "Src/gpio_signal.o"
+"Src/hc-sr501pir_sensor.o"
 "Src/main.o"
 "Src/syscalls.o"
 "Src/sysmem.o"

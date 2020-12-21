@@ -1,4 +1,5 @@
-Src/gpio_signal.o: ../Src/gpio_signal.c ../Inc/gpio_signal.h \
+Src/hc-sr501pir_sensor.o: ../Src/hc-sr501pir_sensor.c \
+ ../Inc/hc-sr501pir_sensor.h \
  C:/Users/mayan/STM32Cube/Repository/STM32Cube_FW_F1_V1.8.3/Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f103xb.h \
  C:/Users/mayan/STM32Cube/Repository/STM32Cube_FW_F1_V1.8.3/Drivers/CMSIS/Core/Include/core_cm3.h \
  C:/Users/mayan/STM32Cube/Repository/STM32Cube_FW_F1_V1.8.3/Drivers/CMSIS/Core/Include/cmsis_version.h \
@@ -7,7 +8,7 @@ Src/gpio_signal.o: ../Src/gpio_signal.c ../Inc/gpio_signal.h \
  C:/Users/mayan/STM32Cube/Repository/STM32Cube_FW_F1_V1.8.3/Drivers/CMSIS/Device/ST/STM32F1xx/Include/system_stm32f1xx.h \
  C:/Users/mayan/STM32Cube/Repository/STM32Cube_FW_F1_V1.8.3/Drivers/CMSIS/Core/Include/cmsis_gcc.h
 
-../Inc/gpio_signal.h:
+../Inc/hc-sr501pir_sensor.h:
 
 C:/Users/mayan/STM32Cube/Repository/STM32Cube_FW_F1_V1.8.3/Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f103xb.h:
 

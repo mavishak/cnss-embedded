@@ -1,0 +1,4 @@
+core_cm3.h:1511:22:__NVIC_EnableIRQ	16	static
+hc-sr501pir_sensor.c:14:6:init_sensor_with_interrupt	8	static,ignoring_inline_asm
+hc-sr501pir_sensor.c:58:6:init_sensor_led_response	4	static
+hc-sr501pir_sensor.c:76:6:toggle_led	4	static
