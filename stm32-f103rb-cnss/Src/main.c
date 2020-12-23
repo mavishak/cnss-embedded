@@ -26,6 +26,7 @@
 // #include "core_cm3.h" /*for NVIC_enableIRQ() and NVIC_SetPriority()*/
 #include "event_queue.h"
 #include "hc-sr501pir_sensor.h"
+#include "usart.h"
 
 
 
@@ -33,12 +34,13 @@
 int main(void)
 {
 
-	init_sensor_with_interrupt();
-	init_sensor_led_response();
+	//init_sensor_with_interrupt();
+	//init_sensor_led_response();
+
+	init_usart();
 	while(1)
 	{
-
-
+		write();
 	}
 }
 

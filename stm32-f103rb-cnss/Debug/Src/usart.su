@@ -1,0 +1,2 @@
+usart.c:19:6:init_usart	4	static
+usart.c:42:6:write	4	static

@@ -8,6 +8,8 @@
 #ifndef USART_H_
 #define USART_H_
 
+void init_usart();
+void write();
 
 
 #endif /* USART_H_ */

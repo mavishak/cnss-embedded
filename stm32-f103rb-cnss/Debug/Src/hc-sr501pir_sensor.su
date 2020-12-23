@@ -1,7 +1,7 @@
 core_cm3.h:1511:22:__NVIC_EnableIRQ	16	static
 core_cm3.h:1639:22:__NVIC_SetPriority	16	static
-hc-sr501pir_sensor.c:27:6:init_sensor_with_interrupt	8	static,ignoring_inline_asm
-hc-sr501pir_sensor.c:89:6:init_sensor_led_response	4	static
-hc-sr501pir_sensor.c:107:6:toggle_led	4	static
-hc-sr501pir_sensor.c:123:6:EXTI4_IRQHandler	8	static
-hc-sr501pir_sensor.c:132:6:EXTI15_10_IRQHandler	8	static
+hc-sr501pir_sensor.c:26:6:init_sensor_with_interrupt	8	static,ignoring_inline_asm
+hc-sr501pir_sensor.c:88:6:init_sensor_led_response	4	static
+hc-sr501pir_sensor.c:106:6:toggle_led	4	static
+hc-sr501pir_sensor.c:122:6:EXTI4_IRQHandler	8	static
+hc-sr501pir_sensor.c:131:6:EXTI15_10_IRQHandler	8	static
