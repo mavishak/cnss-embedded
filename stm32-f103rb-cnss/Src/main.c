@@ -23,7 +23,7 @@
 
 #include "stm32f103xb.h"
 // #include "cmsis_gcc.h"/*for __disable/enable_irq()*/
-// #include "core_cm3.h" /*for NVIC_enableIRQ()*/
+// #include "core_cm3.h" /*for NVIC_enableIRQ() and NVIC_SetPriority()*/
 #include "event_queue.h"
 #include "hc-sr501pir_sensor.h"
 
@@ -45,13 +45,14 @@ int main(void)
 
 
 /*Interrupt service routine for sensor*/
-void EXTI15_10_IRQHandler(void)
+/*void EXTI15_10_IRQHandler(void)
 {
 
 	EXTI->PR |= 0x00000400; //reset flag by writing 1 to bit 10 (reference manual 10.3.6)
 	toggle_led();
 
 }
+*/
 
 
 void SysTick_Handler(void)
