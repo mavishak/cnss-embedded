@@ -9,7 +9,6 @@
  *  			TBD: Change D6 (PB10) to D5 (PB4) and change response to UART, and play with sensor.
  *
  *  22.12.2020: D5 (PB4) is set as input pin.
- *  			NOTE: needs to be tested.
  *  			TBD: Change response to UART, and play with sensor.
  */
 
