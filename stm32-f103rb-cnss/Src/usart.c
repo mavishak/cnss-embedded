@@ -7,8 +7,6 @@
  *  23.12.2020: We dubuged usart_init(), and write() it seems that they work as they are supposed to
  *  			But we haven't manged to view the transmited letter on screen.
  *  			Need to dig deeper - and solve the problem.
- *
- *  27.12.2020: TXE not and USART2->DR not changing (in write()) this might be normal
  */
 
 #include "usart.h"
