@@ -7,6 +7,10 @@
  *  23.12.2020: We dubuged usart_init(), and write() it seems that they work as they are supposed to
  *  			But we haven't manged to view the transmited letter on screen.
  *  			Need to dig deeper - and solve the problem.
+ *
+ *  27.12.2020: USART2->DR is not changing and so is TXE. This might be normal.
+ *  			There might be a problem with ST-LINK/v.2
+ *  			Note: Changed to branch main_v.2 because of problems in main branch
  */
 
 #include "usart.h"
@@ -19,7 +23,7 @@
 void init_usart(){
 
 	/*Enable Alternate Funcion for PINs)*/
-	RCC->APB2ENR |= 0x00000001; // for interrupt (see RM 8.3.7)
+	//RCC->APB2ENR |= 0x00000001; // for interrupt (see RM 8.3.7)
 
 	/*Enable USART2*/
 	RCC->APB1ENR |= 0x00020000; // (see RM 8.3.8)
@@ -44,6 +48,6 @@ void write(){
 	//while(((USART2->SR) & 0x00000040) !=  0x00000040); //wait until transmition is complete TC=1 (see RM 27.6.1)
 	//wait while data is not transferd
 	//wait while txe==0
-	while(((USART2->SR) & 0x00000080) == 0x00000000); // != 0x00000080 check TXE (see RM 27.6.1)
-	USART2->DR = 'c'; //send data (see RM 27.6.2)
+	while(((USART2->SR) & 0x00000080) == 0x00000000);// TXE != 1 // == 0x00000000); // != 0x00000080 check TXE (see RM 27.6.1)
+	USART2->DR = ('A' & 0xFF); //send data (see RM 27.6.2)
 }
