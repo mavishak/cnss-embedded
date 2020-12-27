@@ -57,10 +57,20 @@ void init_usart(){
 	/*Enable Uart Transmit*/
 	USART2->CR1 |= 0x00000008; // Set the TE bit in USART_CR1 to send an idle frame as first transmission. see RM 27.6.4)
 
+	/*Enable Uart Transmit Interrupt*/
+	__disable_irq();
+	USART2->CR1 |= 0x00000080; // Set TXEIE (see RM 27.6.4)
+	// Should we set TCIE (Transmission complete interrupt eneble) interrupt??
+	//	- according to RM when Tx is done we need to wait until TC=1.
+	NVIC_SetPriority(USART2_IRQn,0); //set all interrupt priotity to zero so that no preemption uccors.
+	NVIC_EnableIRQ(USART2_IRQn); //enable handler
+	__enable_irq();
+
 	/*Enable Uart Recirve*/
 	//Maybe afterwords - as of now don't need
 }
 
+/*USART2 write function with no interrupt*/
 void write(){
 
 	//while(((USART2->SR) & 0x00000040) !=  0x00000040); //wait until transmition is complete TC=1 (see RM 27.6.1)
@@ -73,6 +83,15 @@ void write(){
 	for(uint32_t i=0; i<4; i++){
 		for(uint32_t i=0; i<400000; i++);
 	}
+}
+
+
+/*USART2 intterupt handler*/
+void USART2_IRQHandler(void){
+
+	USART2->DR = ((uint32_t)'c' & 0xFF); //send data (see RM 27.6.2)
+	//USART2->CR1 &= ~(0x00000080); // reset TXEIE no interrupt (see RM 27.6.4)
+
 }
 
 
