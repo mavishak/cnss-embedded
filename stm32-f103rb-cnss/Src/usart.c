@@ -14,6 +14,8 @@
  *
  *  27.12.2020: We maneged to connect TeraTerm and USART2 by enabling PA2.
  *  			Problem: TeraTerm is not displaying Character correctly.
+ *
+ *  Test
  */
 
 #include "usart.h"
