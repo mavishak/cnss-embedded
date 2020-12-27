@@ -11,6 +11,9 @@
  *  27.12.2020: USART2->DR is not changing and so is TXE. This might be normal.
  *  			There might be a problem with ST-LINK/v.2
  *  			Note: Changed to branch main_v.2 because of problems in main branch
+ *
+ *  27.12.2020: We maneged to connect TeraTerm and USART2 by enabling PA2.
+ *  			Problem: TeraTerm is not displaying Character correctly.
  */
 
 #include "usart.h"
@@ -22,16 +25,29 @@
 
 void init_usart(){
 
-	/*Enable Alternate Funcion for PINs)*/
-	//RCC->APB2ENR |= 0x00000001; // for interrupt (see RM 8.3.7)
+	/*ADDED...*/
 
-	/*Enable USART2*/
+	/*Enabla RCC for GPIO Port A*/
+	RCC->APB2ENR |= 0x00000004; // (see RM 8.3.7)
+
+	/*Enable RCC for Alternate Funcion*/
+	RCC->APB2ENR |= 0x00000001; // for interrupt (see RM 8.3.7)
+
+	/*Configure USART2 Tx (PA2) as Output */
+	GPIOA->CRL &= 0xFFFFF0FF; //Leave all bits as they are exept for bit 2 (see RM 9.2.1)
+	GPIOA->CRL |= 0x00000A00; //Configure as Alternate function output Push-pull | Speed 2 MHz (see RM 9.2.1)
+
+	/*...ADDED*/
+
+
+	/*Enable RCC for USART2*/
 	RCC->APB1ENR |= 0x00020000; // (see RM 8.3.8)
 
 	/*Following directions RM pg.792 */
 	USART2->CR1 |= 0x00002000; //Enable the USART by writing the UE bit in USART_CR1 register to 1 (see RM 27.6.4)
-	//Program the M bit in USART_CR1 to define the word length to 8 (by default) (see RM 27.6.4)
-	//Program the number of stop bits in USART_CR2 to 1 (by defualt) (see RM 27.6.5)
+	//USART2->CR1 &= ~(0x00001000); //Program the M bit in USART_CR1 to define the word length to 8 (by default) (see RM 27.6.4)
+	//USART2->CR1 &= ~(0x00000400); //Parity Controle Disable (by default) (see RM 27.6.4)
+	//USART2->CR2 &= ~(0x00003000); //Program the number of stop bits in USART_CR2 to 1 (by defualt) (see RM 27.6.5)
 
 	/*Set Baude rate*/
 	USART2->BRR = 0xEA6; // 9600 bps (see https://www.programmersought.com/article/11991629979/ and RM 27.6.3)
@@ -49,5 +65,13 @@ void write(){
 	//wait while data is not transferd
 	//wait while txe==0
 	while(((USART2->SR) & 0x00000080) == 0x00000000);// TXE != 1 // == 0x00000000); // != 0x00000080 check TXE (see RM 27.6.1)
-	USART2->DR = ('A' & 0xFF); //send data (see RM 27.6.2)
+	USART2->DR = ('c' & 0xFF); //send data (see RM 27.6.2)
+
+	//delay
+	for(uint32_t i=0; i<4; i++){
+		for(uint32_t i=0; i<400000; i++);
+	}
 }
+
+
+

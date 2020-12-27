@@ -10,6 +10,7 @@
 
 void init_usart();
 void write();
+void delay();
 
 
 #endif /* USART_H_ */
