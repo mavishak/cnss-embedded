@@ -40,7 +40,7 @@ int main(void)
 	init_usart();
 	while(1)
 	{
-		//write();
+		write();
 	}
 }
 

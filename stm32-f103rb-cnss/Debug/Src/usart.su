@@ -1,5 +1,2 @@
-core_cm3.h:1511:22:__NVIC_EnableIRQ	16	static
-core_cm3.h:1639:22:__NVIC_SetPriority	16	static
-usart.c:28:6:init_usart	8	static,ignoring_inline_asm
-usart.c:74:6:write	16	static
-usart.c:90:6:USART2_IRQHandler	4	static
+usart.c:41:6:init_usart	4	static
+usart.c:98:6:write	4	static
