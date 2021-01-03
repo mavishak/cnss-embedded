@@ -10,18 +10,24 @@
  *
  *  22.12.2020: D5 (PB4) is set as input pin.
  *  			TBD: Change response to UART, and play with sensor.
+ *
+ *  03.01.2021: USART2 is now configured to respond to the sensor interrupt.
+ *  			TBD: Implement triggring of USART with event_queue.
+ *  			Question: Should the handler init the uart() and then trigger write() or should UART be initiolized in advance.
+ *  					  My gut tells me that the handler should do both...
  */
 
 
 #include "stm32f103xb.h"
 #include "hc-sr501pir_sensor.h"
+#include "usart.h"
 #include "cmsis_gcc.h"/*for __disable/enable_irq()*/
 #include "core_cm3.h" /*for NVIC_enableIRQ() and NVIC_SetPriority()*/
 
 /*
- * This functions intiolizes pin D6(was tested)/
- * D5(needs to be tested) to listen for sensors change in mode.
- * If motion is sensed an iterrupt uccors tunning LD2 on
+ * This functions intiolizes pin D5
+ * to listen for sensors change in mode.
+ * If motion is sensed an iterrupt occurs and triggers EXTI4_IRQHandler(void)
  */
 void init_sensor_with_interrupt(){
 
@@ -54,7 +60,6 @@ void init_sensor_with_interrupt(){
 
 
 
-// --NEEDS TO BE TESTED--
 	/*~~~USING D5 (PB4)~~~*/
 
 	/*Enabla RCC for GPIO Port B*/
@@ -79,8 +84,6 @@ void init_sensor_with_interrupt(){
 	__enable_irq();
 
 	/*~~~______________~~~*/
-// --NEEDS TO BE TESTED--
-
 
 }
 
@@ -123,11 +126,14 @@ void EXTI4_IRQHandler(void)
 {
 
 	EXTI->PR |= 0x00000010; //reset flag by writing 1 to bit 4 (reference manual 10.3.6)
-	toggle_led();
+
+	toggle_led(); //This is temporary for testing.
+	write(); //This chould be executed using the event_queue
 
 }
 
-/*Interrupt service routine for sensor using pin D6 (PB10) as input mode*/
+/*Interrupt service routine for sensor using pin D6 (PB10) as input mode.
+ *Note: Not in use.*/
 void EXTI15_10_IRQHandler(void)
 {
 

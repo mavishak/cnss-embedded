@@ -1,2 +1,3 @@
-usart.c:41:6:init_usart	4	static
-usart.c:98:6:write	4	static
+usart.c:44:6:init_usart	4	static
+usart.c:101:6:init_buffer_Tx	16	static
+usart.c:117:6:write	4	static

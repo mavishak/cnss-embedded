@@ -28,7 +28,8 @@
  *  			(I don't know if it matters but - GPIOA is configured to a speed of 2 MHz.)
  *  			Note: Interrupt is now disabled - Instructions from above.
  *
- *
+ * 03.01.2021: A message is now sent to screen rather than one letter.
+ * 			   The problems listed above are still valid :/
  */
 
 #include "usart.h"
@@ -36,8 +37,15 @@
 #include "hc-sr501pir_sensor.h"
 #include "cmsis_gcc.h"/*for __disable/enable_irq()*/
 #include "core_cm3.h" /*for NVIC_enableIRQ() and NVIC_SetPriority()*/
+#include <string.h>
+#include <stdlib.h>
 
+static Buffer buff;
 
+/*This dunctions Inits all registors that have to do with enabling USART2 (ST-LINK/V.2)
+ *inorder to send message to computer.
+ *The code is not complete there are still problems with Buad Rate probably as a misconception of the clock tree.
+ *Note: Interrupts are not enabled intentionally.*/
 void init_usart(){
 
 	/*This program works when TeraTerm speed is set to 2400 and USART_BRR is set to 0xD05.
@@ -51,7 +59,7 @@ void init_usart(){
 
 	/*ADDED...*/
 	/*Enable RCC for Alternate Funcion for PINs*/
-	//RCC->APB2ENR |= 0x00000001; //  (see RM 8.3.7)
+	RCC->APB2ENR |= 0x00000001; //  (see RM 8.3.7)
 
 	/*Enabla RCC for GPIO Port A*/
 	RCC->APB2ENR |= 0x00000004; // (see RM 8.3.7)
@@ -65,7 +73,7 @@ void init_usart(){
 
 
 	/*Enable RCC for USART2*/
-	RCC->APB1ENR |= 0x00020000; // (see RM 8.3.8)
+	RCC->APB1ENR |= 0x00020000; // (see RM 8.3.8) IS THIS REALLY NEEDED??
 
 
 	/*Following directions RM pg.792 */
@@ -94,14 +102,38 @@ void init_usart(){
 	//Maybe afterwords - as of now don't need
 }
 
-/*USART2 write function with no interrupt*/
+
+/*This function sets the Tx buffer up with chosen message.
+ * One may choose to use the default MSG defined in usart.h*/
+void init_buffer_Tx(uint8_t *msg){
+
+
+	memset(buff.Tx, '\0', BUFF_SIZE*sizeof(uint8_t));
+	if(BUFF_SIZE - (strlen((char*)msg) + 1) < 0){
+		strcpy((char*)buff.Tx,"Error msg to Long");
+	}
+	else{
+		strcpy((char*)buff.Tx,(char*)msg);
+	}
+
+	buff.Tx_len = strlen((char*)msg);
+	buff.write_index = 0;
+}
+
+/*USART2 write function with no interrupt.
+ *This function writes msg written in buffet_Tx to USART2_DR.*/
 void write(){
 
-	//while(((USART2->SR) & 0x00000040) !=  0x00000040); //wait until transmition is complete TC=1 (see RM 27.6.1)
-	//wait while data is not transferd
-	//wait while txe==0
-	while(((USART2->SR) & 0x00000080) == 0x00000000);// TXE != 1 // == 0x00000000); // != 0x00000080 check TXE (see RM 27.6.1)
-	USART2->DR = (uint8_t)('U' & 0xFF); //send data (see RM 27.6.2)
+
+	while(buff.write_index < buff.Tx_len)
+	{
+		while(((USART2->SR) & 0x00000080) == 0x00000000);// wait while data is not yet transferd (TXE != 1)(see RM 27.6.1)
+		USART2->DR = (uint8_t)(buff.Tx[buff.write_index] & 0xFF); //send data (see RM 27.6.2)
+		//USART2->DR = (uint8_t)('U' & 0xFF); //for testing
+		buff.write_index++;
+	}
+	buff.write_index = 0;
+	while(((USART2->SR) & 0x00000040) !=  0x00000040); //wait until transmition is complete TC=1 (see RM 27.6.1)
 
 }
 

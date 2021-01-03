@@ -34,13 +34,13 @@
 int main(void)
 {
 
-	//init_sensor_with_interrupt();
-	//init_sensor_led_response();
-
+	init_sensor_with_interrupt();
+	init_sensor_led_response();
+	init_buffer_Tx((uint8_t*)MSG);
 	init_usart();
 	while(1)
 	{
-		write();
+		//write();
 	}
 }
 
