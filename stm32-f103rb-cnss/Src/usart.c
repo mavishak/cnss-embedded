@@ -51,10 +51,6 @@ void init_usart(){
 	/*This program works when TeraTerm speed is set to 2400 and USART_BRR is set to 0xD05.
 	 * I HAVE NO IDEA WHY???*/
 
-	/*Testing...*/
-	//RCC->CFGR |= 0x00000400; //(AHB)HCLK/2 NOT HELPFULL...
-	//THIS DIDN"T WORK!!! LEAVING FOR BETTER UNDERSTANDING.
-	/*...Testing*/
 
 
 	/*ADDED...*/
@@ -84,7 +80,8 @@ void init_usart(){
 
 	/*Set Baude rate*/
 	//USART2->BRR = 0xEA6; // 9600 bps (see https://www.programmersought.com/article/11991629979/ and RM 27.6.3)
-	USART2->BRR = 0xD05;
+	//USART2->BRR = 0xD05;
+	USART2->BRR = 0x34D;
 
 	/*Enable Uart Transmit*/
 	USART2->CR1 |= 0x00000008; // Set the TE bit in USART_CR1 to send an idle frame as first transmission. see RM 27.6.4)
