@@ -36,11 +36,11 @@ int main(void)
 
 	init_sensor_with_interrupt();
 	init_sensor_led_response();
-	init_buffer_Tx((uint8_t*)MSG);
-	init_usart();
+	init_usart2();
+	set_usart2_buffer_Tx((uint8_t*)MSG);
 	while(1)
 	{
-		//write();
+		//write_usart2();
 	}
 }
 

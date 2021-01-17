@@ -128,12 +128,15 @@ void EXTI4_IRQHandler(void)
 	EXTI->PR |= 0x00000010; //reset flag by writing 1 to bit 4 (reference manual 10.3.6)
 
 	toggle_led(); //This is temporary for testing.
-	write(); //This chould be executed using the event_queue
+	write_usart2(); //This chould be executed using the event_queue
 
 }
 
+
+
 /*Interrupt service routine for sensor using pin D6 (PB10) as input mode.
  *Note: Not in use.*/
+/*
 void EXTI15_10_IRQHandler(void)
 {
 
@@ -141,3 +144,4 @@ void EXTI15_10_IRQHandler(void)
 	toggle_led();
 
 }
+*/

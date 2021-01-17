@@ -4,4 +4,3 @@ hc-sr501pir_sensor.c:32:6:init_sensor_with_interrupt	8	static,ignoring_inline_as
 hc-sr501pir_sensor.c:91:6:init_sensor_led_response	4	static
 hc-sr501pir_sensor.c:109:6:toggle_led	4	static
 hc-sr501pir_sensor.c:125:6:EXTI4_IRQHandler	8	static
-hc-sr501pir_sensor.c:137:6:EXTI15_10_IRQHandler	8	static

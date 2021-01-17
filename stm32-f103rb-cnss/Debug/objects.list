@@ -1,3 +1,4 @@
+"Src/esp8266.o"
 "Src/event_queue.o"
 "Src/gpio_signal.o"
 "Src/hc-sr501pir_sensor.o"

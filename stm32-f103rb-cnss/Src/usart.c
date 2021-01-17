@@ -30,6 +30,12 @@
  *
  * 03.01.2021: A message is now sent to screen rather than one letter.
  * 			   The problems listed above are still valid :/
+ *
+ * 08.01.2021: SOLVED!!! The USART2 clock is PCLK1 wich is by default only 8MHz NOT 36MHz.
+ * 			   (see RM p.798 for BRR calculation and RM p.93 Fig.8 for clock tree).
+ * 			   So, basically our problem was that we thought that PCLK1 was set to 36MHz by default.
+ * 			   For later practice follow the clock tree and default intiolization of clock registers.
+ *
  */
 
 #include "usart.h"
@@ -40,18 +46,15 @@
 #include <string.h>
 #include <stdlib.h>
 
-static Buffer buff;
+static USART_2 buff;
 
 /*This dunctions Inits all registors that have to do with enabling USART2 (ST-LINK/V.2)
  *inorder to send message to computer.
- *The code is not complete there are still problems with Buad Rate probably as a misconception of the clock tree.
- *Note: Interrupts are not enabled intentionally.*/
-void init_usart(){
+ *Note: Interrupts are not enabled intentionally.
+ *		This program works when TeraTerm speed is set to 9600*/
+void init_usart2(){
 
-	/*This program works when TeraTerm speed is set to 2400 and USART_BRR is set to 0xD05.
-	 * I HAVE NO IDEA WHY???*/
-
-
+	/*This program works when TeraTerm speed is set to 9600 and USART_BRR is set to 0x34D.*/
 
 	/*ADDED...*/
 	/*Enable RCC for Alternate Funcion for PINs*/
@@ -79,9 +82,7 @@ void init_usart(){
 	//USART2->CR2 &= ~(0x00003000); //Program the number of stop bits in USART_CR2 to 1 (by defualt) (see RM 27.6.5)
 
 	/*Set Baude rate*/
-	//USART2->BRR = 0xEA6; // 9600 bps (see https://www.programmersought.com/article/11991629979/ and RM 27.6.3)
-	//USART2->BRR = 0xD05;
-	USART2->BRR = 0x34D;
+	USART2->BRR = 0x34D; //9600 bps (see RM p.798 for BRR calculation and RM p.93 Fig.8 for clock tree)
 
 	/*Enable Uart Transmit*/
 	USART2->CR1 |= 0x00000008; // Set the TE bit in USART_CR1 to send an idle frame as first transmission. see RM 27.6.4)
@@ -102,7 +103,7 @@ void init_usart(){
 
 /*This function sets the Tx buffer up with chosen message.
  * One may choose to use the default MSG defined in usart.h*/
-void init_buffer_Tx(uint8_t *msg){
+void set_usart2_buffer_Tx(uint8_t *msg){
 
 
 	memset(buff.Tx, '\0', BUFF_SIZE*sizeof(uint8_t));
@@ -119,7 +120,7 @@ void init_buffer_Tx(uint8_t *msg){
 
 /*USART2 write function with no interrupt.
  *This function writes msg written in buffet_Tx to USART2_DR.*/
-void write(){
+void write_usart2(){
 
 
 	while(buff.write_index < buff.Tx_len)
