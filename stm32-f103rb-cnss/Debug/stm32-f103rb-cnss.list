@@ -7,43 +7,43 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, ALLOC, LOAD, READONLY, DATA
   1 .text         00000424  08000130  08000130  00010130  2**2
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
-  2 .rodata       0000007c  08000554  08000554  00010554  2**2
+  2 .rodata       00000080  08000554  08000554  00010554  2**2
                   CONTENTS, ALLOC, LOAD, READONLY, DATA
-  3 .ARM.extab    00000000  080005d0  080005d0  000105d8  2**0
+  3 .ARM.extab    00000000  080005d4  080005d4  000105dc  2**0
                   CONTENTS
-  4 .ARM          00000000  080005d0  080005d0  000105d8  2**0
+  4 .ARM          00000000  080005d4  080005d4  000105dc  2**0
                   CONTENTS
-  5 .preinit_array 00000000  080005d0  080005d8  000105d8  2**0
+  5 .preinit_array 00000000  080005d4  080005dc  000105dc  2**0
                   CONTENTS, ALLOC, LOAD, DATA
-  6 .init_array   00000004  080005d0  080005d0  000105d0  2**2
+  6 .init_array   00000004  080005d4  080005d4  000105d4  2**2
                   CONTENTS, ALLOC, LOAD, DATA
-  7 .fini_array   00000004  080005d4  080005d4  000105d4  2**2
+  7 .fini_array   00000004  080005d8  080005d8  000105d8  2**2
                   CONTENTS, ALLOC, LOAD, DATA
-  8 .data         00000000  20000000  20000000  000105d8  2**0
+  8 .data         00000000  20000000  20000000  000105dc  2**0
                   CONTENTS, ALLOC, LOAD, DATA
-  9 .bss          000000a8  20000000  080005d8  00020000  2**2
+  9 .bss          000000a8  20000000  080005dc  00020000  2**2
                   ALLOC
- 10 ._user_heap_stack 00000600  200000a8  080005d8  000200a8  2**0
+ 10 ._user_heap_stack 00000600  200000a8  080005dc  000200a8  2**0
                   ALLOC
- 11 .ARM.attributes 00000029  00000000  00000000  000105d8  2**0
+ 11 .ARM.attributes 00000029  00000000  00000000  000105dc  2**0
                   CONTENTS, READONLY
- 12 .debug_info   00002bbc  00000000  00000000  00010601  2**0
+ 12 .debug_info   00002bcd  00000000  00000000  00010605  2**0
                   CONTENTS, READONLY, DEBUGGING
- 13 .debug_abbrev 000007d7  00000000  00000000  000131bd  2**0
+ 13 .debug_abbrev 000007d7  00000000  00000000  000131d2  2**0
                   CONTENTS, READONLY, DEBUGGING
- 14 .debug_aranges 00000110  00000000  00000000  00013998  2**3
+ 14 .debug_aranges 00000118  00000000  00000000  000139b0  2**3
                   CONTENTS, READONLY, DEBUGGING
- 15 .debug_ranges 000000c8  00000000  00000000  00013aa8  2**3
+ 15 .debug_ranges 000000d0  00000000  00000000  00013ac8  2**3
                   CONTENTS, READONLY, DEBUGGING
- 16 .debug_macro  00000603  00000000  00000000  00013b70  2**0
+ 16 .debug_macro  00000603  00000000  00000000  00013b98  2**0
                   CONTENTS, READONLY, DEBUGGING
- 17 .debug_line   0000198c  00000000  00000000  00014173  2**0
+ 17 .debug_line   0000199d  00000000  00000000  0001419b  2**0
                   CONTENTS, READONLY, DEBUGGING
- 18 .debug_str    0005755b  00000000  00000000  00015aff  2**0
+ 18 .debug_str    00057563  00000000  00000000  00015b38  2**0
                   CONTENTS, READONLY, DEBUGGING
- 19 .comment      0000007b  00000000  00000000  0006d05a  2**0
+ 19 .comment      0000007b  00000000  00000000  0006d09b  2**0
                   CONTENTS, READONLY
- 20 .debug_frame  000002d4  00000000  00000000  0006d0d8  2**2
+ 20 .debug_frame  000002f4  00000000  00000000  0006d118  2**2
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -541,28 +541,28 @@ void set_usart2_buffer_Tx(uint8_t *msg){
  80003e2:	6078      	str	r0, [r7, #4]
 
 
-	memset(buff.Tx, '\0', BUFF_SIZE*sizeof(uint8_t));
+	memset(usart2.Tx, '\0', BUFF_SIZE*sizeof(uint8_t));
  80003e4:	2280      	movs	r2, #128	; 0x80
  80003e6:	2100      	movs	r1, #0
  80003e8:	480a      	ldr	r0, [pc, #40]	; (8000414 <set_usart2_buffer_Tx+0x38>)
  80003ea:	f000 f897 	bl	800051c <memset>
 	if(BUFF_SIZE - (strlen((char*)msg) + 1) < 0){
-		strcpy((char*)buff.Tx,"Error msg to Long");
+		strcpy((char*)usart2.Tx,"Error msg to Long");
 	}
 	else{
-		strcpy((char*)buff.Tx,(char*)msg);
+		strcpy((char*)usart2.Tx,(char*)msg);
  80003ee:	6879      	ldr	r1, [r7, #4]
  80003f0:	4808      	ldr	r0, [pc, #32]	; (8000414 <set_usart2_buffer_Tx+0x38>)
  80003f2:	f000 f89b 	bl	800052c <strcpy>
 	}
 
-	buff.Tx_len = strlen((char*)msg);
+	usart2.Tx_len = strlen((char*)msg);
  80003f6:	6878      	ldr	r0, [r7, #4]
  80003f8:	f7ff feba 	bl	8000170 <strlen>
  80003fc:	4602      	mov	r2, r0
  80003fe:	4b05      	ldr	r3, [pc, #20]	; (8000414 <set_usart2_buffer_Tx+0x38>)
  8000400:	f8c3 2080 	str.w	r2, [r3, #128]	; 0x80
-	buff.write_index = 0;
+	usart2.write_index = 0;
  8000404:	4b03      	ldr	r3, [pc, #12]	; (8000414 <set_usart2_buffer_Tx+0x38>)
  8000406:	2200      	movs	r2, #0
  8000408:	f8c3 2084 	str.w	r2, [r3, #132]	; 0x84
@@ -582,7 +582,7 @@ void write_usart2(){
  800041a:	af00      	add	r7, sp, #0
 
 
-	while(buff.write_index < buff.Tx_len)
+	while(usart2.write_index < usart2.Tx_len)
  800041c:	e014      	b.n	8000448 <write_usart2+0x30>
 	{
 		while(((USART2->SR) & 0x00000080) == 0x00000000);// wait while data is not yet transferd (TXE != 1)(see RM 27.6.1)
@@ -592,7 +592,7 @@ void write_usart2(){
  8000424:	f003 0380 	and.w	r3, r3, #128	; 0x80
  8000428:	2b00      	cmp	r3, #0
  800042a:	d0f9      	beq.n	8000420 <write_usart2+0x8>
-		USART2->DR = (uint8_t)(buff.Tx[buff.write_index] & 0xFF); //send data (see RM 27.6.2)
+		USART2->DR = (uint8_t)(usart2.Tx[usart2.write_index] & 0xFF); //send data (see RM 27.6.2)
  800042c:	4b13      	ldr	r3, [pc, #76]	; (800047c <write_usart2+0x64>)
  800042e:	f8d3 3084 	ldr.w	r3, [r3, #132]	; 0x84
  8000432:	4a12      	ldr	r2, [pc, #72]	; (800047c <write_usart2+0x64>)
@@ -600,13 +600,13 @@ void write_usart2(){
  8000436:	4b10      	ldr	r3, [pc, #64]	; (8000478 <write_usart2+0x60>)
  8000438:	605a      	str	r2, [r3, #4]
 		//USART2->DR = (uint8_t)('U' & 0xFF); //for testing
-		buff.write_index++;
+		usart2.write_index++;
  800043a:	4b10      	ldr	r3, [pc, #64]	; (800047c <write_usart2+0x64>)
  800043c:	f8d3 3084 	ldr.w	r3, [r3, #132]	; 0x84
  8000440:	3301      	adds	r3, #1
  8000442:	4a0e      	ldr	r2, [pc, #56]	; (800047c <write_usart2+0x64>)
  8000444:	f8c2 3084 	str.w	r3, [r2, #132]	; 0x84
-	while(buff.write_index < buff.Tx_len)
+	while(usart2.write_index < usart2.Tx_len)
  8000448:	4b0c      	ldr	r3, [pc, #48]	; (800047c <write_usart2+0x64>)
  800044a:	f8d3 2084 	ldr.w	r2, [r3, #132]	; 0x84
  800044e:	4b0b      	ldr	r3, [pc, #44]	; (800047c <write_usart2+0x64>)
@@ -614,7 +614,7 @@ void write_usart2(){
  8000454:	429a      	cmp	r2, r3
  8000456:	d3e2      	bcc.n	800041e <write_usart2+0x6>
 	}
-	buff.write_index = 0;
+	usart2.write_index = 0;
  8000458:	4b08      	ldr	r3, [pc, #32]	; (800047c <write_usart2+0x64>)
  800045a:	2200      	movs	r2, #0
  800045c:	f8c3 2084 	str.w	r2, [r3, #132]	; 0x84
@@ -674,7 +674,7 @@ void write_usart2(){
  80004b8:	20005000 	.word	0x20005000
  80004bc:	20000000 	.word	0x20000000
  80004c0:	20000000 	.word	0x20000000
- 80004c4:	080005d8 	.word	0x080005d8
+ 80004c4:	080005dc 	.word	0x080005dc
  80004c8:	20000000 	.word	0x20000000
  80004cc:	200000a8 	.word	0x200000a8
 
@@ -708,10 +708,10 @@ void write_usart2(){
  8000506:	4798      	blx	r3
  8000508:	3501      	adds	r5, #1
  800050a:	e7f2      	b.n	80004f2 <__libc_init_array+0x1e>
- 800050c:	080005d0 	.word	0x080005d0
- 8000510:	080005d0 	.word	0x080005d0
- 8000514:	080005d0 	.word	0x080005d0
- 8000518:	080005d4 	.word	0x080005d4
+ 800050c:	080005d4 	.word	0x080005d4
+ 8000510:	080005d4 	.word	0x080005d4
+ 8000514:	080005d4 	.word	0x080005d4
+ 8000518:	080005d8 	.word	0x080005d8
 
 0800051c <memset>:
  800051c:	4603      	mov	r3, r0

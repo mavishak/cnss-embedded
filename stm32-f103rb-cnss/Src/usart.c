@@ -36,6 +36,12 @@
  * 			   So, basically our problem was that we thought that PCLK1 was set to 36MHz by default.
  * 			   For later practice follow the clock tree and default intiolization of clock registers.
  *
+ * 22.01.2021: Setting the base lines for USART1 for comunication with ESP8266
+ * 			   MADE A FEW SMALL CHANGES TO USART2 init:
+ * 			   1. commented out RCC->APB2ENR |= 0x00000001;
+ * 			   2. changed static USART_2 usart2; //changed from buff
+ * 			   need to check that it is still working...
+ *
  */
 
 #include "usart.h"
@@ -46,7 +52,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-static USART_2 buff;
+static USART_2 usart2; //changed from buff
 
 /*This dunctions Inits all registors that have to do with enabling USART2 (ST-LINK/V.2)
  *inorder to send message to computer.
@@ -58,13 +64,13 @@ void init_usart2(){
 
 	/*ADDED...*/
 	/*Enable RCC for Alternate Funcion for PINs*/
-	RCC->APB2ENR |= 0x00000001; //  (see RM 8.3.7)
+	//RCC->APB2ENR |= 0x00000001; //  (see RM 8.3.7) //I don't think this line is needed...
 
 	/*Enabla RCC for GPIO Port A*/
 	RCC->APB2ENR |= 0x00000004; // (see RM 8.3.7)
 
 	/*Configure USART2 Tx (PA2) as Output */
-	GPIOA->CRL &= 0xFFFFF0FF; //Leave all bits as they are exept for bit 2 (see RM 9.2.1)
+	GPIOA->CRL &= 0xFFFFF0FF; //Leave all bits as they are except for bit 2 (see RM 9.2.1)
 	GPIOA->CRL |= 0x00000A00; //Configure as Alternate function output Push-pull | Speed 2 MHz (see RM 9.2.1)
 	//supposedly this is supposed to be better:
 	//GPIOA->CRL |= 0x00000B00; //Configure as Alternate function output Push-pull | Speed 50 MHz (see RM 9.2.1)
@@ -101,21 +107,65 @@ void init_usart2(){
 }
 
 
+void init_usart1(){
+
+	//Can enable only Tx or Rx Each time (In Arduino we couldn't we can't remeber why)??
+
+	/*Enabla RCC for GPIO Port A*/
+	RCC->APB2ENR |= 0x00000004; // (see RM 8.3.7)
+
+	/*Configure USART1 Tx (PA9) as Output*/
+	GPIOA->CRH &= 0xFFFFFF0F; //Leave all bits as they are except for bit 9 (see RM 9.2.2)
+	GPIOA->CRH |= 0x000000A0; //Configure as Alternate function output Push-pull | max speed 2 MHz (See RM 9.2.2 and pg.181).
+	//Maybe this is supposed to be better:
+	//GPIOA->CRH |= 0x000000B0; //Configure as Alternate function output Push-pull | Speed 50 MHz (see RM 9.2.2)
+
+	/*Configure USART1 Rx (PA10) as Input*/
+	//Input Pull-Up or Pull-Down? Or can we use Input-Floating??
+
+	/*Enable RCC for USART1*/
+	RCC->APB2ENR |= 0x00004000; // (See RM 8.3.7)
+
+	/*Following directions RM pg.792 (Setting Tx procesure)*/
+	USART1->CR1 |= 0x00002000; //Enable the USART by writing the UE bit in USART_CR1 register to 1 (see RM 27.6.4)
+	//USART1->CR1 &= ~(0x00001000); //Program the M bit in USART_CR1 to define the word length to 8 (by default) (see RM 27.6.4)
+	//USART1->CR1 &= ~(0x00000400); //Parity Controle Disable (by default) (see RM 27.6.4)
+	//USART1->CR2 &= ~(0x00003000); //Program the number of stop bits in USART_CR2 to 1 (by defualt) (see RM 27.6.5)
+
+	/* SHOULD WE DO THIS?? (What is DMA)
+	 * Select DMA enable (DMAT) in USART_CR3 if Multi buffer Communication is to take
+	 * place. Configure the DMA register as explained in multibuffer communication.
+	 */
+
+	/*Set Baude Rate for USART1 9600 bps*/
+	// WHAT IS THE CLOCK FREQUENCY
+
+	/*Following directions RM pg.795 (Setting Rx procesure) */
+
+
+	/*Enable Uart Transmit*/
+
+	/*Enable Uart Receive*/
+
+	/*Enable Uart Receive Interrupt*/
+
+}
+
 /*This function sets the Tx buffer up with chosen message.
  * One may choose to use the default MSG defined in usart.h*/
 void set_usart2_buffer_Tx(uint8_t *msg){
 
 
-	memset(buff.Tx, '\0', BUFF_SIZE*sizeof(uint8_t));
+	memset(usart2.Tx, '\0', BUFF_SIZE*sizeof(uint8_t));
 	if(BUFF_SIZE - (strlen((char*)msg) + 1) < 0){
-		strcpy((char*)buff.Tx,"Error msg to Long");
+		strcpy((char*)usart2.Tx,"Error msg to Long");
 	}
 	else{
-		strcpy((char*)buff.Tx,(char*)msg);
+		strcpy((char*)usart2.Tx,(char*)msg);
 	}
 
-	buff.Tx_len = strlen((char*)msg);
-	buff.write_index = 0;
+	usart2.Tx_len = strlen((char*)msg);
+	usart2.write_index = 0;
 }
 
 /*USART2 write function with no interrupt.
@@ -123,14 +173,14 @@ void set_usart2_buffer_Tx(uint8_t *msg){
 void write_usart2(){
 
 
-	while(buff.write_index < buff.Tx_len)
+	while(usart2.write_index < usart2.Tx_len)
 	{
 		while(((USART2->SR) & 0x00000080) == 0x00000000);// wait while data is not yet transferd (TXE != 1)(see RM 27.6.1)
-		USART2->DR = (uint8_t)(buff.Tx[buff.write_index] & 0xFF); //send data (see RM 27.6.2)
+		USART2->DR = (uint8_t)(usart2.Tx[usart2.write_index] & 0xFF); //send data (see RM 27.6.2)
 		//USART2->DR = (uint8_t)('U' & 0xFF); //for testing
-		buff.write_index++;
+		usart2.write_index++;
 	}
-	buff.write_index = 0;
+	usart2.write_index = 0;
 	while(((USART2->SR) & 0x00000040) !=  0x00000040); //wait until transmition is complete TC=1 (see RM 27.6.1)
 
 }
@@ -145,5 +195,11 @@ void write_usart2(){
 
 }*/
 
+
+
+void set_usart1_buffer_Tx(uint8_t *command);
+void set_usart1_buffer_Rx();
+void write_usart1();
+void read_usart1();
 
 

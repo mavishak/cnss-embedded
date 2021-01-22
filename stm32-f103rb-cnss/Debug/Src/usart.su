@@ -1,3 +1,4 @@
 usart.c:55:6:init_usart2	4	static
 usart.c:106:6:set_usart2_buffer_Tx	16	static
 usart.c:123:6:write_usart2	4	static
+usart.c:149:6:init_usart1	4	static
