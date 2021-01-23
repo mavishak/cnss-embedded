@@ -31,18 +31,24 @@
  * 03.01.2021: A message is now sent to screen rather than one letter.
  * 			   The problems listed above are still valid :/
  *
- * 08.01.2021: SOLVED!!! The USART2 clock is PCLK1 wich is by default only 8MHz NOT 36MHz.
+ * 08.01.2021: SOLVED!!! The USART2 clock is PCLK1 which is by default only 8MHz NOT 36MHz.
  * 			   (see RM p.798 for BRR calculation and RM p.93 Fig.8 for clock tree).
  * 			   So, basically our problem was that we thought that PCLK1 was set to 36MHz by default.
- * 			   For later practice follow the clock tree and default intiolization of clock registers.
+ * 			   For later practice follow the clock tree and default initiolization of clock registers.
  *
- * 22.01.2021: Setting the base lines for USART1 for comunication with ESP8266
+ * 22.01.2021: Setting the base lines for USART1 for communication with ESP8266
  * 			   MADE A FEW SMALL CHANGES TO USART2 init:
  * 			   1. commented out RCC->APB2ENR |= 0x00000001;
  * 			   2. changed static USART_2 usart2; //changed from buff
  * 			   need to check that it is still working...
  *
+ * 23.01.2021:
+ *  		  Questions:
+ *  		  1)How to know Rx is complete/receive? assumption: "\r\n" or "\r\n\r\n"
+ *  		  2)When disabling Rx should we disable Rx interrupts as  well?
+ *			  3)Maybe it will be smarter to call the set functions from the init?
  */
+#include "esp8266_WiFi.h"/*for testing usart1 DON'T LEAVE THIS HERE!!!*/
 
 #include "usart.h"
 #include "stm32f103xb.h"
@@ -106,10 +112,15 @@ void init_usart2(){
 	//Maybe afterwords - as of now don't need
 }
 
-
+/*
+ * Usart1 will be use for communication with esp8266.
+ * Generally,
+ * By default, Rx interrupts will be enabled in our program
+ * If you want to use Tx, call function Write_Uart1() that will send your msg and than enable Rx again
+ * */
 void init_usart1(){
 
-	//Can enable only Tx or Rx Each time (In Arduino we couldn't we can't remeber why)??
+	//Can enable only Tx or Rx Each time (In Arduino we couldn't we can't remeber why)?? Only one at a time because they use the same data register
 
 	/*Enabla RCC for GPIO Port A*/
 	RCC->APB2ENR |= 0x00000004; // (see RM 8.3.7)
@@ -121,12 +132,19 @@ void init_usart1(){
 	//GPIOA->CRH |= 0x000000B0; //Configure as Alternate function output Push-pull | Speed 50 MHz (see RM 9.2.2)
 
 	/*Configure USART1 Rx (PA10) as Input*/
-	//Input Pull-Up or Pull-Down? Or can we use Input-Floating??
+	GPIOA->CRH &= 0xFFFFF0FF; //Leave all bits as they are except for bit 10 (see RM 9.2.2)
+	//For Input Pull-Up (See RM pg.167)
+	GPIOA->CRH |= 0x00000800; //Configure as input with pull up/pull down (See RM 9.2.2).
+	GPIOA->ODR |= 0x00000400;//(See RM pg.161 and 9.2.4)
+	//For floating input (See RM pg.167)
+	//GPIOA->CRH |= 0x00000400; //Configure as floating input (See RM 9.2.2)- might be better?
+
 
 	/*Enable RCC for USART1*/
 	RCC->APB2ENR |= 0x00004000; // (See RM 8.3.7)
 
 	/*Following directions RM pg.792 (Setting Tx procesure)*/
+	/*Following directions RM pg.795 (Setting Rx procesure) */
 	USART1->CR1 |= 0x00002000; //Enable the USART by writing the UE bit in USART_CR1 register to 1 (see RM 27.6.4)
 	//USART1->CR1 &= ~(0x00001000); //Program the M bit in USART_CR1 to define the word length to 8 (by default) (see RM 27.6.4)
 	//USART1->CR1 &= ~(0x00000400); //Parity Controle Disable (by default) (see RM 27.6.4)
@@ -135,20 +153,24 @@ void init_usart1(){
 	/* SHOULD WE DO THIS?? (What is DMA)
 	 * Select DMA enable (DMAT) in USART_CR3 if Multi buffer Communication is to take
 	 * place. Configure the DMA register as explained in multibuffer communication.
+	 * WE DONT THINK WE NEED IT.
 	 */
 
 	/*Set Baude Rate for USART1 9600 bps*/
-	// WHAT IS THE CLOCK FREQUENCY
-
-	/*Following directions RM pg.795 (Setting Rx procesure) */
+	USART1->BRR = 0x34D; //9600 bps (see RM p.798 for BRR calculation and RM p.93 Fig.8 for clock tree) //We think that USART1&USART2 use the same clock (HSI)
 
 
-	/*Enable Uart Transmit*/
+	///*Enable Uart Transmit*/
 
 	/*Enable Uart Receive*/
+	USART1->CR1 |= 0x00000004;// Set the RE bit in USART_CR1 to send an idle frame as first transmission. see RM 27.6.4)
 
 	/*Enable Uart Receive Interrupt*/
-
+	 __disable_irq();
+	USART1->CR1 |= 0x00000020; // Set RXEIE (see RM 27.6.4)
+	NVIC_SetPriority(USART1_IRQn,0); //set all interrupt priority to zero so that no preemption occurs.
+	VIC_EnableIRQ(USART1_IRQn); //enable handler
+	__enable_irq();
 }
 
 /*This function sets the Tx buffer up with chosen message.
@@ -185,7 +207,40 @@ void write_usart2(){
 
 }
 
+/*USART1 write function with no interrupt.*/
+void write_usart1(uint8_t *command){
 
+	/*Disable Rx*/
+	/*Disable Rx interrupt?...*/
+	/*Enable Tx*/
+	/*Set Usart usart1_buffer_Tx with msg*/
+	/*Send msg*/
+	/*Wait 'till transmit complete (TC=1) after sending  full msg*/
+	/*Disable tx*/
+	/*Enable Rx*/
+	/*Enable Rx interrupts?...*/
+
+}
+
+void set_usart1_buffer_Tx(uint8_t *command){
+
+	/*Write command into usart1_buffer_Tx*/
+
+}
+
+void set_usart1_buffer_Rx(){
+
+	/*maybe it should be called from init_usart1*/
+
+}
+
+void read_usart1(){
+
+	/*Read character until '\r\n'*/
+
+	//than check response (in different function)
+
+}
 
 /*USART2 intterupt handler*/
 /*void USART2_IRQHandler(void){
@@ -197,9 +252,8 @@ void write_usart2(){
 
 
 
-void set_usart1_buffer_Tx(uint8_t *command);
-void set_usart1_buffer_Rx();
-void write_usart1();
-void read_usart1();
+
+
+
 
 

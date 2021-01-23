@@ -13,12 +13,12 @@
 
 void init_usart2();
 void set_usart2_buffer_Tx(uint8_t *msg);
-void write_usart2();
+void write_usart2();//This function should call set_usart2_buffer_Tx
 
 void init_usart1();
 void set_usart1_buffer_Tx(uint8_t *command);
 void set_usart1_buffer_Rx();
-void write_usart1();
+void write_usart1(uint8_t *command);//This function should call set_usart1_buffer_Tx
 void read_usart1();
 //void delay();
 
