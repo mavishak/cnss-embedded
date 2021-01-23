@@ -128,7 +128,7 @@ void EXTI4_IRQHandler(void)
 	EXTI->PR |= 0x00000010; //reset flag by writing 1 to bit 4 (reference manual 10.3.6)
 
 	toggle_led(); //This is temporary for testing.
-	write_usart2(); //This chould be executed using the event_queue
+	write_usart2((uint8_t*)MSG); //This chould be executed using the event_queue
 
 }
 

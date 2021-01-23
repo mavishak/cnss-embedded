@@ -29,6 +29,8 @@
 #include "usart.h"
 
 
+#include "esp8266_WiFi.h" /*for testing usart1...*/
+
 
 
 int main(void)
@@ -36,11 +38,14 @@ int main(void)
 
 	//init_sensor_with_interrupt();
 	//init_sensor_led_response();
-	init_usart2();
-	set_usart2_buffer_Tx((uint8_t*)MSG);
+	init_usart2(); // for dbugging
+	init_usart1(); // for ESP8266
+	write_usar1((uint8_t*)AT_COMMAND); // RITE TEST COMAND
+	// ALL THE REST HAPPENS ON ITS OWN...
+	// WE EXPECT TO SEE IN SCREEN (TERA TERM ERROR OR OK) OR WORSE... ;)
 	while(1)
 	{
-		write_usart2();//Used only when Testing USART2 without sensor
+		//write_usart2((uint8_t*)MSG);//Used only when Testing USART2 without sensor
 	}
 }
 
