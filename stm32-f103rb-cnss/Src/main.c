@@ -34,13 +34,13 @@
 int main(void)
 {
 
-	init_sensor_with_interrupt();
-	init_sensor_led_response();
+	//init_sensor_with_interrupt();
+	//init_sensor_led_response();
 	init_usart2();
 	set_usart2_buffer_Tx((uint8_t*)MSG);
 	while(1)
 	{
-		//write_usart2();//Used only when Testing USART2 without sensor
+		write_usart2();//Used only when Testing USART2 without sensor
 	}
 }
 

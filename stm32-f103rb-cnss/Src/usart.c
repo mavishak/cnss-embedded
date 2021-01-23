@@ -169,7 +169,7 @@ void init_usart1(){
 	 __disable_irq();
 	USART1->CR1 |= 0x00000020; // Set RXEIE (see RM 27.6.4)
 	NVIC_SetPriority(USART1_IRQn,0); //set all interrupt priority to zero so that no preemption occurs.
-	VIC_EnableIRQ(USART1_IRQn); //enable handler
+	NVIC_EnableIRQ(USART1_IRQn); //enable handler
 	__enable_irq();
 }
 
