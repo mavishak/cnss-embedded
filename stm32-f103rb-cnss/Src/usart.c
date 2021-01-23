@@ -285,7 +285,7 @@ void set_usart1_buffer_Rx(){
 
 void read_usart1(){ //THIS IS NO GOOD! ANOTHER INTERRUPT CAN ACCUR IN THE MIDDLE
 
-	write_usart2((uint_8*)usar1.Rx); //write response to screen
+	write_usart2((uint8_t*)usart1.Rx); //write response to screen
 
 	/*Read character until '\r\n'*/
 
@@ -307,15 +307,15 @@ void USART1_IRQHandler(void){
 	uint8_t c = USART1->DR;
 	if((BUFF_SIZE - usart1.Rx_len + 1) < 0 ){
 		//OverFlow - Do Something
-		write_usart2((uint_8*)"Over Flow Error - USART1 Rx Buffer"); //write response to screen
+		write_usart2((uint8_t*)"Over Flow Error - USART1 Rx Buffer"); //write response to screen
 	}
 	else{
-		usart1.Rx[usar1.read_index] = (uint8_t)(c & 0xFF);
-		usar1.read_index++;
-		usar1.Rx_len++;
+		usart1.Rx[usart1.read_index] = (uint8_t)(c & 0xFF);
+		usart1.read_index++;
+		usart1.Rx_len++;
 
 		//FOR STARTERS..
-		if(c == "\n"){ // for now this is enough later change this according to diffrent endings "\r\n" OR "\r\n\r\n"
+		if(c == (uint8_t)'\n'){ // for now this is enough later change this according to diffrent endings "\r\n" OR "\r\n\r\n"
 			read_usart1();
 			set_usart1_buffer_Rx(); //reset buffer
 		}
