@@ -40,7 +40,7 @@ int main(void)
 	set_usart2_buffer_Tx((uint8_t*)MSG);
 	while(1)
 	{
-		//write_usart2();
+		//write_usart2();//Used only when Testing USART2 without sensor
 	}
 }
 

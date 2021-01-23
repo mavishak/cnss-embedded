@@ -1,5 +1,0 @@
-event_queue.c:29:6:init_queue	4	static
-event_queue.c:37:6:add_event	16	static
-event_queue.c:53:7:do_event	16	static
-event_queue.c:73:10:queue_isFull	4	static
-event_queue.c:79:10:queue_isEmpty	4	static

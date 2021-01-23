@@ -1,6 +1,0 @@
-core_cm3.h:1511:22:__NVIC_EnableIRQ	16	static
-gpio_signal.c:8:6:init	4	static
-gpio_signal.c:27:6:init_interrupt	8	static,ignoring_inline_asm
-gpio_signal.c:60:6:init_interrupt_D6	8	static,ignoring_inline_asm
-gpio_signal.c:92:10:was_pressed	4	static
-gpio_signal.c:100:6:toggle_ld2	4	static
