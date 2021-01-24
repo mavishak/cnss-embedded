@@ -52,6 +52,21 @@
  *			   5. Is it correct to have USART1_IRQHandler do all that it is doing now?
  *			   	  Our idea is that only when \r\n
  *			   	  is found and command is read handler will be se in queue to avoid over running response
+ *
+ * 24.01.2021: We haven't succeded to create a connection with ESP8266.
+ * 			   the interrupt is not accessed.
+ * 			   (We accessed it by mistake after tuching the pins)
+ * 			   What we tried and didn't work:
+ * 			   1. We tried clearing USART1-SR (TC - transmit complete) by reseting it's value
+ * 			   	  This might be the cause of the interrupt - although it is not likely because we did not enable the TC interrupt.
+ * 			   2. input_floating instead os pull-up
+ * 			   3. waiting
+ * 			   4. Enable RCC for Alternate funcion for PINs - Highly unlikely... we don't think it should be enabled at all.
+ *
+ * 			   On another subject - The init_usart1() test prints are printed twice even though they are supposed to print once.
+ * 			   We are pertty sure that the BRR is set currectly (but it might be worth the review...)
+ *
+ *
  */
 
 #include "usart.h"
@@ -125,6 +140,8 @@ void init_usart2(){
  * If you want to use Tx, call function Write_Uart1() that will send your msg and than enable Rx again */
 void init_usart1(){
 
+	write_usart2((uint8_t*)"In init_usart1\r\n");//TESTING
+
 	//Can enable only Tx or Rx Each time (In Arduino we couldn't we can't remeber why)?? Only one at a time because they use the same data register
 
 	/*Enabla RCC for GPIO Port A*/
@@ -147,6 +164,9 @@ void init_usart1(){
 
 	/*Enable RCC for USART1*/
 	RCC->APB2ENR |= 0x00004000; // (See RM 8.3.7)
+
+	/*Enable RCC for Alternate funcion for PINs*/
+	//RCC->APB2ENR |= 0x00000001; //  (see RM 8.3.7) //Is this line needed??
 
 	/*Following directions RM pg.792 (Setting Tx procesure)*/
 	/*Following directions RM pg.795 (Setting Rx procesure) */
@@ -173,12 +193,16 @@ void init_usart1(){
 	/*Enable USART Receive*/
 	USART1->CR1 |= 0x00000004;// Set the RE bit in USART_CR1 to enable USART Receive  (see RM 27.6.4)
 
+	write_usart2((uint8_t*)"End of init_usart1 - #1\r\n");
+
 	/*Enable USART Receive Interrupt*/
 	 __disable_irq();
-	USART1->CR1 |= 0x00000020; // Set RXEIE (see RM 27.6.4)
+	USART1->CR1 |= 0x00000020; // Set RXNEIE (see RM 27.6.4)
 	NVIC_SetPriority(USART1_IRQn,0); //set all interrupt priority to zero so that no preemption occurs.
 	NVIC_EnableIRQ(USART1_IRQn); //enable handler
 	__enable_irq();
+
+	write_usart2((uint8_t*)"End of init_usart1 - #2\r\n");
 }
 
 
@@ -190,24 +214,26 @@ void set_usart2_buffer_Tx(uint8_t *msg){
 	memset(usart2.Tx, '\0', BUFF_SIZE*sizeof(uint8_t));
 	if((BUFF_SIZE - strlen((char*)msg) + 1) < 0){
 		strcpy((char*)usart2.Tx,"Error msg to Long");
+		usart2.Tx_len = strlen((char*)"Error msg to Long");
 	}
 	else{
 		strcpy((char*)usart2.Tx,(char*)msg);
+		usart2.Tx_len = strlen((char*)msg);
 	}
 
-	usart2.Tx_len = strlen((char*)msg);
 	usart2.write_index = 0;
+
 }
 
 
 /*USART2 write function with no interrupt.
  *This function writes msg written in buffet_Tx to USART2_DR.*/
-void write_usart2(uint8_t *msg){
+void write_usart2(uint8_t* msg){
 
 
 	set_usart2_buffer_Tx(msg);
 
-
+	//USART2->SR &= ~(0x00000040); //WE DON"T THINK THIS WILL HELP.. TC IS CLEARED AUTUMATICALLY BY WRTING TO DR.
 	while(usart2.write_index < usart2.Tx_len)
 	{
 		while(((USART2->SR) & 0x00000080) == 0x00000000);// wait while data is not yet transferd (TXE != 1)(see RM 27.6.1)
@@ -215,6 +241,7 @@ void write_usart2(uint8_t *msg){
 		usart2.write_index++;
 	}
 	usart2.write_index = 0;
+	usart2.Tx_len = 0;
 	while(((USART2->SR) & 0x00000040) !=  0x00000040); //wait until transmition is complete TC=1 (see RM 27.6.1)
 
 }
@@ -234,6 +261,7 @@ void write_usart1(uint8_t *command){
 	set_usart1_buffer_Tx(command);
 
 	/*Send command*/
+	//USART1->SR &= ~(0x00000040); //WE DON"T THINK THIS WILL HELP.. TC IS CLEARED AUTUMATICALLY BY WRTING TO DR.
 	while(usart1.write_index < usart1.Tx_len)
 	{
 		while(((USART1->SR) & 0x00000080) == 0x00000000);// wait while data is not yet transferd (TXE != 1)(see RM 27.6.1)
@@ -241,6 +269,7 @@ void write_usart1(uint8_t *command){
 		usart1.write_index++;
 	}
 	usart1.write_index = 0;
+	usart1.Tx_len = 0;
 
 	/*Wait 'till transmit complete (TC=1) after sending  full msg*/
 	while(((USART1->SR) & 0x00000040) !=  0x00000040); //wait until transmition is complete TC=1 (see RM 27.6.1)
@@ -262,12 +291,12 @@ void set_usart1_buffer_Tx(uint8_t *command){
 	memset(usart1.Tx, '\0', BUFF_SIZE*sizeof(uint8_t));
 	if((BUFF_SIZE - strlen((char*)command) + 1) < 0){
 		strcpy((char*)usart1.Tx,"Error command to Long");
+		usart1.Tx_len = strlen((char*)"Error command to Long");
 	}
 	else{
 		strcpy((char*)usart1.Tx,(char*)command);
+		usart1.Tx_len = strlen((char*)command);
 	}
-
-	usart1.Tx_len = strlen((char*)command);
 	usart1.write_index = 0;
 
 }
@@ -285,7 +314,11 @@ void set_usart1_buffer_Rx(){
 
 void read_usart1(){ //THIS IS NO GOOD! ANOTHER INTERRUPT CAN ACCUR IN THE MIDDLE
 
+	write_usart2((uint8_t*)"In read_usart1\r\n");
+
 	write_usart2((uint8_t*)usart1.Rx); //write response to screen
+
+	write_usart2((uint8_t*)"End of read_usart1\r\n");
 
 	/*Read character until '\r\n'*/
 
@@ -304,6 +337,8 @@ void read_usart1(){ //THIS IS NO GOOD! ANOTHER INTERRUPT CAN ACCUR IN THE MIDDLE
 /*USART1 Interrupt Handler - Only Rx is set to have interrupts*/
 void USART1_IRQHandler(void){
 
+	write_usart2((uint8_t*)"In USART1_IRQHandler\r\n");
+
 	uint8_t c = USART1->DR;
 	if((BUFF_SIZE - usart1.Rx_len + 1) < 0 ){
 		//OverFlow - Do Something
@@ -320,6 +355,8 @@ void USART1_IRQHandler(void){
 			set_usart1_buffer_Rx(); //reset buffer
 		}
 	}
+
+	write_usart2((uint8_t*)"End USART1_IRQHandler\r\n");
 
 
 }

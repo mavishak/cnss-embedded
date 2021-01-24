@@ -40,7 +40,8 @@ int main(void)
 	//init_sensor_led_response();
 	init_usart2(); // for dbugging
 	init_usart1(); // for ESP8266
-	write_usart1((uint8_t*)AT_COMMAND); // RITE TEST COMAND
+	//write_usart2((uint8_t*)AT_COMMAND);
+	write_usart1((uint8_t*)AT_COMMAND); // WRITE TEST COMAND
 	// ALL THE REST HAPPENS ON ITS OWN...
 	// WE EXPECT TO SEE IN SCREEN (TERA TERM ERROR OR OK) OR WORSE... ;)
 	while(1)
