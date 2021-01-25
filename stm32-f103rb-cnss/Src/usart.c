@@ -58,13 +58,26 @@
  * 			   (We accessed it by mistake after tuching the pins)
  * 			   What we tried and didn't work:
  * 			   1. We tried clearing USART1-SR (TC - transmit complete) by reseting it's value
- * 			   	  This might be the cause of the interrupt - although it is not likely because we did not enable the TC interrupt.
  * 			   2. input_floating instead os pull-up
  * 			   3. waiting
  * 			   4. Enable RCC for Alternate funcion for PINs - Highly unlikely... we don't think it should be enabled at all.
  *
  * 			   On another subject - The init_usart1() test prints are printed twice even though they are supposed to print once.
  * 			   We are pertty sure that the BRR is set currectly (but it might be worth the review...)
+ *
+ * 25.01.2021: We are maneging to get input from ESP8266 but not the currect one:
+ * 			   1. It might not actually be input - maybe the \0 is printed again and again
+ * 			      hard to believe- because the input grows each time.
+ * 			   2. There is probably a problum of a buffer overflow or another programble problem that is not being taken care
+ * 			      of since the computer is 'blinging'.
+ * 			      blings - every time there is a \r\n on screen.
+ * 			   3. Maybe we are enterring the ISR repitedly because the iterrupt flag is not being cleered.
+ * 			      WHY ARE WE ENTERRING THE ISR SO MANT TIMES WE ONLY WANT TO GET OK??
+ * 			   4. BRR problem with USART1 - maybe it shouldn't be similar to USART2.
+ * 			   5. problem with jumper attachments - very likely. The ISR is entered only after connecting CH_PD (EN) to 3.3v
+ * 			      powering it, playing and then reconnecting the USB.
+ * 			   6. Tx in STM32 is using 5V - should be 3.3V.  Use a logic level shifter or voltage divider between it??
+ *
  *
  *
  */
@@ -79,6 +92,7 @@
 
 static USART_2 usart2;
 static USART_1 usart1;
+uint8_t c; // for holding the USART->DR value
 
 /*This dunctions Inits all registors that have to do with enabling USART2 (ST-LINK/V.2)
  *inorder to send message to computer.
@@ -339,8 +353,8 @@ void USART1_IRQHandler(void){
 
 	write_usart2((uint8_t*)"In USART1_IRQHandler\r\n");
 
-	uint8_t c = USART1->DR;
-	if((BUFF_SIZE - usart1.Rx_len + 1) < 0 ){
+	c = USART1->DR;
+	if((BUFF_SIZE - usart1.Rx_len + 50) < 0 ){//if((BUFF_SIZE - usart1.Rx_len + 1) < 0 ){
 		//OverFlow - Do Something
 		write_usart2((uint8_t*)"Over Flow Error - USART1 Rx Buffer"); //write response to screen
 	}
@@ -351,11 +365,15 @@ void USART1_IRQHandler(void){
 
 		//FOR STARTERS..
 		if(c == (uint8_t)'\n'){ // for now this is enough later change this according to diffrent endings "\r\n" OR "\r\n\r\n"
+			write_usart2((uint8_t*)"at line c == \n");
 			read_usart1();
 			set_usart1_buffer_Rx(); //reset buffer
 		}
 	}
 
+	write_usart2((uint8_t*)"usart1.Rx = ");
+	write_usart2((uint8_t*)usart1.Rx);
+	write_usart2((uint8_t*)"\r\n");
 	write_usart2((uint8_t*)"End USART1_IRQHandler\r\n");
 
 
