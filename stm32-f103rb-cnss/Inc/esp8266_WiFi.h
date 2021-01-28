@@ -9,6 +9,8 @@
 #define ESP8266_WIFI_H_
 
 #define AT_COMMAND "AT\r\n"
+
+//Responses
 #define AT_OK "OK\r\n"
 #define AT_ERROR "ERROR\r\n"
 

@@ -41,19 +41,18 @@ int main(void)
 	init_usart2(); // for dbugging
 	init_usart1(); // for ESP8266
 	//write_usart2((uint8_t*)AT_COMMAND);
-	write_usart1((uint8_t*)AT_COMMAND); // WRITE TEST COMAND
-	// ALL THE REST HAPPENS ON ITS OWN...
-	// WE EXPECT TO SEE IN SCREEN (TERA TERM ERROR OR OK) OR WORSE... ;)
+	//write_usart1((uint8_t*)AT_COMMAND); // WRITE TEST COMAND
+
 	while(1)
 	{
 		//write_usart2((uint8_t*)MSG);//Used only when Testing USART2 without sensor
-		//read_usart1();
-		uint32_t found = search_usart1_buffer_Rx((uint8_t *)AT_OK);
+		write_usart1((uint8_t*)AT_COMMAND); // WRITE TEST COMAND
+		uint32_t found = search_usart1_buffer_Rx((uint8_t *)AT_OK, (uint8_t *)AT_ERROR);
 		if(found)
 		{
 			write_usart2((uint8_t*)"TEST PASSED\r\n");
 		}
-		//else{
+		//else{ //RECEIVING A RESPONSE TAKES TIME IT DOES NOT MEEN THE TEST FAILED
 		//	write_usart2((uint8_t*)"TEST FAILED\r\n");
 		//}
 	}

@@ -83,6 +83,8 @@
  * 			   1. We added NVIC_SetPriorityGrouping(7) to init_usart1() function
  * 			   2. We allowed Rx and Tx to be enabled all the time
  *
+ * 			   One strange thing, it seems the ESP8266 Response is AT\r\n\r\nOK\r\n"
+ *
  */
 
 #include "usart.h"
@@ -97,7 +99,7 @@ static USART_2 usart2;
 static USART_1 usart1;
 static uint8_t c; // for holding the USART->DR value
 
-/*This dunctions Inits all registors that have to do with enabling USART2 (ST-LINK/V.2)
+/*This functions Inits all registors that have to do with enabling USART2 (ST-LINK/V.2)
  *inorder to send message to computer.
  *Note: Interrupts are not enabled intentionally.
  *This program works when TeraTerm speed is set to 9600*/
@@ -150,16 +152,9 @@ void init_usart2(){
 }
 
 
-
-/* Usart1 will be use for communication with esp8266.
- * Generally,
- * By default, Rx interrupts will be enabled in our program
- * If you want to use Tx, call function Write_Uart1() that will send your msg and than enable Rx again */
+/* Usart1 will be use for communication with esp8266. */
 void init_usart1(){
 
-	//write_usart2((uint8_t*)"In init_usart1\r\n");//TESTING
-
-	//Can enable only Tx or Rx Each time (In Arduino we couldn't we can't remeber why)?? Only one at a time because they use the same data register
 
 	/*Enabla RCC for GPIO Port A*/
 	RCC->APB2ENR |= 0x00000004; // (see RM 8.3.7)
@@ -183,7 +178,7 @@ void init_usart1(){
 	RCC->APB2ENR |= 0x00004000; // (See RM 8.3.7)
 
 	/*Enable RCC for Alternate funcion for PINs*/
-	//RCC->APB2ENR |= 0x00000001; //  (see RM 8.3.7) //Is this line needed??
+	//RCC->APB2ENR |= 0x00000001; //  (see RM 8.3.7) //Is this line needed?? NO
 
 	/*Following directions RM pg.792 (Setting Tx procesure)*/
 	/*Following directions RM pg.795 (Setting Rx procesure) */
@@ -192,14 +187,9 @@ void init_usart1(){
 	//USART1->CR1 &= ~(0x00000400); //Parity Controle Disable (by default) (see RM 27.6.4)
 	//USART1->CR2 &= ~(0x00003000); //Program the number of stop bits in USART_CR2 to 1 (by defualt) (see RM 27.6.5)
 
-	/* SHOULD WE DO THIS?? (What is DMA)
-	 * Select DMA enable (DMAT) in USART_CR3 if Multi buffer Communication is to take
-	 * place. Configure the DMA register as explained in multibuffer communication.
-	 * WE DONT THINK WE NEED IT.
-	 */
 
-	/*Set Baude Rate for USART1 115200 // !X9600 bpsX!*/
-	USART1->BRR = 0x45; //0x34D; //9600 bps (see RM p.798 for BRR calculation and RM p.93 Fig.8 for clock tree) //We think that USART1&USART2 use the same clock (HSI)
+	/*Set Baude Rate for USART1 115200 (The optimal buadrate for AT COMMANDS)*/
+	USART1->BRR = 0x45; // 115200 bps (see RM p.798 for BRR calculation and RM p.93 Fig.8 for clock tree) //We think that USART1&USART2 use the same clock (HSI)
 
 
 	/*Enable Tx*/
@@ -211,21 +201,15 @@ void init_usart1(){
 	/*Enable USART Receive*/
 	USART1->CR1 |= 0x00000004;// Set the RE bit in USART_CR1 to enable USART Receive  (see RM 27.6.4)
 
-	//write_usart2((uint8_t*)"End of init_usart1 - #1\r\n");
 
 	/*Enable USART Receive Interrupt*/
 	 __disable_irq();
 	USART1->CR1 |= 0x00000020; // Set RXNEIE to enable Rx interrupt(see RM 27.6.4)
-
 	NVIC_SetPriorityGrouping(7); //This should disable interrupt nesting(priority wont be not allowed)//->MABY IT'S THE DEFAULT
 	NVIC_SetPriority(USART1_IRQn,0); //set all interrupt priority to zero so that no preemption occurs.//->MABY IT'S THE DEFAULT
-
 	NVIC_EnableIRQ(USART1_IRQn); //enable handler
-	//USART1->SR &= ~(0x00000020);
-	//NVIC_ClearPendingIRQ(USART1_IRQn);
 	__enable_irq();
 
-	//write_usart2((uint8_t*)"End of init_usart1 - #2\r\n");
 }
 
 
@@ -256,7 +240,6 @@ void write_usart2(uint8_t* msg){
 
 	set_usart2_buffer_Tx(msg);
 
-	//USART2->SR &= ~(0x00000040); //WE DON"T THINK THIS WILL HELP.. TC IS CLEARED AUTUMATICALLY BY WRTING TO DR.
 	while(usart2.write_index < usart2.Tx_len)
 	{
 		while(((USART2->SR) & 0x00000080) == 0x00000000);// wait while data is not yet transfered (TXE != 1)(see RM 27.6.1)
@@ -269,22 +252,15 @@ void write_usart2(uint8_t* msg){
 
 }
 
+
 /*USART1 write function with no interrupt.*/
 void write_usart1(uint8_t *command){
 
-	/*Disable Rx*/
-	//USART1->CR1 &= ~(0x00000004);// Reset the RE bit in USART_CR1 to disable USART Receive see RM 27.6.4)
-
-	///*Disable Rx interrupt?...*/
-
-	/*Enable Tx*/
-	//USART1->CR1 |= 0x00000008; // Set the TE bit in USART_CR1 to send an idle frame as first transmission. see RM 27.6.4)
 
 	/*Set usart1_buffer_Tx with command*/
 	set_usart1_buffer_Tx(command);
 
 	/*Send command*/
-	//USART1->SR &= ~(0x00000040); //WE DON"T THINK THIS WILL HELP.. TC IS CLEARED AUTUMATICALLY BY WRTING TO DR.
 	while(usart1.write_index < usart1.Tx_len)
 	{
 		while(((USART1->SR) & 0x00000080) == 0x00000000);// wait while data is not yet transfered (TXE != 1)(see RM 27.6.1)
@@ -294,14 +270,6 @@ void write_usart1(uint8_t *command){
 	while(((USART1->SR) & 0x00000040) !=  0x00000040); //wait until transmission is complete TC=1 (see RM 27.6.1)
 	usart1.write_index = 0;
 	usart1.Tx_len = 0;
-
-	/*Disable tx*/
-	//USART1->CR1 &= ~(0x00000008);// Reset the TE bit in USART_CR1 to disable USART transmit (see RM 27.6.4)
-
-	/*Enable Rx*/
-	//USART1->CR1 |= 0x00000004;// Set the RE bit in USART_CR1 to enable USART Receive  (see RM 27.6.4)
-
-	///*Enable Rx interrupts?...*/
 
 }
 
@@ -332,27 +300,32 @@ void set_usart1_buffer_Rx(){
 
 }
 
-/*Debug function- USART2 must be initialised*/
-void read_usart1(){ //THIS IS NO GOOD! ANOTHER INTERRUPT CAN ACCUR IN THE MIDDLE
 
-	write_usart2((uint8_t*)usart1.Rx); //write response to screen
+uint32_t search_usart1_buffer_Rx(uint8_t *pass, uint8_t *fail){
 
-	/*Read character until '\r\n'*/
-
-	//than check response (in different function)
-}
-
-uint32_t search_usart1_buffer_Rx(uint8_t *response){
 	/*!TODO:need to check that usart1.Rx buffer wasn't overflow*/
-	if(strstr((const char*)usart1.Rx , (const char*)response)){
-		read_usart1();
-		set_usart1_buffer_Rx();
-		return (uint32_t)1;
+	if((usart1.Rx_len + 1) < BUFF_SIZE){
+
+		if(strstr((const char*)usart1.Rx , (const char*)pass)){
+			write_usart2((uint8_t*)usart1.Rx); //write response to screen
+			set_usart1_buffer_Rx();
+			return (uint32_t)1; //TRUE
+		}
+		else if(strstr((const char*)usart1.Rx , (const char*)fail)){
+			write_usart2((uint8_t*)usart1.Rx); //write response to screen
+			set_usart1_buffer_Rx();
+			return (uint32_t)0; //FALSE
+		}
+		else{
+			return (uint32_t)0; //FALSE
+		}
+
 	}
+
 	else{
-		return (uint32_t)0;
+		/*!TODO: when usart1.Rx buffer is overflown start chaeck from end??*/
+		return (uint32_t)0; //FALSE
 	}
-	/*!TODO: when usart1.Rx buffer is overflow*/
 
 }
 
@@ -371,34 +344,6 @@ void USART1_IRQHandler(void){
 			//!TODO: Restart index
 		}
 	}
-
-	//write_usart2((uint8_t*)"In USART1_IRQHandler\r\n");
-	//int i = 5;
-	//if(i==8);
-	//!//c = USART1->DR;
-	/*
-	if((BUFF_SIZE - usart1.Rx_len + 1) < 0 ){
-		//OverFlow - Do Something
-		write_usart2((uint8_t*)"Over Flow Error - USART1 Rx Buffer"); //write response to screen
-	}
-	else{
-		usart1.Rx[usart1.read_index] = (uint8_t)(c & 0xFF);
-		usart1.read_index++;
-		usart1.Rx_len++;
-
-		//FOR STARTERS..
-		if(c == (uint8_t)'\n'){ // for now this is enough later change this according to diffrent endings "\r\n" OR "\r\n\r\n"
-			write_usart2((uint8_t*)"at line c == \n");
-			read_usart1();
-			set_usart1_buffer_Rx(); //reset buffer
-		}
-	}
-
-	write_usart2((uint8_t*)"usart1.Rx = ");
-	write_usart2((uint8_t*)usart1.Rx);
-	write_usart2((uint8_t*)"\r\n");
-	write_usart2((uint8_t*)"End USART1_IRQHandler\r\n");
-	*/
 
 
 }

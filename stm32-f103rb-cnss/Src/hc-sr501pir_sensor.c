@@ -15,6 +15,9 @@
  *  			TBD: Implement triggring of USART with event_queue.
  *  			Question: Should the handler init the uart() and then trigger write() or should UART be initiolized in advance.
  *  					  My gut tells me that the handler should do both...
+ *
+ *  28.01.2021: Added NVIC_SetPriorityGrouping(7); to init_sensor_with_interrupt()
+ *  			need to check that it is not causing problems...
  */
 
 
@@ -79,6 +82,7 @@ void init_sensor_with_interrupt(){
 	AFIO->EXTICR[1] |= 0x00000001; // Allow interupts for line_4 (see reference manual 9.4.4 and pg. 210)
 	EXTI->IMR |= 0x00000010; //Enable iterrupt with mask for port B pin 4 (see reference manual 10.3.1)
 	EXTI->RTSR |= 0x00000010 ; //rising trigger selection register - to anable full button press before reacting ((see reference manual 10.3.3)
+	NVIC_SetPriorityGrouping(7); //?//This should disable interrupt nesting(priority wont be not allowed)//->MABY IT'S THE DEFAULT
 	NVIC_SetPriority(EXTI4_IRQn,0); //set all interrupt priotity to zero so that no preemption uccors.
 	NVIC_EnableIRQ(EXTI4_IRQn); //enable handler
 	__enable_irq();
