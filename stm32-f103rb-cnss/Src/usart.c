@@ -92,7 +92,7 @@
 
 static USART_2 usart2;
 static USART_1 usart1;
-uint8_t c; // for holding the USART->DR value
+static uint8_t c; // for holding the USART->DR value
 
 /*This dunctions Inits all registors that have to do with enabling USART2 (ST-LINK/V.2)
  *inorder to send message to computer.
@@ -195,8 +195,8 @@ void init_usart1(){
 	 * WE DONT THINK WE NEED IT.
 	 */
 
-	/*Set Baude Rate for USART1 9600 bps*/
-	USART1->BRR = 0x34D; //9600 bps (see RM p.798 for BRR calculation and RM p.93 Fig.8 for clock tree) //We think that USART1&USART2 use the same clock (HSI)
+	/*Set Baude Rate for USART1 115200 // !X9600 bpsX!*/
+	USART1->BRR = 0x45; //0x34D; //9600 bps (see RM p.798 for BRR calculation and RM p.93 Fig.8 for clock tree) //We think that USART1&USART2 use the same clock (HSI)
 
 
 	///*Enable Uart Transmit*/
@@ -214,9 +214,11 @@ void init_usart1(){
 	USART1->CR1 |= 0x00000020; // Set RXNEIE (see RM 27.6.4)
 	NVIC_SetPriority(USART1_IRQn,0); //set all interrupt priority to zero so that no preemption occurs.
 	NVIC_EnableIRQ(USART1_IRQn); //enable handler
+	USART1->SR &= ~(0x00000020);
+	NVIC_ClearPendingIRQ(USART1_IRQn);
 	__enable_irq();
 
-	write_usart2((uint8_t*)"End of init_usart1 - #2\r\n");
+	//write_usart2((uint8_t*)"End of init_usart1 - #2\r\n");
 }
 
 
@@ -351,10 +353,12 @@ void read_usart1(){ //THIS IS NO GOOD! ANOTHER INTERRUPT CAN ACCUR IN THE MIDDLE
 /*USART1 Interrupt Handler - Only Rx is set to have interrupts*/
 void USART1_IRQHandler(void){
 
-	write_usart2((uint8_t*)"In USART1_IRQHandler\r\n");
-
+	//write_usart2((uint8_t*)"In USART1_IRQHandler\r\n");
+	//int i = 5;
+	//if(i==8);
 	c = USART1->DR;
-	if((BUFF_SIZE - usart1.Rx_len + 50) < 0 ){//if((BUFF_SIZE - usart1.Rx_len + 1) < 0 ){
+	/*
+	if((BUFF_SIZE - usart1.Rx_len + 1) < 0 ){
 		//OverFlow - Do Something
 		write_usart2((uint8_t*)"Over Flow Error - USART1 Rx Buffer"); //write response to screen
 	}
@@ -375,6 +379,7 @@ void USART1_IRQHandler(void){
 	write_usart2((uint8_t*)usart1.Rx);
 	write_usart2((uint8_t*)"\r\n");
 	write_usart2((uint8_t*)"End USART1_IRQHandler\r\n");
+	*/
 
 
 }
