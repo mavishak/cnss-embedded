@@ -78,7 +78,10 @@
  * 			      powering it, playing and then reconnecting the USB.
  * 			   6. Tx in STM32 is using 5V - should be 3.3V.  Use a logic level shifter or voltage divider between it??
  *
- *
+ * 28.01.2021: THE ESP8266 IS ALIIIIIVE!
+ * 			   The 2 main things we changed:
+ * 			   1. We added NVIC_SetPriorityGrouping(7) to init_usart1() function
+ * 			   2. We allowed Rx and Tx to be enabled all the time
  *
  */
 
@@ -154,7 +157,7 @@ void init_usart2(){
  * If you want to use Tx, call function Write_Uart1() that will send your msg and than enable Rx again */
 void init_usart1(){
 
-	write_usart2((uint8_t*)"In init_usart1\r\n");//TESTING
+	//write_usart2((uint8_t*)"In init_usart1\r\n");//TESTING
 
 	//Can enable only Tx or Rx Each time (In Arduino we couldn't we can't remeber why)?? Only one at a time because they use the same data register
 
@@ -199,7 +202,8 @@ void init_usart1(){
 	USART1->BRR = 0x45; //0x34D; //9600 bps (see RM p.798 for BRR calculation and RM p.93 Fig.8 for clock tree) //We think that USART1&USART2 use the same clock (HSI)
 
 
-	///*Enable Uart Transmit*/
+	/*Enable Tx*/
+	USART1->CR1 |= 0x00000008; // Set the TE bit in USART_CR1 to send an idle frame as first transmission. see RM 27.6.4)
 
 	/*Init Receive buffer*/
 	set_usart1_buffer_Rx();
@@ -207,15 +211,18 @@ void init_usart1(){
 	/*Enable USART Receive*/
 	USART1->CR1 |= 0x00000004;// Set the RE bit in USART_CR1 to enable USART Receive  (see RM 27.6.4)
 
-	write_usart2((uint8_t*)"End of init_usart1 - #1\r\n");
+	//write_usart2((uint8_t*)"End of init_usart1 - #1\r\n");
 
 	/*Enable USART Receive Interrupt*/
 	 __disable_irq();
-	USART1->CR1 |= 0x00000020; // Set RXNEIE (see RM 27.6.4)
-	NVIC_SetPriority(USART1_IRQn,0); //set all interrupt priority to zero so that no preemption occurs.
+	USART1->CR1 |= 0x00000020; // Set RXNEIE to enable Rx interrupt(see RM 27.6.4)
+
+	NVIC_SetPriorityGrouping(7); //This should disable interrupt nesting(priority wont be not allowed)//->MABY IT'S THE DEFAULT
+	NVIC_SetPriority(USART1_IRQn,0); //set all interrupt priority to zero so that no preemption occurs.//->MABY IT'S THE DEFAULT
+
 	NVIC_EnableIRQ(USART1_IRQn); //enable handler
-	USART1->SR &= ~(0x00000020);
-	NVIC_ClearPendingIRQ(USART1_IRQn);
+	//USART1->SR &= ~(0x00000020);
+	//NVIC_ClearPendingIRQ(USART1_IRQn);
 	__enable_irq();
 
 	//write_usart2((uint8_t*)"End of init_usart1 - #2\r\n");
@@ -229,8 +236,8 @@ void set_usart2_buffer_Tx(uint8_t *msg){
 
 	memset(usart2.Tx, '\0', BUFF_SIZE*sizeof(uint8_t));
 	if((BUFF_SIZE - strlen((char*)msg) + 1) < 0){
-		strcpy((char*)usart2.Tx,"Error msg to Long");
-		usart2.Tx_len = strlen((char*)"Error msg to Long");
+		strcpy((char*)usart2.Tx,"Error msg to Long\r\n");
+		usart2.Tx_len = strlen((char*)"Error msg to Long\r\n");
 	}
 	else{
 		strcpy((char*)usart2.Tx,(char*)msg);
@@ -252,13 +259,13 @@ void write_usart2(uint8_t* msg){
 	//USART2->SR &= ~(0x00000040); //WE DON"T THINK THIS WILL HELP.. TC IS CLEARED AUTUMATICALLY BY WRTING TO DR.
 	while(usart2.write_index < usart2.Tx_len)
 	{
-		while(((USART2->SR) & 0x00000080) == 0x00000000);// wait while data is not yet transferd (TXE != 1)(see RM 27.6.1)
+		while(((USART2->SR) & 0x00000080) == 0x00000000);// wait while data is not yet transfered (TXE != 1)(see RM 27.6.1)
 		USART2->DR = (uint8_t)(usart2.Tx[usart2.write_index] & 0xFF); //send data (see RM 27.6.2)
 		usart2.write_index++;
 	}
+	while(((USART2->SR) & 0x00000040) !=  0x00000040); //wait until transmission is complete TC=1 (see RM 27.6.1)
 	usart2.write_index = 0;
 	usart2.Tx_len = 0;
-	while(((USART2->SR) & 0x00000040) !=  0x00000040); //wait until transmition is complete TC=1 (see RM 27.6.1)
 
 }
 
@@ -266,35 +273,33 @@ void write_usart2(uint8_t* msg){
 void write_usart1(uint8_t *command){
 
 	/*Disable Rx*/
-	USART1->CR1 &= ~(0x00000004);// Reset the RE bit in USART_CR1 to disable USART Receive see RM 27.6.4)
+	//USART1->CR1 &= ~(0x00000004);// Reset the RE bit in USART_CR1 to disable USART Receive see RM 27.6.4)
 
 	///*Disable Rx interrupt?...*/
 
 	/*Enable Tx*/
-	USART1->CR1 |= 0x00000008; // Set the TE bit in USART_CR1 to send an idle frame as first transmission. see RM 27.6.4)
+	//USART1->CR1 |= 0x00000008; // Set the TE bit in USART_CR1 to send an idle frame as first transmission. see RM 27.6.4)
 
-	/*Set Usart usart1_buffer_Tx with command*/
+	/*Set usart1_buffer_Tx with command*/
 	set_usart1_buffer_Tx(command);
 
 	/*Send command*/
 	//USART1->SR &= ~(0x00000040); //WE DON"T THINK THIS WILL HELP.. TC IS CLEARED AUTUMATICALLY BY WRTING TO DR.
 	while(usart1.write_index < usart1.Tx_len)
 	{
-		while(((USART1->SR) & 0x00000080) == 0x00000000);// wait while data is not yet transferd (TXE != 1)(see RM 27.6.1)
+		while(((USART1->SR) & 0x00000080) == 0x00000000);// wait while data is not yet transfered (TXE != 1)(see RM 27.6.1)
 		USART1->DR = (uint8_t)(usart1.Tx[usart1.write_index] & 0xFF); //send data (see RM 27.6.2)
 		usart1.write_index++;
 	}
+	while(((USART1->SR) & 0x00000040) !=  0x00000040); //wait until transmission is complete TC=1 (see RM 27.6.1)
 	usart1.write_index = 0;
 	usart1.Tx_len = 0;
 
-	/*Wait 'till transmit complete (TC=1) after sending  full msg*/
-	while(((USART1->SR) & 0x00000040) !=  0x00000040); //wait until transmition is complete TC=1 (see RM 27.6.1)
-
 	/*Disable tx*/
-	USART1->CR1 &= ~(0x00000008);// Reset the TE bit in USART_CR1 to disable USART transmit (see RM 27.6.4)
+	//USART1->CR1 &= ~(0x00000008);// Reset the TE bit in USART_CR1 to disable USART transmit (see RM 27.6.4)
 
 	/*Enable Rx*/
-	USART1->CR1 |= 0x00000004;// Set the RE bit in USART_CR1 to enable USART Receive  (see RM 27.6.4)
+	//USART1->CR1 |= 0x00000004;// Set the RE bit in USART_CR1 to enable USART Receive  (see RM 27.6.4)
 
 	///*Enable Rx interrupts?...*/
 
@@ -306,8 +311,8 @@ void set_usart1_buffer_Tx(uint8_t *command){
 	/*Write command into usart1_buffer_Tx*/
 	memset(usart1.Tx, '\0', BUFF_SIZE*sizeof(uint8_t));
 	if((BUFF_SIZE - strlen((char*)command) + 1) < 0){
-		strcpy((char*)usart1.Tx,"Error command to Long");
-		usart1.Tx_len = strlen((char*)"Error command to Long");
+		strcpy((char*)usart1.Tx,"Error command to Long\r\n");
+		usart1.Tx_len = strlen((char*)"Error command to Long\r\n");
 	}
 	else{
 		strcpy((char*)usart1.Tx,(char*)command);
@@ -327,36 +332,50 @@ void set_usart1_buffer_Rx(){
 
 }
 
-
+/*Debug function- USART2 must be initialised*/
 void read_usart1(){ //THIS IS NO GOOD! ANOTHER INTERRUPT CAN ACCUR IN THE MIDDLE
 
-	write_usart2((uint8_t*)"In read_usart1\r\n");
-
 	write_usart2((uint8_t*)usart1.Rx); //write response to screen
-
-	write_usart2((uint8_t*)"End of read_usart1\r\n");
 
 	/*Read character until '\r\n'*/
 
 	//than check response (in different function)
-
 }
 
-/*USART2 intterupt handler*/
-/*void USART2_IRQHandler(void){
+uint32_t search_usart1_buffer_Rx(uint8_t *response){
+	/*!TODO:need to check that usart1.Rx buffer wasn't overflow*/
+	if(strstr((const char*)usart1.Rx , (const char*)response)){
+		read_usart1();
+		set_usart1_buffer_Rx();
+		return (uint32_t)1;
+	}
+	else{
+		return (uint32_t)0;
+	}
+	/*!TODO: when usart1.Rx buffer is overflow*/
 
-	USART2->DR = (0x55 & 0xFF);//(uint8_t)('U' & 0xFF); //send data (see RM 27.6.2)
-	//USART2->CR1 &= ~(0x00000080); // reset TXEIE no interrupt (see RM 27.6.4)
-
-}*/
+}
 
 /*USART1 Interrupt Handler - Only Rx is set to have interrupts*/
 void USART1_IRQHandler(void){
 
+	if(((USART1->SR) & 0x00000020) == 0x00000020){ //Check if RXNE=1, this means that Rx interrupt occurred (see RM 27.6.1)
+
+		c = USART1->DR; //This clear RXNE bit
+		if((usart1.Rx_len + 1) < BUFF_SIZE){
+			usart1.Rx[usart1.read_index] = (uint8_t)(c & 0xFF);
+			usart1.read_index++;
+			usart1.Rx_len++;
+		}
+		else{
+			//!TODO: Restart index
+		}
+	}
+
 	//write_usart2((uint8_t*)"In USART1_IRQHandler\r\n");
 	//int i = 5;
 	//if(i==8);
-	c = USART1->DR;
+	//!//c = USART1->DR;
 	/*
 	if((BUFF_SIZE - usart1.Rx_len + 1) < 0 ){
 		//OverFlow - Do Something
@@ -385,6 +404,13 @@ void USART1_IRQHandler(void){
 }
 
 
+/*USART2 intterupt handler*/
+/*void USART2_IRQHandler(void){
+
+	USART2->DR = (0x55 & 0xFF);//(uint8_t)('U' & 0xFF); //send data (see RM 27.6.2)
+	//USART2->CR1 &= ~(0x00000080); // reset TXEIE no interrupt (see RM 27.6.4)
+
+}*/
 
 
 
