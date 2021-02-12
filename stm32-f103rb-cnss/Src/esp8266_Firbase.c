@@ -5,7 +5,7 @@
  *      Author: mayan and naomi
  *
  *  12.02.2021: AT_RST works after that stuck in while loop of AT+CWJAP
- *  			!TODO: Need to debub
+ *  			!TODO: Need to debug
  *  			Note: DO NOT PUT NULL AS FAIL DEFAULT
  */
 
