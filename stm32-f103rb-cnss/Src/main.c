@@ -27,6 +27,7 @@
 #include "event_queue.h"
 #include "hc-sr501pir_sensor.h"
 #include "usart.h"
+#include "esp8266_Firebase.h"
 
 
 #include "esp8266_WiFi.h" /*for testing usart1...*/
@@ -43,18 +44,21 @@ int main(void)
 	//write_usart2((uint8_t*)AT_COMMAND);
 	//write_usart1((uint8_t*)AT_COMMAND); // WRITE TEST COMAND
 
+	ESPinit(); //THE FUNCTION NAME HAS NOTHING TO DO WITH IT"S CONTENT...! :)~
+
 	while(1)
 	{
 		//write_usart2((uint8_t*)MSG);//Used only when Testing USART2 without sensor
-		write_usart1((uint8_t*)AT_COMMAND); // WRITE TEST COMAND
-		uint32_t found = search_usart1_buffer_Rx((uint8_t *)AT_OK, (uint8_t *)AT_ERROR);
-		if(found)
-		{
-			write_usart2((uint8_t*)"TEST PASSED\r\n");
-		}
+		//write_usart1((uint8_t*)AT_COMMAND); // WRITE TEST COMAND
+		//uint32_t found = search_usart1_buffer_Rx((uint8_t *)AT_OK, (uint8_t *)AT_ERROR);
+		//if(found)
+		//{
+		//	write_usart2((uint8_t*)"TEST PASSED\r\n");
+		//}
 		//else{ //RECEIVING A RESPONSE TAKES TIME IT DOES NOT MEEN THE TEST FAILED
 		//	write_usart2((uint8_t*)"TEST FAILED\r\n");
 		//}
+
 	}
 }
 

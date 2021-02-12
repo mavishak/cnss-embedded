@@ -3,6 +3,10 @@
  *
  *  Created on: 09/02/2021
  *      Author: mayan and naomi
+ *
+ *  12.02.2021: AT_RST works after that stuck in while loop of AT+CWJAP
+ *  			!TODO: Need to debub
+ *  			Note: DO NOT PUT NULL AS FAIL DEFAULT
  */
 
 #include "esp8266_Firebase.h"
@@ -34,9 +38,9 @@ void ESPinit(void){
 	write_usart1((uint8_t*)AT_RST);
 
 	while(!found){
-		found = search_usart1_buffer_Rx((uint8_t *)AT_OK, NULL);
+		found = search_usart1_buffer_Rx((uint8_t *)AT_OK, (uint8_t *)"NON");
 	}
-	write_usart2((uint8_t*)"AT_RST PASSED\r\n");
+	//write_usart2((uint8_t*)"AT_RST PASSED\r\n");
 	found = FALSE;
 
 	//Join access point
@@ -45,13 +49,13 @@ void ESPinit(void){
 	//sprintf((char*)command, command_len ,"AT+CWJAP=\"%s\",\"%s\"\r\n",SSID,PWD);
 	sprintf((char*)command, "AT+CWJAP=\"%s\",\"%s\"\r\n",SSID,PWD);
 
-	write_usart2((uint8_t*)command); // test
+	//write_usart2((uint8_t*)command); // test
 	write_usart1((uint8_t*)command);
 
 	while(!found){
 		found = search_usart1_buffer_Rx((uint8_t *)AT_OK, (uint8_t *)AT_FAIL);
 	}
-	write_usart2((uint8_t*)"AT_CWJAP PASSED\r\n");
+	//write_usart2((uint8_t*)"AT_CWJAP PASSED\r\n");
 	found = FALSE;
 
 
@@ -100,7 +104,7 @@ void ESPinit(void){
 	//Close TCP connection
 	write_usart1((uint8_t*)AT_CIPCLOSE);
 	while(!found){
-		found = search_usart1_buffer_Rx((uint8_t *)AT_OK, NULL);
+		found = search_usart1_buffer_Rx((uint8_t *)AT_OK, (uint8_t *)"NON");
 	}
 	write_usart2((uint8_t*)"AT_CIPCLOSE PASSED\r\n");
 	found = FALSE;
