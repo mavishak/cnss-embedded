@@ -22,7 +22,7 @@ uint32_t search_usart1_buffer_Rx(uint8_t *pass, uint8_t *fail);
 void write_usart1(uint8_t *command);//This function should call set_usart1_buffer_Tx
 
 
-#define BUFF_SIZE 128
+#define BUFF_SIZE 512
 #define MSG "A suspicious movement has been detected near a security system you are connected to.\r\nPlease check your messages online.\r\n\r\n"
 
 typedef struct usart2{

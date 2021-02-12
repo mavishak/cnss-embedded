@@ -10,6 +10,7 @@
 
 #include "esp8266_WiFi.h"
 #include "configurations.h"
+#include "stm32f103xb.h" //this file is included to every header file
 
 void ESPinit(void);
 void waitFor(uint32_t* response);
