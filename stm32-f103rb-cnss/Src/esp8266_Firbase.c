@@ -30,7 +30,8 @@ static uint32_t http_len = 0 ;
 static uint8_t api[] = "api.openweathermap.org" ;
 static uint8_t api_key[] = "4e622e19669401cd85da98eb2c3852f5" ;
 
-void ESPinit(void){
+
+void TestWifiConnection(void){
 
 	// before useing this function init_usart1(); and  init_usart2(); must be executed
 
@@ -43,13 +44,24 @@ void ESPinit(void){
 	//write_usart2((uint8_t*)"AT_RST PASSED\r\n");
 	found = FALSE;
 
+	//Mode
+	write_usart1((uint8_t*)AT_CWMODE);
+	while(!found){
+		found = search_usart1_buffer_Rx((uint8_t *)AT_OK, (uint8_t *)"NON");
+	}
+	found = FALSE;
+
+	//AT Command
+	write_usart1((uint8_t*)AT_COMMAND); // WRITE TEST COMAND
+	while(!found){
+		found = search_usart1_buffer_Rx((uint8_t *)AT_OK, (uint8_t *)AT_ERROR);
+	}
+	found = FALSE;
+
 	//Join access point
 	memset((char*)command, '\0', COMMAND_SIZE*sizeof(uint8_t));
-	//command_len += strlen("AT+CIPSTART=") + strlen("TCP") + strlen("") + 7; // 7 = "",""\r\n
-	//sprintf((char*)command, command_len ,"AT+CWJAP=\"%s\",\"%s\"\r\n",SSID,PWD);
 	sprintf((char*)command, "AT+CWJAP=\"%s\",\"%s\"\r\n",SSID,PWD);
 
-	//write_usart2((uint8_t*)command); // test
 	write_usart1((uint8_t*)command);
 
 	while(!found){
@@ -57,6 +69,7 @@ void ESPinit(void){
 	}
 	//write_usart2((uint8_t*)"AT_CWJAP PASSED\r\n");
 	found = FALSE;
+	//write_usart2((uint8_t*)"After AT_CWJAP while\r\n");//TEST :~)
 
 
 	/*Default: AT+CIPMUX=0 (according to: AT instruction set- 5.2.15)*/

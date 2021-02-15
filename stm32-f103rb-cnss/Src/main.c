@@ -42,9 +42,28 @@ int main(void)
 	init_usart2(); // for dbugging
 	init_usart1(); // for ESP8266
 	//write_usart2((uint8_t*)AT_COMMAND);
-	//write_usart1((uint8_t*)AT_COMMAND); // WRITE TEST COMAND
 
-	ESPinit(); //THE FUNCTION NAME HAS NOTHING TO DO WITH IT"S CONTENT...! :)~
+	write_usart2((uint8_t*)("\r\n_______________\r\n"));//For test
+
+	/*TEST :~)*/
+	/*
+	 write_usart1((uint8_t*)AT_COMMAND); // WRITE TEST COMAND
+	uint32_t found = search_usart1_buffer_Rx((uint8_t *)AT_OK, (uint8_t *)AT_ERROR);
+	if(found)
+	{
+		write_usart2((uint8_t*)"TEST PASSED\r\n");
+	}
+	else{ //RECEIVING A RESPONSE TAKES TIME IT DOES NOT MEEN THE TEST FAILED
+		write_usart2((uint8_t*)"TEST FAILED\r\n");
+	}
+	uint32_t i;
+	for(i=10000;i>0;i--);
+	*/
+	/*TEST :~)*/
+
+	//!write_usart2((uint8_t*)"b4 ESPinit()\r\n");//TEST :~)
+
+	TestWifiConnection(); //THE FUNCTION NAME HAS NOTHING TO DO WITH IT"S CONTENT...! :)~
 
 	while(1)
 	{
