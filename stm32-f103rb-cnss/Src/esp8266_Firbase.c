@@ -7,12 +7,18 @@
  *  12.02.2021: AT_RST works after that stuck in while loop of AT+CWJAP
  *  			!TODO: Need to debug
  *  			Note: DO NOT PUT NULL AS FAIL DEFAULT
+ *
+ *  15.02.2021: Problems: YIII HIIII
+ *  			1. Reset when downloading code to modul -> Not so bad... ()
+ *  			2. AT + RESET stops program from continuing to run -> BAD - > why is this happening?
+ *  			3. Not receiving > after AT+CIPSEND
  */
 
 #include "esp8266_Firebase.h"
 #include "usart.h"
 #include <string.h>
 #include <stdio.h>
+//#include <time.h>
 
 #define FALSE 0
 #define TRUE 1
@@ -35,28 +41,34 @@ void TestWifiConnection(void){
 
 	// before useing this function init_usart1(); and  init_usart2(); must be executed
 
+
 	//Reset ESP8266
-	write_usart1((uint8_t*)AT_RST);
+//	write_usart1((uint8_t*)AT_RST);
+//
+//	while(!found){
+//		found = search_usart1_buffer_Rx((uint8_t *)AT_OK, (uint8_t *)AT_ERROR);
+//	}
+//	write_usart2((uint8_t*)"AT_RST PASSED\r\n");
+//	found = FALSE;
 
-	while(!found){
-		found = search_usart1_buffer_Rx((uint8_t *)AT_OK, (uint8_t *)"NON");
-	}
-	//write_usart2((uint8_t*)"AT_RST PASSED\r\n");
-	found = FALSE;
 
-	//Mode
+	//Set client mode
 	write_usart1((uint8_t*)AT_CWMODE);
-	while(!found){
-		found = search_usart1_buffer_Rx((uint8_t *)AT_OK, (uint8_t *)"NON");
-	}
-	found = FALSE;
-
-	//AT Command
-	write_usart1((uint8_t*)AT_COMMAND); // WRITE TEST COMAND
+	write_usart2((uint8_t*)"BEFORE AT_CWMODE WHILE\r\n");
 	while(!found){
 		found = search_usart1_buffer_Rx((uint8_t *)AT_OK, (uint8_t *)AT_ERROR);
 	}
+	write_usart2((uint8_t*)"AT_CWMODE PASSED\r\n");
 	found = FALSE;
+
+//	//AT COMMAND
+//	write_usart1((uint8_t*)AT_COMMAND);
+//	while(!found){
+//		found = search_usart1_buffer_Rx((uint8_t *)AT_OK, (uint8_t *)AT_ERROR);
+//	}
+//	write_usart2((uint8_t*)"AT_COMMAND PASSED\r\n");
+//	found = FALSE;
+
 
 	//Join access point
 	memset((char*)command, '\0', COMMAND_SIZE*sizeof(uint8_t));
@@ -67,9 +79,17 @@ void TestWifiConnection(void){
 	while(!found){
 		found = search_usart1_buffer_Rx((uint8_t *)AT_OK, (uint8_t *)AT_FAIL);
 	}
-	//write_usart2((uint8_t*)"AT_CWJAP PASSED\r\n");
 	found = FALSE;
-	//write_usart2((uint8_t*)"After AT_CWJAP while\r\n");//TEST :~)
+
+
+//	//AT COMMAND
+//	write_usart1((uint8_t*)AT_COMMAND);
+//	while(!found){
+//		found = search_usart1_buffer_Rx((uint8_t *)AT_OK, (uint8_t *)AT_ERROR);
+//	}
+//	write_usart2((uint8_t*)"AT_COMMAND PASSED\r\n");
+//	found = FALSE;
+
 
 
 	/*Default: AT+CIPMUX=0 (according to: AT instruction set- 5.2.15)*/
@@ -109,17 +129,24 @@ void TestWifiConnection(void){
 
 	write_usart1((uint8_t*)http);
 
+	// SEND OK
 	while(!found){
 		found = search_usart1_buffer_Rx((uint8_t *)AT_OK, (uint8_t *)AT_FAIL); //We counting on the appearance of OK in the HTTP response (we wont see the full response)
 	}
 	found = FALSE;
 
-	//Close TCP connection
+	// READ RESPONSE
+	while(!found){
+		//found = search_usart1_buffer_Rx((uint8_t *)"\r\n\r\nOK\r\n", (uint8_t *)AT_FAIL); //We counting on the appearance of OK in the HTTP response (we wont see the full response)
+		found = search_usart1_buffer_Rx((uint8_t *)"CLOSED\r\n", (uint8_t *)AT_FAIL);
+	}
+	found = FALSE;
+
+	//Close TCP connection: THIS MIGHT BE UNESESARY BECAUSE HTTP is vs 1.0 wich allows one request
 	write_usart1((uint8_t*)AT_CIPCLOSE);
 	while(!found){
-		found = search_usart1_buffer_Rx((uint8_t *)AT_OK, (uint8_t *)"NON");
+		found = search_usart1_buffer_Rx((uint8_t *)AT_OK, (uint8_t *)AT_ERROR);
 	}
-	write_usart2((uint8_t*)"AT_CIPCLOSE PASSED\r\n");
 	found = FALSE;
 
 
@@ -136,6 +163,12 @@ void pushData(void){
 }
 void ping(void){
 
+}
+
+/*delay for 1/4 of a second*/
+void delay(void){
+	uint32_t i = 10000000; // 1/4 of a second
+	while(i-- > 0);
 }
 
 

@@ -95,6 +95,9 @@
 #include <string.h>
 #include <stdlib.h>
 
+#define FALSE 0
+#define TRUE 1
+
 static USART_2 usart2;
 static USART_1 usart1;
 static uint8_t c; // for holding the USART->DR value
@@ -309,22 +312,26 @@ uint32_t search_usart1_buffer_Rx(uint8_t *pass, uint8_t *fail){
 		if(strstr((const char*)usart1.Rx , (const char*)pass)){
 			write_usart2((uint8_t*)usart1.Rx); //write response to screen
 			set_usart1_buffer_Rx();
-			return (uint32_t)1; //TRUE
+			return (uint32_t)TRUE;
 		}
 		else if(strstr((const char*)usart1.Rx , (const char*)fail)){
 			write_usart2((uint8_t*)usart1.Rx); //write response to screen
 			set_usart1_buffer_Rx();
-			return (uint32_t)0; //FALSE
+			return (uint32_t)FALSE;
 		}
 		else{
-			return (uint32_t)0; //FALSE
+//			write_usart2((uint8_t*)usart1.Rx);//for debuging
+//			write_usart2((uint8_t*)"\r\n"); //for debuging
+			return (uint32_t)FALSE;
 		}
 
 	}
 
 	else{
-		/*!TODO: when usart1.Rx buffer is overflown start chaeck from end??*/
-		return (uint32_t)0; //FALSE
+		/*!TODO: when usart1.Rx buffer is overflown start check from end??*/
+		write_usart2((uint8_t*)"\r\nBUFFER_OVERFLOW\r\n");
+		set_usart1_buffer_Rx();
+		return (uint32_t)FALSE; //FALSE
 	}
 
 }
@@ -337,12 +344,14 @@ void USART1_IRQHandler(void){
 		c = USART1->DR; //This clear RXNE bit
 		if((usart1.Rx_len + 1) < BUFF_SIZE){
 			usart1.Rx[usart1.read_index] = (uint8_t)(c & 0xFF);
-			usart1.read_index++;
-			usart1.Rx_len++;
 		}
 		else{
-			//!TODO: Restart index
+			//Restart index
+			usart1.read_index = 0;
+			usart1.Rx[usart1.read_index] = (uint8_t)(c & 0xFF);
 		}
+		usart1.read_index++;
+		usart1.Rx_len++;
 	}
 
 
