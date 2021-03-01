@@ -9,11 +9,11 @@
 #define ESP8266_FIREBASE_H_
 
 #include "esp8266_WiFi.h"
-#include "configurations.h"
 #include "stm32f103xb.h" //this file is included to every header file
 
 //void ESPinit(void);
 void TestWifiConnection(void);
+void connectFirbase(void);
 void waitFor(uint32_t* response);
 void addData(uint32_t* name, uint32_t* value);
 void pushData(void);

@@ -7,43 +7,43 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, ALLOC, LOAD, READONLY, DATA
   1 .text         000010e0  08000130  08000130  00010130  2**2
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
-  2 .rodata       0000020c  08001210  08001210  00011210  2**2
+  2 .rodata       00000238  08001210  08001210  00011210  2**2
                   CONTENTS, ALLOC, LOAD, READONLY, DATA
-  3 .ARM.extab    00000000  0800141c  0800141c  000200a0  2**0
+  3 .ARM.extab    00000000  08001448  08001448  000200a0  2**0
                   CONTENTS
-  4 .ARM          00000000  0800141c  0800141c  000200a0  2**0
+  4 .ARM          00000000  08001448  08001448  000200a0  2**0
                   CONTENTS
-  5 .preinit_array 00000000  0800141c  0800141c  000200a0  2**0
+  5 .preinit_array 00000000  08001448  08001448  000200a0  2**0
                   CONTENTS, ALLOC, LOAD, DATA
-  6 .init_array   00000004  0800141c  0800141c  0001141c  2**2
+  6 .init_array   00000004  08001448  08001448  00011448  2**2
                   CONTENTS, ALLOC, LOAD, DATA
-  7 .fini_array   00000004  08001420  08001420  00011420  2**2
+  7 .fini_array   00000004  0800144c  0800144c  0001144c  2**2
                   CONTENTS, ALLOC, LOAD, DATA
-  8 .data         000000a0  20000000  08001424  00020000  2**2
+  8 .data         000000a0  20000000  08001450  00020000  2**2
                   CONTENTS, ALLOC, LOAD, DATA
-  9 .bss          000007d4  200000a0  080014c4  000200a0  2**2
+  9 .bss          000007d4  200000a0  080014f0  000200a0  2**2
                   ALLOC
- 10 ._user_heap_stack 00000604  20000874  080014c4  00020874  2**0
+ 10 ._user_heap_stack 00000604  20000874  080014f0  00020874  2**0
                   ALLOC
  11 .ARM.attributes 00000029  00000000  00000000  000200a0  2**0
                   CONTENTS, READONLY
- 12 .debug_info   000045e9  00000000  00000000  000200c9  2**0
+ 12 .debug_info   0000463d  00000000  00000000  000200c9  2**0
                   CONTENTS, READONLY, DEBUGGING
- 13 .debug_abbrev 00000caf  00000000  00000000  000246b2  2**0
+ 13 .debug_abbrev 00000caf  00000000  00000000  00024706  2**0
                   CONTENTS, READONLY, DEBUGGING
- 14 .debug_aranges 000001c8  00000000  00000000  00025368  2**3
+ 14 .debug_aranges 000001d0  00000000  00000000  000253b8  2**3
                   CONTENTS, READONLY, DEBUGGING
- 15 .debug_ranges 00000160  00000000  00000000  00025530  2**3
+ 15 .debug_ranges 00000168  00000000  00000000  00025588  2**3
                   CONTENTS, READONLY, DEBUGGING
- 16 .debug_macro  00010c9c  00000000  00000000  00025690  2**0
+ 16 .debug_macro  00010c93  00000000  00000000  000256f0  2**0
                   CONTENTS, READONLY, DEBUGGING
- 17 .debug_line   00002814  00000000  00000000  0003632c  2**0
+ 17 .debug_line   0000283e  00000000  00000000  00036383  2**0
                   CONTENTS, READONLY, DEBUGGING
- 18 .debug_str    00058e2d  00000000  00000000  00038b40  2**0
+ 18 .debug_str    00058e7b  00000000  00000000  00038bc1  2**0
                   CONTENTS, READONLY, DEBUGGING
- 19 .comment      0000007b  00000000  00000000  0009196d  2**0
+ 19 .comment      0000007b  00000000  00000000  00091a3c  2**0
                   CONTENTS, READONLY
- 20 .debug_frame  000008f0  00000000  00000000  000919e8  2**2
+ 20 .debug_frame  0000090c  00000000  00000000  00091ab8  2**2
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -86,9 +86,9 @@ Disassembly of section .text:
  800017e:	4770      	bx	lr
 
 08000180 <TestWifiConnection>:
-//see: https://openweathermap.org/current
-static uint8_t api[] = "api.openweathermap.org" ;
-static uint8_t api_key[] = "4e622e19669401cd85da98eb2c3852f5" ;
+	found = FALSE;
+
+}
 
 
 void TestWifiConnection(void){
@@ -127,8 +127,6 @@ void TestWifiConnection(void){
  80001ae:	4b58      	ldr	r3, [pc, #352]	; (8000310 <TestWifiConnection+0x190>)
  80001b0:	2200      	movs	r2, #0
  80001b2:	601a      	str	r2, [r3, #0]
-//	write_usart2((uint8_t*)"AT_COMMAND PASSED\r\n");
-//	found = FALSE;
 
 
 	//Join access point
@@ -177,7 +175,7 @@ void TestWifiConnection(void){
  80001f0:	2100      	movs	r1, #0
  80001f2:	4849      	ldr	r0, [pc, #292]	; (8000318 <TestWifiConnection+0x198>)
  80001f4:	f000 fbc4 	bl	8000980 <memset>
-	sprintf((char*)command, "AT+CIPSTART=\"TCP\",\"%s\",80\r\n",api);
+	sprintf((char*)command, "AT+CIPSTART=\"TCP\",\"%s\",80\r\n", (char*)weather_api);
  80001f8:	4a4c      	ldr	r2, [pc, #304]	; (800032c <TestWifiConnection+0x1ac>)
  80001fa:	494d      	ldr	r1, [pc, #308]	; (8000330 <TestWifiConnection+0x1b0>)
  80001fc:	4846      	ldr	r0, [pc, #280]	; (8000318 <TestWifiConnection+0x198>)
@@ -223,7 +221,7 @@ void TestWifiConnection(void){
  8000238:	2100      	movs	r1, #0
  800023a:	483f      	ldr	r0, [pc, #252]	; (8000338 <TestWifiConnection+0x1b8>)
  800023c:	f000 fba0 	bl	8000980 <memset>
-	sprintf((char*)http,("GET /data/2.5/weather?q=London,uk&appid=%s HTTP/1.0\r\nHost: %s\r\n\r\n\r\n"),api_key,api); // HTTP/1.0- Allow only one request
+	sprintf((char*)http,("GET /data/2.5/weather?q=London,uk&appid=%s HTTP/1.0\r\nHost: %s\r\n\r\n\r\n"),weather_api_key,weather_api); // HTTP/1.0- Allow only one request
  8000240:	4b3a      	ldr	r3, [pc, #232]	; (800032c <TestWifiConnection+0x1ac>)
  8000242:	4a3e      	ldr	r2, [pc, #248]	; (800033c <TestWifiConnection+0x1bc>)
  8000244:	493e      	ldr	r1, [pc, #248]	; (8000340 <TestWifiConnection+0x1c0>)
@@ -364,16 +362,16 @@ void TestWifiConnection(void){
  8000324:	08001278 	.word	0x08001278
  8000328:	08001290 	.word	0x08001290
  800032c:	20000000 	.word	0x20000000
- 8000330:	08001298 	.word	0x08001298
- 8000334:	080012b4 	.word	0x080012b4
+ 8000330:	08001350 	.word	0x08001350
+ 8000334:	080012b8 	.word	0x080012b8
  8000338:	20000140 	.word	0x20000140
  800033c:	20000018 	.word	0x20000018
- 8000340:	080012c8 	.word	0x080012c8
+ 8000340:	080012cc 	.word	0x080012cc
  8000344:	20000240 	.word	0x20000240
- 8000348:	0800130c 	.word	0x0800130c
- 800034c:	08001320 	.word	0x08001320
- 8000350:	08001324 	.word	0x08001324
- 8000354:	08001330 	.word	0x08001330
+ 8000348:	08001310 	.word	0x08001310
+ 800034c:	08001324 	.word	0x08001324
+ 8000350:	08001334 	.word	0x08001334
+ 8000354:	08001340 	.word	0x08001340
 
 08000358 <toggle_led>:
 
@@ -453,7 +451,7 @@ void EXTI4_IRQHandler(void)
  80003b8:	bd80      	pop	{r7, pc}
  80003ba:	bf00      	nop
  80003bc:	40010400 	.word	0x40010400
- 80003c0:	08001340 	.word	0x08001340
+ 80003c0:	0800136c 	.word	0x0800136c
 
 080003c4 <main>:
 #include "esp8266_WiFi.h" /*for testing usart1...*/
@@ -483,7 +481,7 @@ int main(void)
 
 	while(1)
  80003da:	e7fe      	b.n	80003da <main+0x16>
- 80003dc:	080013c0 	.word	0x080013c0
+ 80003dc:	080013ec 	.word	0x080013ec
 
 080003e0 <SysTick_Handler>:
 }
@@ -1276,7 +1274,7 @@ uint32_t search_usart1_buffer_Rx(uint8_t *pass, uint8_t *fail){
  800083e:	bd80      	pop	{r7, pc}
  8000840:	20000450 	.word	0x20000450
  8000844:	20000650 	.word	0x20000650
- 8000848:	080013d4 	.word	0x080013d4
+ 8000848:	08001400 	.word	0x08001400
 
 0800084c <USART1_IRQHandler>:
 
@@ -1447,7 +1445,7 @@ LoopForever:
   ldr r1, =_edata
  8000918:	200000a0 	.word	0x200000a0
   ldr r2, =_sidata
- 800091c:	08001424 	.word	0x08001424
+ 800091c:	08001450 	.word	0x08001450
   ldr r2, =_sbss
  8000920:	200000a0 	.word	0x200000a0
   ldr r4, =_ebss
@@ -1496,10 +1494,10 @@ Infinite_Loop:
  800096a:	4798      	blx	r3
  800096c:	3501      	adds	r5, #1
  800096e:	e7f2      	b.n	8000956 <__libc_init_array+0x1e>
- 8000970:	0800141c 	.word	0x0800141c
- 8000974:	0800141c 	.word	0x0800141c
- 8000978:	0800141c 	.word	0x0800141c
- 800097c:	08001420 	.word	0x08001420
+ 8000970:	08001448 	.word	0x08001448
+ 8000974:	08001448 	.word	0x08001448
+ 8000978:	08001448 	.word	0x08001448
+ 800097c:	0800144c 	.word	0x0800144c
 
 08000980 <memset>:
  8000980:	4603      	mov	r3, r0
@@ -1851,9 +1849,9 @@ Infinite_Loop:
  8000c9c:	f000 f882 	bl	8000da4 <_printf_i>
  8000ca0:	e7ea      	b.n	8000c78 <_svfiprintf_r+0x1b0>
  8000ca2:	bf00      	nop
- 8000ca4:	080013e8 	.word	0x080013e8
- 8000ca8:	080013ee 	.word	0x080013ee
- 8000cac:	080013f2 	.word	0x080013f2
+ 8000ca4:	08001414 	.word	0x08001414
+ 8000ca8:	0800141a 	.word	0x0800141a
+ 8000cac:	0800141e 	.word	0x0800141e
  8000cb0:	00000000 	.word	0x00000000
  8000cb4:	08000a15 	.word	0x08000a15
 
@@ -2189,8 +2187,8 @@ Infinite_Loop:
  8000fb6:	f104 0542 	add.w	r5, r4, #66	; 0x42
  8000fba:	f884 3042 	strb.w	r3, [r4, #66]	; 0x42
  8000fbe:	e76c      	b.n	8000e9a <_printf_i+0xf6>
- 8000fc0:	080013f9 	.word	0x080013f9
- 8000fc4:	0800140a 	.word	0x0800140a
+ 8000fc0:	08001425 	.word	0x08001425
+ 8000fc4:	08001436 	.word	0x08001436
 
 08000fc8 <memchr>:
  8000fc8:	b510      	push	{r4, lr}
