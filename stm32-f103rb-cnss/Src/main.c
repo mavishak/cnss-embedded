@@ -45,8 +45,9 @@ int main(void)
 
 	write_usart2((uint8_t*)("\r\n_______________\r\n"));//For test
 
+	connectFirbase();
 
-	TestWifiConnection(); //THE FUNCTION NAME HAS NOTHING TO DO WITH IT"S CONTENT...! :)~
+	//TestWifiConnection(); //THE FUNCTION NAME HAS NOTHING TO DO WITH IT"S CONTENT...! :)~
 
 	while(1)
 	{

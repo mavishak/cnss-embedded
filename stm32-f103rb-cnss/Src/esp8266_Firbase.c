@@ -12,6 +12,17 @@
  *  			1. Reset when downloading code to modul -> Not so bad... ()
  *  			2. AT + RESET stops program from continuing to run -> BAD - > why is this happening?
  *  			3. Not receiving > after AT+CIPSEND
+ *
+ *  04.03.2021: We succeed to send a POST message to Real-time database! (using AT commands, HTTPS and SSL)
+ *  			1. We needed to write: AT+CIPSSLSIZE=4096
+ *  			2. We needed to write: sprintf((char*)command, "AT+CIPSTART=\"SSL\",\"%s\",%ld\r\n",(char*)firebase_host, https_port)
+ *  			3. The POST message was:
+ *  			    POST /rest/test/posts.json? HTTP/1.1\r\n
+ *					Host: %s\r\n
+ *					Content-Type: application/json\r\n
+ *					Content-Length: 49\r\n\r\n
+ *					{"author": "Nemo Resh", "title": "Fish are blue"}
+ *					\r\n
  */
 
 #include "esp8266_Firebase.h"
@@ -38,13 +49,13 @@ void connectFirbase(void){
 	// before useing this function init_usart1(); and  init_usart2(); must be executed
 
 	//Reset ESP8266
-	//	write_usart1((uint8_t*)AT_RST);
-	//
-	//	while(!found){
-	//		found = search_usart1_buffer_Rx((uint8_t *)AT_OK, (uint8_t *)AT_ERROR);
-	//	}
-	//	write_usart2((uint8_t*)"AT_RST PASSED\r\n");
-	//	found = FALSE;
+//	write_usart1((uint8_t*)AT_RST);
+//
+//	while(!found){
+//		found = search_usart1_buffer_Rx((uint8_t *)AT_OK, (uint8_t *)AT_ERROR);
+//	}
+//	write_usart2((uint8_t*)"AT_RST PASSED\r\n");
+//	found = FALSE;
 
 	//Set client mode
 	write_usart1((uint8_t*)AT_CWMODE);
@@ -70,9 +81,34 @@ void connectFirbase(void){
 
 	/*Default: AT+CIPMUX=0 (according to: AT instruction set- 5.2.15)*/
 
+
+
+
+
+
+
+//----------------------------TESTING----------------------------\\
+	//FOR SSL
+	//write_usart1((uint8_t*)"AT+CIPSSLSIZE?\r\n");//Answer: +CIPSSLSIZE:2048
+	write_usart1((uint8_t*)"AT+CIPSSLSIZE=4096\r\n");//at_instruction: 5.2.4 page 50
+	//write_usart1((uint8_t*)"AT+CIPSSLCCONF?\r\n");
+	while(!found){
+		found = search_usart1_buffer_Rx((uint8_t *)AT_OK, (uint8_t *)AT_ERROR);
+	}
+	found = FALSE;
+
+
+//----------------------------TESTING----------------------------\\
+
+
+
+
+
 	//Connect to API
 	memset((char*)command, '\0', COMMAND_SIZE*sizeof(uint8_t));
-	sprintf((char*)command, "AT+CIPSTART=\"TCP\",\"%s\",%ld\r\n",(char*)firebase_host, https_port);
+	sprintf((char*)command, "AT+CIPSTART=\"SSL\",\"%s\",%ld\r\n",(char*)firebase_host, https_port);
+	//sprintf((char*)command, "AT+CIPSTART=\"TCP\",\"%s\",%ld\r\n",(char*)firebase_host, https_port);
+	//sprintf((char*)command, "AT+CIPSTART=\"TCP\",\"%s\",%ld\r\n",(char*)firebase_host, http_port);
 
 	//write_usart2((uint8_t*)command); // test
 	write_usart1((uint8_t*)command);
@@ -86,8 +122,11 @@ void connectFirbase(void){
 
 	//Set HTTP request
 	memset((char*)http, '\0', HTTP_SIZE*sizeof(uint8_t));
-	sprintf((char*)http,("GET /data/2.5/weather?q=London,uk&appid=%s HTTP/1.0\r\nHost: %s\r\n\r\n\r\n"),(char*)firebase_auth_key,(char*)firebase_host); // HTTP/1.0- Allow only one request
+	sprintf((char*)http,("POST /rest/test/posts.json? HTTP/1.1\r\nHost: %s\r\nContent-Type: application/json\r\nContent-Length: 49\r\n\r\n{\"author\": \"Nemo Resh\", \"title\": \"Fish are blue\"}\r\n"),(char*)firebase_host); // HTTP/1.0- Allow only one request
+	//sprintf((char*)http,("POST /rest/test/posts.json?Content-Type=application/x-www-form-urlencoded HTTP/1.1\r\nHost: %s\r\nContent-Type: application/json\r\n\r\n{\"author\": \"Nemo Resh\", \"title\": \"Fish are blue\"}\r\n\r\n\r\n"),(char*)firebase_host); // HTTP/1.0- Allow only one request
+    //"POST /rest/test/posts.json?Content-Type=application/x-www-form-urlencoded HTTP/1.1\r\nHost: %s\r\nContent-Type: application/json\r\n\r\n{\"author\": \"Nemo Resh\", \"title\": \"Fish are blue\"}\r\n"
 	http_len = strlen((char*)http)-strlen("\r\n"); // the last \r\n is for the AT command, and not included in the request's length
+
 
 	//Send number of data bytes
 	memset((char*)command, '\0', COMMAND_SIZE*sizeof(uint8_t));
@@ -104,7 +143,7 @@ void connectFirbase(void){
 
 	write_usart1((uint8_t*)http);
 
-	// SEND OK
+	// WAIT FOR OK
 	while(!found){
 		found = search_usart1_buffer_Rx((uint8_t *)AT_OK, (uint8_t *)AT_FAIL); //We counting on the appearance of OK in the HTTP response (we wont see the full response)
 	}
@@ -126,7 +165,7 @@ void connectFirbase(void){
 
 }
 
-
+//-------------------------------------------------------------------------------------------------------------
 void TestWifiConnection(void){
 
 	// before useing this function init_usart1(); and  init_usart2(); must be executed
@@ -243,5 +282,4 @@ void delay(void){
 	uint32_t i = 10000000; // 1/4 of a second
 	while(i-- > 0);
 }
-
 
