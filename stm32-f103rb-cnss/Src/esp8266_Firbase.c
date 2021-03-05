@@ -8,7 +8,7 @@
  *  			!TODO: Need to debug
  *  			Note: DO NOT PUT NULL AS FAIL DEFAULT
  *
- *  15.02.2021: Problems: YIII HIIII
+ *  15.02.2021: Problems:
  *  			1. Reset when downloading code to modul -> Not so bad... ()
  *  			2. AT + RESET stops program from continuing to run -> BAD - > why is this happening?
  *  			3. Not receiving > after AT+CIPSEND
@@ -30,7 +30,7 @@
 #include "usart.h"
 #include <string.h>
 #include <stdio.h>
-//#include <time.h>
+#include <time.h>
 
 #define FALSE 0
 #define TRUE 1
@@ -45,6 +45,18 @@ static uint8_t http[HTTP_SIZE];
 static uint32_t http_len = 0 ;
 
 
+void timestamp(void){
+
+	   time_t rawtime;
+	   struct tm *info;
+	   time( &rawtime );
+	   info = localtime( &rawtime );
+	   memset((char*)command, '\0', COMMAND_SIZE*sizeof(uint8_t));
+	   sprintf((char*)command, "Current local time and date: %s", asctime(info));
+	   write_usart2((uint8_t*)command);
+
+}
+
 void connectFirbase(void){
 	// before useing this function init_usart1(); and  init_usart2(); must be executed
 
@@ -56,6 +68,7 @@ void connectFirbase(void){
 //	}
 //	write_usart2((uint8_t*)"AT_RST PASSED\r\n");
 //	found = FALSE;
+
 
 	//Set client mode
 	write_usart1((uint8_t*)AT_CWMODE);
@@ -82,12 +95,6 @@ void connectFirbase(void){
 	/*Default: AT+CIPMUX=0 (according to: AT instruction set- 5.2.15)*/
 
 
-
-
-
-
-
-//----------------------------TESTING----------------------------\\
 	//FOR SSL
 	//write_usart1((uint8_t*)"AT+CIPSSLSIZE?\r\n");//Answer: +CIPSSLSIZE:2048
 	write_usart1((uint8_t*)"AT+CIPSSLSIZE=4096\r\n");//at_instruction: 5.2.4 page 50
@@ -96,11 +103,6 @@ void connectFirbase(void){
 		found = search_usart1_buffer_Rx((uint8_t *)AT_OK, (uint8_t *)AT_ERROR);
 	}
 	found = FALSE;
-
-
-//----------------------------TESTING----------------------------\\
-
-
 
 
 
@@ -122,7 +124,7 @@ void connectFirbase(void){
 
 	//Set HTTP request
 	memset((char*)http, '\0', HTTP_SIZE*sizeof(uint8_t));
-	sprintf((char*)http,("POST /rest/test/posts.json? HTTP/1.1\r\nHost: %s\r\nContent-Type: application/json\r\nContent-Length: 49\r\n\r\n{\"author\": \"Nemo Resh\", \"title\": \"Fish are blue\"}\r\n"),(char*)firebase_host); // HTTP/1.0- Allow only one request
+	sprintf((char*)http,("POST /rest/test/posts.json? HTTP/1.1\r\nHost: %s\r\nContent-Type: application/json\r\nContent-Length: 50\r\n\r\n{\"author\": \"Nemo Resh\", \"title\": \"Fish can't fly\"}\r\n"),(char*)firebase_host); // HTTP/1.0- Allow only one request
 	//sprintf((char*)http,("POST /rest/test/posts.json?Content-Type=application/x-www-form-urlencoded HTTP/1.1\r\nHost: %s\r\nContent-Type: application/json\r\n\r\n{\"author\": \"Nemo Resh\", \"title\": \"Fish are blue\"}\r\n\r\n\r\n"),(char*)firebase_host); // HTTP/1.0- Allow only one request
     //"POST /rest/test/posts.json?Content-Type=application/x-www-form-urlencoded HTTP/1.1\r\nHost: %s\r\nContent-Type: application/json\r\n\r\n{\"author\": \"Nemo Resh\", \"title\": \"Fish are blue\"}\r\n"
 	http_len = strlen((char*)http)-strlen("\r\n"); // the last \r\n is for the AT command, and not included in the request's length

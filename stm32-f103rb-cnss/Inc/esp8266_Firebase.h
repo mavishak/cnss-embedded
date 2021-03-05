@@ -19,6 +19,7 @@ void addData(uint32_t* name, uint32_t* value);
 void pushData(void);
 void ping(void);
 void delay(void);
+void timestamp(void);
 
 
 #endif /* ESP8266_FIREBASE_H_ */
