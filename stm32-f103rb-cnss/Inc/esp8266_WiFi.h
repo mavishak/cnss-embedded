@@ -20,6 +20,7 @@
 #define AT_ERROR "ERROR\r\n"
 #define AT_FAIL "FAIL\r\n"
 #define AT_ALREADY_CONNECTED "ALREADY CONNECTED\r\n"
+#define SEND_OK "SEND OK\r\n"
 
 //enum Commands{AT_COMMAND}
 //enum Respondes{AT_OK, AT_ERROR}

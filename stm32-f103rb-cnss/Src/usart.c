@@ -330,6 +330,7 @@ uint32_t search_usart1_buffer_Rx(uint8_t *pass, uint8_t *fail){
 	else{
 		/*!TODO: when usart1.Rx buffer is overflown start check from end??*/
 		write_usart2((uint8_t*)"\r\nBUFFER_OVERFLOW\r\n");
+		write_usart2((uint8_t*)usart1.Rx);
 		set_usart1_buffer_Rx();
 		return (uint32_t)FALSE; //FALSE
 	}

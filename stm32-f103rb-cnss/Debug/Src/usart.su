@@ -9,4 +9,4 @@ usart.c:260:6:write_usart1	16	static
 usart.c:280:6:set_usart1_buffer_Tx	16	static
 usart.c:298:6:set_usart1_buffer_Rx	8	static
 usart.c:307:10:search_usart1_buffer_Rx	16	static
-usart.c:340:6:USART1_IRQHandler	4	static
+usart.c:341:6:USART1_IRQHandler	4	static
