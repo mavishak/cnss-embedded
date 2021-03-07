@@ -36,7 +36,9 @@
 #define TRUE 1
 
 #define COMMAND_SIZE 256
-#define HTTP_SIZE 256
+#define HTTP_SIZE 512
+#define CONTENT_SIZE 128
+#define PATH_SIZE 128
 
 static uint32_t found = FALSE;
 static uint8_t command[COMMAND_SIZE];
@@ -44,17 +46,14 @@ static uint8_t command[COMMAND_SIZE];
 static uint8_t http[HTTP_SIZE];
 static uint32_t http_len = 0 ;
 
+static uint8_t content[CONTENT_SIZE]; //The HTTP body
+static uint32_t content_len = 0 ;
 
-void timestamp(void){
+static uint8_t image_path[PATH_SIZE];
 
-	   time_t rawtime;
-	   struct tm *info;
-	   time( &rawtime );
-	   info = localtime( &rawtime );
-	   memset((char*)command, '\0', COMMAND_SIZE*sizeof(uint8_t));
-	   sprintf((char*)command, "Current local time and date: %s", asctime(info));
-	   write_usart2((uint8_t*)command);
-
+void setImagePath(void){
+	memset((char*)image_path, '\0', PATH_SIZE*sizeof(uint8_t));
+	sprintf((char*)image_path, "image/path");
 }
 
 void connectFirbase(void){
@@ -96,9 +95,7 @@ void connectFirbase(void){
 
 
 	//FOR SSL
-	//write_usart1((uint8_t*)"AT+CIPSSLSIZE?\r\n");//Answer: +CIPSSLSIZE:2048
 	write_usart1((uint8_t*)"AT+CIPSSLSIZE=4096\r\n");//at_instruction: 5.2.4 page 50
-	//write_usart1((uint8_t*)"AT+CIPSSLCCONF?\r\n");
 	while(!found){
 		found = search_usart1_buffer_Rx((uint8_t *)AT_OK, (uint8_t *)AT_ERROR);
 	}
@@ -109,24 +106,27 @@ void connectFirbase(void){
 	//Connect to API
 	memset((char*)command, '\0', COMMAND_SIZE*sizeof(uint8_t));
 	sprintf((char*)command, "AT+CIPSTART=\"SSL\",\"%s\",%ld\r\n",(char*)firebase_host, https_port);
-	//sprintf((char*)command, "AT+CIPSTART=\"TCP\",\"%s\",%ld\r\n",(char*)firebase_host, https_port);
-	//sprintf((char*)command, "AT+CIPSTART=\"TCP\",\"%s\",%ld\r\n",(char*)firebase_host, http_port);
 
-	//write_usart2((uint8_t*)command); // test
 	write_usart1((uint8_t*)command);
 
 	while(!found){
 		found = search_usart1_buffer_Rx((uint8_t *)AT_OK, (uint8_t *)AT_FAIL);
 		found = search_usart1_buffer_Rx((uint8_t *)AT_OK, (uint8_t *)AT_ALREADY_CONNECTED);
 	}
-	//write_usart2((uint8_t*)"AT+CIPSTART PASSED\r\n");
 	found = FALSE;
+
+	//Set Image Path
+	setImagePath(); //Need to check params later
+
+	//Set HTTP body content
+	memset((char*)content, '\0', CONTENT_SIZE*sizeof(uint8_t));
+	sprintf((char*)content,("{\"image_path\": \"%s\", \"notes\": \"alarm went off!\", \"timestamp\": {\".sv\": \"timestamp\"}}"),(char*)image_path);
+	content_len = strlen((char*)content);
+
 
 	//Set HTTP request
 	memset((char*)http, '\0', HTTP_SIZE*sizeof(uint8_t));
-	sprintf((char*)http,("POST /rest/test/posts.json? HTTP/1.1\r\nHost: %s\r\nContent-Type: application/json\r\nContent-Length: 50\r\n\r\n{\"author\": \"Nemo Resh\", \"title\": \"Fish can't fly\"}\r\n"),(char*)firebase_host); // HTTP/1.0- Allow only one request
-	//sprintf((char*)http,("POST /rest/test/posts.json?Content-Type=application/x-www-form-urlencoded HTTP/1.1\r\nHost: %s\r\nContent-Type: application/json\r\n\r\n{\"author\": \"Nemo Resh\", \"title\": \"Fish are blue\"}\r\n\r\n\r\n"),(char*)firebase_host); // HTTP/1.0- Allow only one request
-    //"POST /rest/test/posts.json?Content-Type=application/x-www-form-urlencoded HTTP/1.1\r\nHost: %s\r\nContent-Type: application/json\r\n\r\n{\"author\": \"Nemo Resh\", \"title\": \"Fish are blue\"}\r\n"
+	sprintf((char*)http,("POST /devices/%s/history.json?auth=%s&print=silent HTTP/1.1\r\nHost: %s\r\nContent-Type: application/json\r\nContent-Length: %ld\r\n\r\n%s\r\n"),(char*)device_id,(char*)firebase_auth_key,(char*)firebase_host,content_len,(char*)content); // HTTP/1.0- Allow only one request
 	http_len = strlen((char*)http)-strlen("\r\n"); // the last \r\n is for the AT command, and not included in the request's length
 
 
@@ -153,7 +153,7 @@ void connectFirbase(void){
 
 	// READ RESPONSE
 	while(!found){
-		found = search_usart1_buffer_Rx((uint8_t *)"\r\n\r\nOK\r\n", (uint8_t *)AT_FAIL); //We counting on the appearance of OK in the HTTP response (we wont see the full response)
+		//found = search_usart1_buffer_Rx((uint8_t *)"\r\n\r\nOK\r\n", (uint8_t *)AT_FAIL); //We counting on the appearance of OK in the HTTP response (we wont see the full response)
 		found = search_usart1_buffer_Rx((uint8_t *)"CLOSED\r\n", (uint8_t *)AT_FAIL);
 	}
 	found = FALSE;

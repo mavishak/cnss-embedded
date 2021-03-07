@@ -320,8 +320,8 @@ uint32_t search_usart1_buffer_Rx(uint8_t *pass, uint8_t *fail){
 			return (uint32_t)FALSE;
 		}
 		else{
-//			write_usart2((uint8_t*)usart1.Rx);//for debuging
-//			write_usart2((uint8_t*)"\r\n"); //for debuging
+			//write_usart2((uint8_t*)usart1.Rx);//for debuging
+			//write_usart2((uint8_t*)"\r\n"); //for debuging
 			return (uint32_t)FALSE;
 		}
 
