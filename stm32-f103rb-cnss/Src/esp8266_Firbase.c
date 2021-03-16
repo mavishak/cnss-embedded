@@ -30,7 +30,9 @@
 #include "usart.h"
 #include <string.h>
 #include <stdio.h>
-#include <time.h>
+
+
+
 
 #define FALSE 0
 #define TRUE 1
@@ -52,6 +54,11 @@ static uint32_t content_len = 0 ;
 static uint8_t image_path[PATH_SIZE];
 
 
+/*delay for 1/4 of a second*/
+void delay(void){
+	uint32_t i = 9000000;//1300000;//1240000;//620000;//1000000; // 1/4 of a second
+	while(i-- > 0);
+}
 
 
 void setImagePath(void){
@@ -61,49 +68,75 @@ void setImagePath(void){
 }
 
 
-void connectFirbase(){
-
-}
 
 
 void recordAlert(void){
 	// before useing this function init_usart1(); and  init_usart2(); must be executed
 
+
+	//write_usart2((uint8_t*)"testing delay\r\n");
+	//delay(10);
+	//write_usart2((uint8_t*)"testing delay\r\n");
+
 	//Reset ESP8266
+	//	ets_intr_lock();
+	//	ets_wdt_disable();
+	//system_soft_wdt_stop();
 	//reset(); //!TODO THIS FUNCTIONALITY NEEDS FIXING!!!
+
+
+	//delay();
+	//delay();
+
+	//write_usart2((uint8_t*)"0\r\n"); //with this it reaches AT+CWJAP
+
 
 
 	//Set client mode
 	setClientMode();
+
+	//delay();
 	write_usart2((uint8_t*)"1\r\n");
 
 
 	//Join access point
 	joinAccessPoint();
+
+	//delay();
 	write_usart2((uint8_t*)"2\r\n");
 
 	/*Default: AT+CIPMUX=0 (according to: AT instruction set- 5.2.15)*/
 
 	//Connect HOST IP
 	connectFirebaseHost();
+
+	//delay();
 	write_usart2((uint8_t*)"3\r\n");
 
 
 	//Set Image Path
 	setImagePath(); //Need to check params later
+
+	//delay();
 	write_usart2((uint8_t*)"4\r\n");
 
 	//Create HTTP request
 	createPostMsg();
+
+	//delay();
 	write_usart2((uint8_t*)"5\r\n");
 
 
 	//Send number of data bytes
 	sendRequest();
+
+	//delay();
 	write_usart2((uint8_t*)"6\r\n");
 
 	//Read response
 	readResponse();
+
+	//delay();
 	write_usart2((uint8_t*)"7\r\n");
 
 	//Close cunnection with firebase - this might be useless as firebase already closes connection with "CLOSED" response
@@ -238,6 +271,7 @@ void sendRequest(void){
 	write_usart1((uint8_t*)command);
 	while(!found){
 		found = search_usart1_buffer_Rx((uint8_t *)">", (uint8_t *)AT_ERROR);
+		found = search_usart1_buffer_Rx((uint8_t *)">", (uint8_t *)"CLOSED\r\n");//I think this should be here
 	}
 	found = FALSE;
 
@@ -276,12 +310,6 @@ void closeCunnection(void){
 
 }
 
-
-/*delay for 1/4 of a second*/
-void delay(void){
-	uint32_t i = 10000000; // 1/4 of a second
-	while(i-- > 0);
-}
 
 
 void TestWifiConnection(void){
