@@ -66,5 +66,3 @@ void test_timer2(void){
 void wait_with_timer2(uint32_t num_of_millis){
 	init_timer2();
 }
-
-

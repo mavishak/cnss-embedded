@@ -44,70 +44,12 @@ int main(void)
 	//init_usart1(); // for ESP8266
 	//write_usart2((uint8_t*)("\r\n_______________\r\n"));//For test
 
-<<<<<<< HEAD
 	//recordAlert();
-=======
-	//connectFirbase();
-//	write_usart2((uint8_t*)"testing delay\r\n");
-//	delay(10);
-//	write_usart2((uint8_t*)"testing delay\r\n");
-
-//	recordAlert();
->>>>>>> 2cbdcb6f61c10bb5fe19d6016fffb4daa7ed315a
 
 
 	while(1)
 	{
-<<<<<<< HEAD
 		test_timer2();
-=======
-		recordAlert();
-//		write_usart2((uint8_t*)"0 sec\r\n");
-//		delay();
-//		//delay();
-//		write_usart2((uint8_t*)"1 sec\r\n");
-//		delay();
-//		//delay();
-//		write_usart2((uint8_t*)"2 sec\r\n");
-//		delay();
-//		//delay();
-//		write_usart2((uint8_t*)"3 sec\r\n");
-//		delay();
-//		//delay();
-//		write_usart2((uint8_t*)"5 sec\r\n");
-//		delay();
-//		//delay();
-
-		//write_usart2((uint8_t*)MSG);//Used only when Testing USART2 without sensor
-		//write_usart1((uint8_t*)AT_COMMAND); // WRITE TEST COMAND
-		//uint32_t found = search_usart1_buffer_Rx((uint8_t *)AT_OK, (uint8_t *)AT_ERROR);
-		//if(found)
-		//{
-		//	write_usart2((uint8_t*)"TEST PASSED\r\n");
-		//}
-		//else{ //RECEIVING A RESPONSE TAKES TIME IT DOES NOT MEEN THE TEST FAILED
-		//	write_usart2((uint8_t*)"TEST FAILED\r\n");
-		//}
->>>>>>> 2cbdcb6f61c10bb5fe19d6016fffb4daa7ed315a
 
 	}
 }
-
-<<<<<<< HEAD
-=======
-
-
-/*Interrupt service routine for sensor*/
-/*void EXTI15_10_IRQHandler(void)
-{
-
-	EXTI->PR |= 0x00000400; //reset flag by writing 1 to bit 10 (reference manual 10.3.6)
-	toggle_led();
-
-}
-*/
-
-
-
-
->>>>>>> 2cbdcb6f61c10bb5fe19d6016fffb4daa7ed315a
