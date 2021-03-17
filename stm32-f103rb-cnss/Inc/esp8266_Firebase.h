@@ -28,6 +28,7 @@ void readResponse(void);
 void closeCunnection(void);
 
 void delay(void);
+
 void setImagePath(void);
 
 void connectFirbase(void);
