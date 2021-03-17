@@ -31,7 +31,7 @@
 
 
 #include "esp8266_WiFi.h" /*for testing usart1...*/
-
+#include "timers.h"
 
 
 int main(void)
@@ -40,47 +40,17 @@ int main(void)
 	//init_sensor_with_interrupt();
 	//init_sensor_led_response();
 	init_usart2(); // for dbugging
-	init_usart1(); // for ESP8266
-	//write_usart2((uint8_t*)AT_COMMAND);
+	init_timer2();
+	//init_usart1(); // for ESP8266
+	//write_usart2((uint8_t*)("\r\n_______________\r\n"));//For test
 
-	write_usart2((uint8_t*)("\r\n_______________\r\n"));//For test
+	//recordAlert();
 
-	//connectFirbase();
-	recordAlert();
-
-	//TestWifiConnection(); //THE FUNCTION NAME HAS NOTHING TO DO WITH IT"S CONTENT...! :)~
 
 	while(1)
 	{
-		//write_usart2((uint8_t*)MSG);//Used only when Testing USART2 without sensor
-		//write_usart1((uint8_t*)AT_COMMAND); // WRITE TEST COMAND
-		//uint32_t found = search_usart1_buffer_Rx((uint8_t *)AT_OK, (uint8_t *)AT_ERROR);
-		//if(found)
-		//{
-		//	write_usart2((uint8_t*)"TEST PASSED\r\n");
-		//}
-		//else{ //RECEIVING A RESPONSE TAKES TIME IT DOES NOT MEEN THE TEST FAILED
-		//	write_usart2((uint8_t*)"TEST FAILED\r\n");
-		//}
+		test_timer2();
 
 	}
-}
-
-
-
-/*Interrupt service routine for sensor*/
-/*void EXTI15_10_IRQHandler(void)
-{
-
-	EXTI->PR |= 0x00000400; //reset flag by writing 1 to bit 10 (reference manual 10.3.6)
-	toggle_led();
-
-}
-*/
-
-
-void SysTick_Handler(void)
-{
-
 }
 
