@@ -53,11 +53,11 @@ void init_timer2(){
 /*USART2 has to be enabled*/
 void test_timer2(void){
 
-	uint32_t i = TIM2->CNT;
-	write_usart2((uint8_t *)i);
+//	uint32_t i = TIM2->CNT;
+//	write_usart2((uint8_t *)i);
 
 //	write_usart2((uint8_t *)TIM2->CNT);
-	write_usart2((uint8_t *)"\r\n");
+//	write_usart2((uint8_t *)"\r\n");
 }
 
 
