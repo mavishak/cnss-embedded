@@ -40,16 +40,26 @@ int main(void)
 	//init_sensor_with_interrupt();
 	//init_sensor_led_response();
 	init_usart2(); // for dbugging
+
 	init_timer2();
+	init_timer3();
+	init_timer4();
+
 	//init_usart1(); // for ESP8266
-	//write_usart2((uint8_t*)("\r\n_______________\r\n"));//For test
+	write_usart2((uint8_t*)("\r\n_______________\r\n"));//For test
 
 	//recordAlert();
 
-
 	while(1)
 	{
-		test_timer2();
+		//test_timer2();
+		delay_with_timer3(1000);
+		write_usart2((uint8_t*)("Hello Stich\r\n"));
 
+		delay_with_timer2(1000);
+		write_usart2((uint8_t*)("Hi Lilo\r\n"));
+
+		delay_with_timer2(1000);
+		write_usart2((uint8_t*)("Muffasa!\r\n"));
 	}
 }
