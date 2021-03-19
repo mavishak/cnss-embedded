@@ -52,14 +52,13 @@ int main(void)
 
 	while(1)
 	{
-		//test_timer2();
 		delay_with_timer3(1000);
-		write_usart2((uint8_t*)("Hello Stich\r\n"));
+		write_usart2((uint8_t*)("1\r\n"));
 
 		delay_with_timer2(1000);
-		write_usart2((uint8_t*)("Hi Lilo\r\n"));
+		write_usart2((uint8_t*)("2\r\n"));
 
-		delay_with_timer2(1000);
-		write_usart2((uint8_t*)("Muffasa!\r\n"));
+		delay_with_timer4(1000);
+		write_usart2((uint8_t*)("3\r\n"));
 	}
 }
