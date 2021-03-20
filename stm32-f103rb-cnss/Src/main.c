@@ -53,12 +53,22 @@ int main(void)
 	while(1)
 	{
 		delay_with_timer3(1000);
-		write_usart2((uint8_t*)("1\r\n"));
+		write_usart2((uint8_t*)(":)\r\n"));
 
 		delay_with_timer2(1000);
-		write_usart2((uint8_t*)("2\r\n"));
+		write_usart2((uint8_t*)(":|\r\n"));
 
-		delay_with_timer4(1000);
-		write_usart2((uint8_t*)("3\r\n"));
+		delay_with_timer4(1);
+		write_usart2((uint8_t*)(":/\r\n"));
+
+		while(!timeout_with_timer2(1000));
+		write_usart2((uint8_t*)(":(\r\n"));
+
+		while(!timeout_with_timer3(1000));
+		write_usart2((uint8_t*)(";)\r\n"));
+
+		while(!timeout_with_timer4(1));
+		write_usart2((uint8_t*)(":D\r\n"));
+
 	}
 }
