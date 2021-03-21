@@ -10,6 +10,7 @@
 
 #include "esp8266_WiFi.h"
 #include "stm32f103xb.h" //this file is included to every header file
+#include "common.h"
 
 
 
@@ -17,21 +18,19 @@
 void TestWifiConnection(void);
 
 
-void ping(void);
-void reset(void);
-void setClientMode(void);
-void joinAccessPoint(void);
-void connectFirebaseHost(void);
+BOOL ping(uint32_t tries, uint32_t timeout);
+BOOL reset(uint32_t tries, uint32_t timeout);
+BOOL setClientMode(uint32_t tries, uint32_t timeout);
+BOOL joinAccessPoint(uint32_t tries, uint32_t timeout);
+BOOL connectFirebaseHost(uint32_t _ssl_tries, uint32_t _cipstart_tries , uint32_t _ssl_timeout, uint32_t  _cipstart_timeout);
 void createPostMsg(void);
-void sendRequest(void);
-void readResponse(void);
-void closeCunnection(void);
-
-void delay(void);
+BOOL sendRequest(uint32_t _CIPSEND_tries,uint32_t _SEND_OK_tries , uint32_t _CIPSEND_timeout, uint32_t _SEND_OK_timeout);
+void readResponse(void); //CHAINGE TO BOOL
+void closeCunnection(void); //CHAINGE TO BOOL
 
 void setImagePath(void);
 
 void connectFirbase(void);
-void recordAlert(void);
+void recordAlert(void); //CHAINGE TO BOOL
 
 #endif /* ESP8266_FIREBASE_H_ */

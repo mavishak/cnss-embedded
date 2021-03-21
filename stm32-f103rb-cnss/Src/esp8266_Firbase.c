@@ -23,6 +23,10 @@
  *					Content-Length: 49\r\n\r\n
  *					{"author": "Nemo Resh", "title": "Fish are blue"}
  *					\r\n
+ *
+ * 21.03.2021: See __LINE__ 285:
+ * 			   found = search_usart1_buffer_Rx((uint8_t *)AT_OK, (uint8_t *)AT_ALREADY_CONNECTED);
+ * 			   //NO IDEA WHY THIS IS SO CRITICAL BUT IT IS!
  */
 
 #include "esp8266_Firebase.h"
@@ -30,19 +34,18 @@
 #include "usart.h"
 #include <string.h>
 #include <stdio.h>
+#include "timers.h"
 
 
-
-
-#define FALSE 0
-#define TRUE 1
+//#define FALSE 0
+//#define TRUE 1
 
 #define COMMAND_SIZE 256
 #define HTTP_SIZE 512
 #define CONTENT_SIZE 128
 #define PATH_SIZE 128
 
-static uint32_t found = FALSE;
+static STATE found = STANDBY;
 static uint8_t command[COMMAND_SIZE];
 
 static uint8_t http[HTTP_SIZE];
@@ -53,12 +56,9 @@ static uint32_t content_len = 0 ;
 
 static uint8_t image_path[PATH_SIZE];
 
+//static uint32_t tries = 0;
+//static uint32_t timeout = 0;
 
-/*delay for 1/4 of a second*/
-void delay(void){
-	uint32_t i = 9000000;//1300000;//1240000;//620000;//1000000; // 1/4 of a second
-	while(i-- > 0);
-}
 
 
 void setImagePath(void){
@@ -68,39 +68,29 @@ void setImagePath(void){
 }
 
 
-
-
+/*This function sends an alert to realtime DB in containig the time of the alert firebase
+ * before useing this function
+ * init_usart1(), init_usart2() and init_timer4() must be executed.*/
 void recordAlert(void){
-	// before useing this function init_usart1(); and  init_usart2(); must be executed
 
-
-	//write_usart2((uint8_t*)"testing delay\r\n");
-	//delay(10);
-	//write_usart2((uint8_t*)"testing delay\r\n");
 
 	//Reset ESP8266
-	//	ets_intr_lock();
-	//	ets_wdt_disable();
-	//system_soft_wdt_stop();
 	//reset(); //!TODO THIS FUNCTIONALITY NEEDS FIXING!!!
 
-
-	//delay();
-	//delay();
+	//delay???
 
 	//write_usart2((uint8_t*)"0\r\n"); //with this it reaches AT+CWJAP
 
 
-
 	//Set client mode
-	setClientMode();
+	setClientMode(3,1);
 
 	//delay();
 	write_usart2((uint8_t*)"1\r\n");
 
 
 	//Join access point
-	joinAccessPoint();
+	joinAccessPoint(3,3);
 
 	//delay();
 	write_usart2((uint8_t*)"2\r\n");
@@ -108,7 +98,7 @@ void recordAlert(void){
 	/*Default: AT+CIPMUX=0 (according to: AT instruction set- 5.2.15)*/
 
 	//Connect HOST IP
-	connectFirebaseHost();
+	connectFirebaseHost(3,3,3,6);
 
 	//delay();
 	write_usart2((uint8_t*)"3\r\n");
@@ -128,7 +118,7 @@ void recordAlert(void){
 
 
 	//Send number of data bytes
-	sendRequest();
+	sendRequest(3,3,30,30);
 
 	//delay();
 	write_usart2((uint8_t*)"6\r\n");
@@ -143,7 +133,6 @@ void recordAlert(void){
 	//closeCunnection();
 	write_usart2((uint8_t*)"8\r\n");
 
-
 }
 
 
@@ -151,88 +140,161 @@ void recordAlert(void){
 
 
 /*This function pings ESP8266 modem with AT test command,
- * returns uppon success.*/
-void ping(void){
+ * returns uppon success
+ * tries: number of times to send ping incase of timeout or failure.
+ * timeout: number of seconds to wait for response.*/
+BOOL ping(uint32_t tries, uint32_t timeout){
 
-	found = FALSE;
-
+	found = STANDBY;
 	write_usart1((uint8_t*)AT_COMMAND);
-	while(!found){
-		found = search_usart1_buffer_Rx((uint8_t *)AT_OK, (uint8_t *)AT_ERROR); //returns true only if AT_OK is found
+	while(tries > 0){
+		while(found == STANDBY && !timeout_with_timer4(timeout)){
+			found = search_usart1_buffer_Rx((uint8_t *)AT_OK, (uint8_t *)AT_ERROR); //returns true only if AT_OK is found
+		}
+		if(found == PASS){
+			return TRUE;
+		}
+		else{ // FAIL OR TIMEOUT
+			tries--;
+			write_usart1((uint8_t*)AT_COMMAND);
+		}
 	}
+	return FALSE;
 
 }
 
 
 /*This function resets ESP8266 modem with AT+RST command,
  * returns uppon success.
+ * tries: number of times to send ping incase of timeout or failure.
+ * timeout: number of seconds to wait for response.
  * !TODO This functionality does not work properly - needs fixing with TIMEOUT or some other way.*/
-void reset(void){
+BOOL reset(uint32_t tries, uint32_t timeout){
 
-	found = FALSE;
+	found = STANDBY;
 	write_usart1((uint8_t*)AT_RST);
-
-	while(!found){
-		found = search_usart1_buffer_Rx((uint8_t *)AT_OK, (uint8_t *)AT_ERROR);
+	while(tries > 0){
+		while(found == STANDBY && !timeout_with_timer4(timeout)){
+			found = search_usart1_buffer_Rx((uint8_t *)AT_OK, (uint8_t *)AT_ERROR);
+		}
+		if(found == PASS){
+			return TRUE;
+		}
+		else{ // FAIL OR TIMEOUT
+			tries--;
+			write_usart1((uint8_t*)AT_RST);
+		}
 	}
+	return FALSE;
 
 }
 
 
 /*This function sets ESP8266 modem to client mode,
- * returns uppon success.*/
-void setClientMode(void){
+ * returns uppon success.
+ * tries: number of times to send ping incase of timeout or failure.
+ * timeout: number of seconds to wait for response.*/
+BOOL setClientMode(uint32_t tries, uint32_t timeout){
 
-	found = FALSE;
+	found = STANDBY;
 	write_usart1((uint8_t*)AT_CWMODE);
-	while(!found){
-		found = search_usart1_buffer_Rx((uint8_t *)AT_OK, (uint8_t *)AT_ERROR);
+	while(tries > 0){
+		while(found == STANDBY && !timeout_with_timer4(timeout)){
+			found = search_usart1_buffer_Rx((uint8_t *)AT_OK, (uint8_t *)AT_ERROR);
+		}
+		if(found == PASS){
+			return TRUE;
+		}
+		else{ // FAIL OR TIMEOUT
+			tries--;
+			write_usart1((uint8_t*)AT_CWMODE);
+		}
 	}
+	return FALSE;
 }
 
 
 /*This function connects the WiFi modem ESP8266 to the given SSID in configurations.h,
- * returns upon success.*/
-void joinAccessPoint(void){
+ * returns upon success.
+ * tries: number of times to send ping incase of timeout or failure.
+ * timeout: number of seconds to wait for response.*/
+BOOL joinAccessPoint(uint32_t tries, uint32_t timeout){
 
 	memset((char*)command, '\0', COMMAND_SIZE*sizeof(uint8_t));
 	sprintf((char*)command, "AT+CWJAP=\"%s\",\"%s\"\r\n",SSID,PWD);
 
-	found = FALSE;
+	found = STANDBY;
 	write_usart1((uint8_t*)command);
-
-	while(!found){
-		found = search_usart1_buffer_Rx((uint8_t *)AT_OK, (uint8_t *)AT_FAIL);
+	while(tries > 0){
+		while(found == STANDBY && !timeout_with_timer4(timeout)){
+			found = search_usart1_buffer_Rx((uint8_t *)AT_OK, (uint8_t *)AT_FAIL);
+		}
+		if(found == PASS){
+			return TRUE;
+		}
+		else{ // FAIL OR TIMEOUT
+			tries--;
+			write_usart1((uint8_t*)command);
+		}
 	}
+	return FALSE;
 
 }
 
 
 /*This function cunnects to firebase via secure HTTP (HTTPS) using SSL,
- * returns upon success.*/
-void connectFirebaseHost(){
+ * returns upon success.
+ * tries: number of times to send ping incase of timeout or failure.
+ * timeout: number of seconds to wait for response
+ * need to enter tries and timout for both SSL AT_command and CIPSTART AT_command*/
+BOOL connectFirebaseHost(uint32_t _ssl_tries, uint32_t _cipstart_tries , uint32_t _ssl_timeout, uint32_t  _cipstart_timeout){
 
 
 	//Create secure cunnection via SSL
-	found = FALSE;
+	found = STANDBY;
 	write_usart1((uint8_t*)"AT+CIPSSLSIZE=4096\r\n");//at_instruction: 5.2.4 page 50
-	while(!found){
-		found = search_usart1_buffer_Rx((uint8_t *)AT_OK, (uint8_t *)AT_ERROR);
+	while(_ssl_tries > 0){
+		while(found == STANDBY && !timeout_with_timer4(_ssl_timeout)){
+			found = search_usart1_buffer_Rx((uint8_t *)AT_OK, (uint8_t *)AT_ERROR);
+		}
+		if(found == PASS){
+			break; //move on to next command
+		}
+		else{ // FAIL OR TIMEOUT
+			_ssl_tries--;
+			write_usart1((uint8_t*)"AT+CIPSSLSIZE=4096\r\n");
+		}
+	}
+
+	if(found == FAIL || found == STANDBY){
+		return FALSE;
 	}
 
 
 
 	//Connect Firebase Host
-	found = FALSE;
 	memset((char*)command, '\0', COMMAND_SIZE*sizeof(uint8_t));
 	sprintf((char*)command, "AT+CIPSTART=\"SSL\",\"%s\",%ld\r\n",(char*)firebase_host, https_port);
 
+	found = STANDBY;
 	write_usart1((uint8_t*)command);
-
-	while(!found){
-		found = search_usart1_buffer_Rx((uint8_t *)AT_OK, (uint8_t *)AT_FAIL);
-		found = search_usart1_buffer_Rx((uint8_t *)AT_OK, (uint8_t *)AT_ALREADY_CONNECTED);
+	while(_cipstart_tries > 0){
+		while(found == STANDBY && !timeout_with_timer4(_cipstart_timeout)){
+			found = search_usart1_buffer_Rx((uint8_t *)AT_OK, (uint8_t *)AT_FAIL);
+			if(found!= PASS){
+				found = search_usart1_buffer_Rx((uint8_t *)AT_OK, (uint8_t *)AT_ALREADY_CONNECTED);//NO IDEA WHY THIS IS SO CRITICAL BUT IT IS!
+			}
+		}
+		if(found == PASS){
+			return TRUE;
+		}
+		else{ // FAIL OR TIMEOUT
+			_cipstart_tries--;
+			write_usart1((uint8_t*)command);
+		}
 	}
+	return FALSE;
+
 
 
 }
@@ -259,29 +321,56 @@ void createPostMsg(void){
 
 
 /*This function Sends request to firbase,
- * returns apun success.*/
-void sendRequest(void){
+ * returns apun success.
+ * timeout (in seconds): the amount of time to wait for response.
+ * in the case of response timeout should probably be between 0.5 minutes*/
+BOOL sendRequest(uint32_t _CIPSEND_tries,uint32_t _SEND_OK_tries , uint32_t _CIPSEND_timeout, uint32_t _SEND_OK_timeout ){
 
-	found = FALSE;
 
 	/*Send Request Length - number of data bytes to be sent*/
 	memset((char*)command, '\0', COMMAND_SIZE*sizeof(uint8_t));
 	sprintf((char*)command, "AT+CIPSEND=%ld\r\n",http_len);
 
+	found = STANDBY;
 	write_usart1((uint8_t*)command);
-	while(!found){
-		found = search_usart1_buffer_Rx((uint8_t *)">", (uint8_t *)AT_ERROR);
-		found = search_usart1_buffer_Rx((uint8_t *)">", (uint8_t *)"CLOSED\r\n");//I think this should be here
+	while(_CIPSEND_tries > 0){
+		while(found == STANDBY && !timeout_with_timer4(_CIPSEND_timeout)){
+			found = search_usart1_buffer_Rx((uint8_t *)">", (uint8_t *)AT_ERROR);
+			if(found != PASS){
+				found = search_usart1_buffer_Rx((uint8_t *)">", (uint8_t *)"CLOSED\r\n");//I think this should be here
+			}
+		}
+		if(found == PASS){
+			break; //move on to next command
+		}
+		else{ // FAIL OR TIMEOUT
+			_CIPSEND_tries--;
+			write_usart1((uint8_t*)command);
+		}
 	}
-	found = FALSE;
+	if(found == FAIL || found == STANDBY){
+		return FALSE;
+	}
+
 
 	/*Send HTTP request*/
+	found = STANDBY;
 	write_usart1((uint8_t*)http);
 
 	/*Wait for SEND_OK after this a response will come*/
-	while(!found){
-		found = search_usart1_buffer_Rx((uint8_t *)SEND_OK, (uint8_t *)AT_FAIL);
+	while(_SEND_OK_tries > 0){
+		while(found == STANDBY && !timeout_with_timer4(_SEND_OK_timeout)){
+			found = search_usart1_buffer_Rx((uint8_t *)SEND_OK, (uint8_t *)AT_FAIL);
+		}
+		if(found == PASS){
+			return TRUE;
+		}
+		else{
+			_SEND_OK_tries--;
+			write_usart1((uint8_t*)http);
+		}
 	}
+	return FALSE;
 
 }
 

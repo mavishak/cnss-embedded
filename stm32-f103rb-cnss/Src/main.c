@@ -32,6 +32,7 @@
 
 #include "esp8266_WiFi.h" /*for testing usart1...*/
 #include "timers.h"
+#include "common.h"
 
 
 int main(void)
@@ -41,34 +42,70 @@ int main(void)
 	//init_sensor_led_response();
 	init_usart2(); // for dbugging
 
-	init_timer2();
+//	init_timer2();
 	init_timer3();
 	init_timer4();
 
-	//init_usart1(); // for ESP8266
+	init_usart1(); // for ESP8266
 	write_usart2((uint8_t*)("\r\n_______________\r\n"));//For test
 
 	//recordAlert();
 
 	while(1)
 	{
+
+		//recordAlert();
+		if(setClientMode(3, 1)){
+			write_usart2((uint8_t*)(":)\r\n"));
+		}
+		else{
+			write_usart2((uint8_t*)(":(\r\n"));
+		}
 		delay_with_timer3(1000);
-		write_usart2((uint8_t*)(":)\r\n"));
 
-		delay_with_timer2(1000);
-		write_usart2((uint8_t*)(":|\r\n"));
 
-		delay_with_timer4(1);
-		write_usart2((uint8_t*)(":/\r\n"));
+		if(joinAccessPoint(3, 3)){
+			write_usart2((uint8_t*)(":)\r\n"));
+		}
+		else{
+			write_usart2((uint8_t*)(":(\r\n"));
+		}
+		delay_with_timer3(1000);
 
-		while(!timeout_with_timer2(1000));
-		write_usart2((uint8_t*)(":(\r\n"));
 
-		while(!timeout_with_timer3(1000));
-		write_usart2((uint8_t*)(";)\r\n"));
+		if(connectFirebaseHost(3,3,3,6)){
+			write_usart2((uint8_t*)(":)\r\n"));
+		}
+		else{
+			write_usart2((uint8_t*)(":(\r\n"));
+		}
+		delay_with_timer3(1000);
 
-		while(!timeout_with_timer4(1));
-		write_usart2((uint8_t*)(":D\r\n"));
+
+		if(sendRequest(3,3,30,60)){
+			write_usart2((uint8_t*)(":)\r\n"));
+		}
+		else{
+			write_usart2((uint8_t*)(":(\r\n"));
+		}
+		delay_with_timer3(1000);
+
+//		write_usart2((uint8_t*)(":)\r\n"));
+//
+//		delay_with_timer2(1000);
+//		write_usart2((uint8_t*)(":|\r\n"));
+//
+//		delay_with_timer4(1);
+//		write_usart2((uint8_t*)(":/\r\n"));
+//
+//		while(!timeout_with_timer2(1000));
+//		write_usart2((uint8_t*)(":(\r\n"));
+//
+//		while(!timeout_with_timer3(1000));
+//		write_usart2((uint8_t*)(";)\r\n"));
+//
+//		while(!timeout_with_timer4(1));
+//		write_usart2((uint8_t*)(":D\r\n"));
 
 	}
 }

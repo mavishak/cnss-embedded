@@ -8,11 +8,7 @@
 #ifndef TIMERS_H_
 #define TIMERS_H_
 
-enum _bool{
-	FALSE = 0,
-	TRUE = 1
-};
-typedef enum _bool BOOL;
+#include "common.h"
 
 
 //Timer 2

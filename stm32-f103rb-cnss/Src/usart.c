@@ -85,6 +85,9 @@
  *
  * 			   One strange thing, it seems the ESP8266 Response is AT\r\n\r\nOK\r\n"
  *
+ * 21.03.2021: We modified 'search_usart1_buffer_Rx' funcion to return a STATE rather than true OR False.
+ * 			   See: Common.h
+ *
  */
 
 #include "usart.h"
@@ -95,8 +98,11 @@
 #include <string.h>
 #include <stdlib.h>
 
-#define FALSE 0
-#define TRUE 1
+
+
+
+//#define FALSE 0
+//#define TRUE 1
 
 static USART_2 usart2;
 static USART_1 usart1;
@@ -304,7 +310,11 @@ void set_usart1_buffer_Rx(){
 }
 
 
-uint32_t search_usart1_buffer_Rx(uint8_t *pass, uint8_t *fail){
+/*This function returns 3 values type STATE - defined by common.h:
+ * PASS - when pass param is found.
+ * FAIL - when fail param is found.
+ * STANDBY - when neither pass param or fail param are found.*/
+STATE search_usart1_buffer_Rx(uint8_t *pass, uint8_t *fail){
 
 	/*!TODO:need to check that usart1.Rx buffer wasn't overflow*/
 	if((usart1.Rx_len + 1) < BUFF_SIZE){
@@ -312,17 +322,17 @@ uint32_t search_usart1_buffer_Rx(uint8_t *pass, uint8_t *fail){
 		if(strstr((const char*)usart1.Rx , (const char*)pass)){
 			write_usart2((uint8_t*)usart1.Rx); //write response to screen
 			set_usart1_buffer_Rx();
-			return (uint32_t)TRUE;
+			return (uint32_t)PASS;
 		}
 		else if(strstr((const char*)usart1.Rx , (const char*)fail)){
 			write_usart2((uint8_t*)usart1.Rx); //write response to screen
 			set_usart1_buffer_Rx();
-			return (uint32_t)FALSE;
+			return (uint32_t)FAIL;
 		}
 		else{
 			write_usart2((uint8_t*)usart1.Rx);//for debuging
 			write_usart2((uint8_t*)"\r\n"); //for debuging
-			return (uint32_t)FALSE;
+			return (uint32_t)STANDBY;
 		}
 
 	}
@@ -332,7 +342,7 @@ uint32_t search_usart1_buffer_Rx(uint8_t *pass, uint8_t *fail){
 		write_usart2((uint8_t*)"\r\nBUFFER_OVERFLOW\r\n");
 		write_usart2((uint8_t*)usart1.Rx);
 		set_usart1_buffer_Rx();
-		return (uint32_t)FALSE; //FALSE
+		return (uint32_t)STANDBY;
 	}
 
 }
