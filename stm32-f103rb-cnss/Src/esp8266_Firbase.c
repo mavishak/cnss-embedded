@@ -71,67 +71,66 @@ void setImagePath(void){
 /*This function sends an alert to realtime DB in containig the time of the alert firebase
  * before useing this function
  * init_usart1(), init_usart2() and init_timer4() must be executed.*/
-void recordAlert(void){
+BOOL recordAlert(void){
 
 
 	//Reset ESP8266
-	//reset(); //!TODO THIS FUNCTIONALITY NEEDS FIXING!!!
-
-	//delay???
+//	if(!reset(3,1)){ //!TODO THIS FUNCTIONALITY NEEDS FIXING!!!
+//		return FALSE;
+//	}
+//	delay_with_timer4(3);
 
 	//write_usart2((uint8_t*)"0\r\n"); //with this it reaches AT+CWJAP
 
 
 	//Set client mode
-	setClientMode(3,1);
-
-	//delay();
+	if(!setClientMode(3,3)){
+		return FALSE;
+	}
 	write_usart2((uint8_t*)"1\r\n");
 
-
 	//Join access point
-	joinAccessPoint(3,3);
-
-	//delay();
+	if(!joinAccessPoint(3,3)){
+		return FALSE;
+	}
 	write_usart2((uint8_t*)"2\r\n");
 
 	/*Default: AT+CIPMUX=0 (according to: AT instruction set- 5.2.15)*/
 
 	//Connect HOST IP
-	connectFirebaseHost(3,3,3,6);
-
-	//delay();
+	if(!connectFirebaseHost(3,3,3,6)){
+		return FALSE;
+	}
 	write_usart2((uint8_t*)"3\r\n");
 
 
 	//Set Image Path
 	setImagePath(); //Need to check params later
-
-	//delay();
 	write_usart2((uint8_t*)"4\r\n");
 
 	//Create HTTP request
 	createPostMsg();
-
-	//delay();
 	write_usart2((uint8_t*)"5\r\n");
 
 
 	//Send number of data bytes
-	sendRequest(3,3,30,30);
-
-	//delay();
+	if(!sendRequest(3,3,30,60)){
+		return FALSE;
+	}
 	write_usart2((uint8_t*)"6\r\n");
 
 	//Read response
-	readResponse();
+	if(!readResponse(180)){//timeout set t0 3 minutes
+		return FALSE;
+	}
 
-	//delay();
 	write_usart2((uint8_t*)"7\r\n");
 
 	//Close cunnection with firebase - this might be useless as firebase already closes connection with "CLOSED" response
-	//closeCunnection();
+	closeCunnection(3,3);
 	write_usart2((uint8_t*)"8\r\n");
+
+	return TRUE;
 
 }
 
@@ -142,7 +141,7 @@ void recordAlert(void){
 /*This function pings ESP8266 modem with AT test command,
  * returns uppon success
  * tries: number of times to send ping incase of timeout or failure.
- * timeout: number of seconds to wait for response.*/
+ * timeout (in seconds): number of seconds to wait for response.*/
 BOOL ping(uint32_t tries, uint32_t timeout){
 
 	found = STANDBY;
@@ -167,7 +166,7 @@ BOOL ping(uint32_t tries, uint32_t timeout){
 /*This function resets ESP8266 modem with AT+RST command,
  * returns uppon success.
  * tries: number of times to send ping incase of timeout or failure.
- * timeout: number of seconds to wait for response.
+ * timeout (in seconds): number of seconds to wait for response.
  * !TODO This functionality does not work properly - needs fixing with TIMEOUT or some other way.*/
 BOOL reset(uint32_t tries, uint32_t timeout){
 
@@ -193,7 +192,7 @@ BOOL reset(uint32_t tries, uint32_t timeout){
 /*This function sets ESP8266 modem to client mode,
  * returns uppon success.
  * tries: number of times to send ping incase of timeout or failure.
- * timeout: number of seconds to wait for response.*/
+ * timeout (in seconds): number of seconds to wait for response.*/
 BOOL setClientMode(uint32_t tries, uint32_t timeout){
 
 	found = STANDBY;
@@ -217,7 +216,7 @@ BOOL setClientMode(uint32_t tries, uint32_t timeout){
 /*This function connects the WiFi modem ESP8266 to the given SSID in configurations.h,
  * returns upon success.
  * tries: number of times to send ping incase of timeout or failure.
- * timeout: number of seconds to wait for response.*/
+ * timeout (in seconds): number of seconds to wait for response.*/
 BOOL joinAccessPoint(uint32_t tries, uint32_t timeout){
 
 	memset((char*)command, '\0', COMMAND_SIZE*sizeof(uint8_t));
@@ -245,7 +244,7 @@ BOOL joinAccessPoint(uint32_t tries, uint32_t timeout){
 /*This function cunnects to firebase via secure HTTP (HTTPS) using SSL,
  * returns upon success.
  * tries: number of times to send ping incase of timeout or failure.
- * timeout: number of seconds to wait for response
+ * timeout (in seconds): number of seconds to wait for response
  * need to enter tries and timout for both SSL AT_command and CIPSTART AT_command*/
 BOOL connectFirebaseHost(uint32_t _ssl_tries, uint32_t _cipstart_tries , uint32_t _ssl_timeout, uint32_t  _cipstart_timeout){
 
@@ -313,7 +312,7 @@ void createPostMsg(void){
 
 	//Set HTTP request
 	memset((char*)http, '\0', HTTP_SIZE*sizeof(uint8_t));
-	sprintf((char*)http,"POST /devices/%s/history.json?auth=%s HTTP/1.1\r\nHost: %s\r\nContent-Type: application/json\r\nContent-Length: %ld\r\n\r\n%s\r\n",(char*)device_id,(char*)firebase_auth_key,(char*)firebase_host,content_len,(char*)content); // HTTP/1.0- Allow only one request
+	sprintf((char*)http,"POST /devices/%s/history.json?auth=%s HTTP/1.0\r\nHost: %s\r\nContent-Type: application/json\r\nContent-Length: %ld\r\n\r\n%s\r\n",(char*)device_id,(char*)firebase_auth_key,(char*)firebase_host,content_len,(char*)content); // HTTP/1.0- Allow only one request
 	//sprintf((char*)http,"POST /devices/%s/history.json?auth=%s&print=silent HTTP/1.1\r\nHost: %s\r\nContent-Type: application/json\r\nContent-Length: %ld\r\n\r\n{\"image_path\": \"%s\", \"notes\": \"alarm went off\", \"timestamp\": {\".sv\": \"timestamp\"}}\r\n",(char*)device_id,(char*)firebase_auth_key,(char*)firebase_host,content_len,(char*)image_path); // HTTP/1.0- Allow only one request
 	http_len = strlen((char*)http)-strlen("\r\n"); // the last \r\n is for the AT command, and not included in the request's length
 
@@ -322,8 +321,9 @@ void createPostMsg(void){
 
 /*This function Sends request to firbase,
  * returns apun success.
- * timeout (in seconds): the amount of time to wait for response.
- * in the case of response timeout should probably be between 0.5 minutes*/
+ * tries: number of times to send ping incase of timeout or failure.
+ * timeout (in seconds): number of seconds to wait for response
+ */
 BOOL sendRequest(uint32_t _CIPSEND_tries,uint32_t _SEND_OK_tries , uint32_t _CIPSEND_timeout, uint32_t _SEND_OK_timeout ){
 
 
@@ -376,26 +376,46 @@ BOOL sendRequest(uint32_t _CIPSEND_tries,uint32_t _SEND_OK_tries , uint32_t _CIP
 
 
 /*This function waits for response from firebase,
- * and returns once response is recieved.*/
-void readResponse(void){
+ * and returns once response is recieved.
+ * timeout (in seconds): number of seconds to wait for response*/
+BOOL readResponse(uint32_t timeout){
 
-	found = FALSE;
-	while(!found){
+	found = STANDBY;
+	while(found == STANDBY && !timeout_with_timer4(timeout)){
 		//found = search_usart1_buffer_Rx((uint8_t *)"\r\n\r\nOK\r\n", (uint8_t *)AT_FAIL); //We counting on the appearance of OK in the HTTP response (we wont see the full response)
 		found = search_usart1_buffer_Rx((uint8_t *)"CLOSED\r\n", (uint8_t *)AT_FAIL);
+	}
+
+	if(found == PASS){
+		return TRUE;
+	}
+	else{
+		return FALSE;
 	}
 
 }
 
 
-/*This function closes connection*/
-void closeCunnection(void){
+/*This function closes connection
+ * tries: number of times to send ping incase of timeout or failure.
+ * timeout (in seconds): number of seconds to wait for response*/
+BOOL closeCunnection(uint32_t tries, uint32_t timeout){
 
-	found = FALSE;
+	found = STANDBY;
 	write_usart1((uint8_t*)AT_CIPCLOSE);
-	while(!found){
-		found = search_usart1_buffer_Rx((uint8_t *)AT_OK, (uint8_t *)AT_ERROR);
+	while(tries > 0){
+		while(found == STANDBY && !timeout_with_timer4(timeout)){
+			found = search_usart1_buffer_Rx((uint8_t *)AT_OK, (uint8_t *)AT_ERROR);
+		}
+		if(found == PASS){
+			return TRUE;
+		}
+		else{ // FAIL OR TIMEOUT
+			tries--;
+			write_usart1((uint8_t*)AT_CIPCLOSE);
+		}
 	}
+	return FALSE;
 
 }
 

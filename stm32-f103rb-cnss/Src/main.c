@@ -49,46 +49,57 @@ int main(void)
 	init_usart1(); // for ESP8266
 	write_usart2((uint8_t*)("\r\n_______________\r\n"));//For test
 
-	//recordAlert();
+//	if(recordAlert()){
+//		write_usart2((uint8_t*)(":)\r\n"));
+//	}
+//	else{
+//		write_usart2((uint8_t*)(":(\r\n"));
+//	}
 
 	while(1)
 	{
+		if(recordAlert()){
+			write_usart2((uint8_t*)(":)\r\n"));
+		}
+		else{
+			write_usart2((uint8_t*)(":(\r\n"));
+		}
 
 		//recordAlert();
-		if(setClientMode(3, 1)){
-			write_usart2((uint8_t*)(":)\r\n"));
-		}
-		else{
-			write_usart2((uint8_t*)(":(\r\n"));
-		}
-		delay_with_timer3(1000);
-
-
-		if(joinAccessPoint(3, 3)){
-			write_usart2((uint8_t*)(":)\r\n"));
-		}
-		else{
-			write_usart2((uint8_t*)(":(\r\n"));
-		}
-		delay_with_timer3(1000);
-
-
-		if(connectFirebaseHost(3,3,3,6)){
-			write_usart2((uint8_t*)(":)\r\n"));
-		}
-		else{
-			write_usart2((uint8_t*)(":(\r\n"));
-		}
-		delay_with_timer3(1000);
-
-
-		if(sendRequest(3,3,30,60)){
-			write_usart2((uint8_t*)(":)\r\n"));
-		}
-		else{
-			write_usart2((uint8_t*)(":(\r\n"));
-		}
-		delay_with_timer3(1000);
+//		if(setClientMode(3, 1)){
+//			write_usart2((uint8_t*)(":)\r\n"));
+//		}
+//		else{
+//			write_usart2((uint8_t*)(":(\r\n"));
+//		}
+//		delay_with_timer3(1000);
+//
+//
+//		if(joinAccessPoint(3, 3)){
+//			write_usart2((uint8_t*)(":)\r\n"));
+//		}
+//		else{
+//			write_usart2((uint8_t*)(":(\r\n"));
+//		}
+//		delay_with_timer3(1000);
+//
+//
+//		if(connectFirebaseHost(3,3,3,6)){
+//			write_usart2((uint8_t*)(":)\r\n"));
+//		}
+//		else{
+//			write_usart2((uint8_t*)(":(\r\n"));
+//		}
+//		delay_with_timer3(1000);
+//
+//
+//		if(sendRequest(3,3,30,60)){
+//			write_usart2((uint8_t*)(":)\r\n"));
+//		}
+//		else{
+//			write_usart2((uint8_t*)(":(\r\n"));
+//		}
+//		delay_with_timer3(1000);
 
 //		write_usart2((uint8_t*)(":)\r\n"));
 //
