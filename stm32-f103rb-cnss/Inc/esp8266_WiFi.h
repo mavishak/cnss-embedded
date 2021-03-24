@@ -13,7 +13,7 @@
 #define AT_RST "AT+RST\r\n"
 #define AT_CWJAP "AT+CWJAP"
 #define AT_CIPCLOSE "AT+CIPCLOSE\r\n"
-#define AT_CWMODE "AT+CWMODE=1\r\n"
+#define AT_CWMODE "AT+CWMODE=1\r\n" //set as station mode (client mode)
 
 //Responses
 #define AT_OK "OK\r\n"

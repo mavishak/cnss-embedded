@@ -49,6 +49,13 @@ int main(void)
 	init_usart1(); // for ESP8266
 	write_usart2((uint8_t*)("\r\n_______________\r\n"));//For test
 
+//	if(recordAlert()){
+//		write_usart2((uint8_t*)(":)\r\n"));
+//	}
+//	else{
+//		write_usart2((uint8_t*)(":(\r\n"));
+//	}
+
 
 	while(1)
 	{
@@ -58,6 +65,9 @@ int main(void)
 		else{
 			write_usart2((uint8_t*)(":(\r\n"));
 		}
+
+		write_usart2((uint8_t*)("\r\n.....................\r\n"));
+		write_usart2((uint8_t*)("\r\n\r\n"));
 
 	}
 }

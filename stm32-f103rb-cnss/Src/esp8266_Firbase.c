@@ -78,19 +78,19 @@ BOOL recordAlert(void){
 //	if(!reset(3,1)){ //!TODO THIS FUNCTIONALITY NEEDS FIXING!!!
 //		return FALSE;
 //	}
-//	delay_with_timer4(3);
+//	delay_with_timer4(1);
 
 	//write_usart2((uint8_t*)"0\r\n"); //with this it reaches AT+CWJAP
 
 
 	//Set client mode
-	if(!setClientMode(3,3)){
+	if(!setClientMode(3,6)){
 		return FALSE;
 	}
 	write_usart2((uint8_t*)"1\r\n");
 
 	//Join access point
-	if(!joinAccessPoint(3,3)){
+	if(!joinAccessPoint(3,6)){
 		return FALSE;
 	}
 	write_usart2((uint8_t*)"2\r\n");
@@ -98,7 +98,7 @@ BOOL recordAlert(void){
 	/*Default: AT+CIPMUX=0 (according to: AT instruction set- 5.2.15)*/
 
 	//Connect HOST IP
-	if(!connectFirebaseHost(3,3,3,6)){
+	if(!connectFirebaseHost(3,3,3,10)){
 		return FALSE;
 	}
 	write_usart2((uint8_t*)"3\r\n");
@@ -115,20 +115,22 @@ BOOL recordAlert(void){
 
 	//Send number of data bytes
 	if(!sendRequest(3,3,30,60)){
+		closeCunnection(3,3);
 		return FALSE;
 	}
 	write_usart2((uint8_t*)"6\r\n");
 
 	//Read response
 	if(!readResponse(180)){//timeout set t0 3 minutes
+		closeCunnection(3,3);
 		return FALSE;
 	}
 
 	write_usart2((uint8_t*)"7\r\n");
 
 	//Close cunnection with firebase - this might be useless as firebase already closes connection with "CLOSED" response
-	closeCunnection(3,3);
-	write_usart2((uint8_t*)"8\r\n");
+	//closeCunnection(3,3);
+	//write_usart2((uint8_t*)"8\r\n");
 
 	return TRUE;
 
@@ -167,7 +169,7 @@ BOOL ping(uint32_t tries, uint32_t timeout){
  * returns uppon success.
  * tries: number of times to send ping incase of timeout or failure.
  * timeout (in seconds): number of seconds to wait for response.
- * !TODO This functionality does not work properly - needs fixing with TIMEOUT or some other way.*/
+ * !TODO This functionality does not work properly - needs fixing.*/
 BOOL reset(uint32_t tries, uint32_t timeout){
 
 	found = STANDBY;
@@ -279,9 +281,9 @@ BOOL connectFirebaseHost(uint32_t _ssl_tries, uint32_t _cipstart_tries , uint32_
 	write_usart1((uint8_t*)command);
 	while(_cipstart_tries > 0){
 		while(found == STANDBY && !timeout_with_timer4(_cipstart_timeout)){
-			found = search_usart1_buffer_Rx((uint8_t *)AT_OK, (uint8_t *)AT_FAIL);
-			if(found!= PASS){
-				found = search_usart1_buffer_Rx((uint8_t *)AT_OK, (uint8_t *)AT_ALREADY_CONNECTED);//NO IDEA WHY THIS IS SO CRITICAL BUT IT IS!
+			found = search_usart1_buffer_Rx((uint8_t *)AT_OK, (uint8_t *)AT_ERROR);
+			if(found == STANDBY){
+				found = search_usart1_buffer_Rx((uint8_t *)AT_ALREADY_CONNECTED, (uint8_t *)AT_ERROR);//NO IDEA WHY THIS IS SO CRITICAL BUT IT IS!
 			}
 		}
 		if(found == PASS){
@@ -336,8 +338,8 @@ BOOL sendRequest(uint32_t _CIPSEND_tries,uint32_t _SEND_OK_tries , uint32_t _CIP
 	while(_CIPSEND_tries > 0){
 		while(found == STANDBY && !timeout_with_timer4(_CIPSEND_timeout)){
 			found = search_usart1_buffer_Rx((uint8_t *)">", (uint8_t *)AT_ERROR);
-			if(found != PASS){
-				found = search_usart1_buffer_Rx((uint8_t *)">", (uint8_t *)"CLOSED\r\n");//I think this should be here
+			if(found == STANDBY){
+				found = search_usart1_buffer_Rx((uint8_t *)">", (uint8_t *)"CLOSED\r\n");
 			}
 		}
 		if(found == PASS){
@@ -382,10 +384,8 @@ BOOL readResponse(uint32_t timeout){
 
 	found = STANDBY;
 	while(found == STANDBY && !timeout_with_timer4(timeout)){
-		//found = search_usart1_buffer_Rx((uint8_t *)"\r\n\r\nOK\r\n", (uint8_t *)AT_FAIL); //We counting on the appearance of OK in the HTTP response (we wont see the full response)
 		found = search_usart1_buffer_Rx((uint8_t *)"CLOSED\r\n", (uint8_t *)AT_FAIL);
 	}
-
 	if(found == PASS){
 		return TRUE;
 	}
