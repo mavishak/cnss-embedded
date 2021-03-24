@@ -42,7 +42,7 @@ void add_event(Handler handler)
 
 	queue.eq[queue.writeIndex].handler = handler;
 
-	if(queue.writeIndex < QUEUE_SIZE)
+	if(queue.writeIndex < (QUEUE_SIZE-1)) //changed from  < QUEUE_SIZE
 		queue.writeIndex++;
 	else
 		queue.writeIndex = 0;
@@ -60,7 +60,7 @@ void *do_event()
 
    res = queue.eq[queue.readIndex].handler();
 
-   if(queue.readIndex < QUEUE_SIZE)
+   if(queue.readIndex < (QUEUE_SIZE - 1))//changed from < QUEUE_SIZE
       queue.readIndex++;
    else
       queue.readIndex = 0;
@@ -70,13 +70,13 @@ void *do_event()
 }
 
 
-uint32_t queue_isFull()
+BOOL queue_isFull()
 {
 	return (queue.readIndex == ((queue.writeIndex + 1) % QUEUE_SIZE));
 }
 
 
-uint32_t queue_isEmpty()
+BOOL queue_isEmpty()
 {
 	 return queue.readIndex == queue.writeIndex;
 }

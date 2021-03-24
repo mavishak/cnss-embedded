@@ -3,6 +3,10 @@
 #include "cmsis_gcc.h"/*for __disable/enable_irq()*/
 #include "core_cm3.h" /*for NVIC_enableIRQ()*/
 
+/*FOR TESTING*/
+#include "event_queue.h"
+/*FOR TESTING*/
+
 
 /*This function enables user button B1 and led LD2*/
 void init()
@@ -26,6 +30,8 @@ void init()
 /*This function enables user button B1 and led LD2 and interrupts*/
 void init_interrupt()
 {
+	state = OFF;
+
 	/*RCC enabled for user button PC13*/
 	RCC->APB2ENR |= 0x00000010; //enable reset and control clock for port c (see reference manual 8.3.7)
 
@@ -59,6 +65,8 @@ void init_interrupt()
 /*This function Initiolizes D6 (PB10) as input with interrupt and LD2 (PA5) as output*/
 void init_interrupt_D6(){
 
+	state = OFF;
+
 	/*RCC enabled for led PA5*/
 	RCC->APB2ENR |= 0x00000004; //enable reset and control clock for port A (see reference manual 8.3.7)
 
@@ -88,6 +96,7 @@ void init_interrupt_D6(){
 
 
 }
+
 /*This function returns 1 if user button B1 was pressed*/
 uint32_t was_pressed()
 {
@@ -137,29 +146,31 @@ void toggle_ld2()
 
 	}
 }
+*/
+
 // Interrupt service routine for user button
 void EXTI15_10_IRQHandler(void) //EXTI4_IRQHandler(void)
 {
-	i=5;
-
 
 	EXTI->PR = 0x00002000; //reset flag by writing 1 to bit 13 (reference manual 10.3.6)
 	EXTI->PR |= 0x00000400; //reset flag by writing 1 to bit 10 (reference manual 10.3.6)
-	if(state == OFF)
-	{
-		GPIOA->ODR |= 0x0020;
-		state=ON;
-	}
-	else
-	{
-		GPIOA->ODR &= ~(0x0020);
-		state=OFF;
-	}
+
+	add_event(interrupt_handler);
+	//interrupt_handler();
+	//	if(state == OFF)
+	//	{
+	//		GPIOA->ODR |= 0x0020;
+	//		state=ON;
+	//	}
+	//	else
+	//	{
+	//		GPIOA->ODR &= ~(0x0020);
+	//		state=OFF;
+	//	}
 }
 
-// interrupt works
-void SysTick_Handler(void)
-{
+void *interrupt_handler(void){
+
 	if(state == OFF)
 	{
 		GPIOA->ODR |= 0x0020;
@@ -170,5 +181,11 @@ void SysTick_Handler(void)
 		GPIOA->ODR &= ~(0x0020);
 		state=OFF;
 	}
+
+	return NULL;
+
 }
- */
+
+
+
+
