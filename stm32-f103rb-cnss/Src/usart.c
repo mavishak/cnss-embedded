@@ -320,18 +320,18 @@ STATE search_usart1_buffer_Rx(uint8_t *pass, uint8_t *fail){
 	if((usart1.Rx_len + 1) < BUFF_SIZE){
 
 		if(strstr((const char*)usart1.Rx , (const char*)pass)){
-			//write_usart2((uint8_t*)usart1.Rx); //write response to screen
+			write_usart2((uint8_t*)usart1.Rx); //write response to screen
 			set_usart1_buffer_Rx();
 			return (uint32_t)PASS;
 		}
 		else if(strstr((const char*)usart1.Rx , (const char*)fail)){
-			//write_usart2((uint8_t*)usart1.Rx); //write response to screen
+			write_usart2((uint8_t*)usart1.Rx); //write response to screen
 			set_usart1_buffer_Rx();
 			return (uint32_t)FAIL;
 		}
 		else{
-			//write_usart2((uint8_t*)usart1.Rx);//for debuging
-			//write_usart2((uint8_t*)"\r\n"); //for debuging
+			write_usart2((uint8_t*)usart1.Rx);//for debuging
+			write_usart2((uint8_t*)"\r\n"); //for debuging
 			return (uint32_t)STANDBY;
 		}
 
@@ -339,8 +339,8 @@ STATE search_usart1_buffer_Rx(uint8_t *pass, uint8_t *fail){
 
 	else{
 		/*!TODO: when usart1.Rx buffer is overflown start check from end??*/
-		//write_usart2((uint8_t*)"\r\nBUFFER_OVERFLOW\r\n");
-		//write_usart2((uint8_t*)usart1.Rx);
+		write_usart2((uint8_t*)"\r\nBUFFER_OVERFLOW\r\n");
+		write_usart2((uint8_t*)usart1.Rx);
 		set_usart1_buffer_Rx();
 		return (uint32_t)STANDBY;
 	}
