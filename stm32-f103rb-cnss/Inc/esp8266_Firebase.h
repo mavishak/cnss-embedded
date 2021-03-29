@@ -32,5 +32,6 @@ void setImagePath(void);
 
 void connectFirbase(void);
 BOOL recordAlert(void);
+void *alert_Handler(void);
 
 #endif /* ESP8266_FIREBASE_H_ */

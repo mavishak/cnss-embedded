@@ -26,6 +26,8 @@
 #include "usart.h"
 #include "cmsis_gcc.h"/*for __disable/enable_irq()*/
 #include "core_cm3.h" /*for NVIC_enableIRQ() and NVIC_SetPriority()*/
+#include "esp8266_Firebase.h"
+#include "event_queue.h"
 
 /*
  * This functions intiolizes pin D5
@@ -130,9 +132,12 @@ void EXTI4_IRQHandler(void)
 {
 
 	EXTI->PR |= 0x00000010; //reset flag by writing 1 to bit 4 (reference manual 10.3.6)
+	add_event(alert_Handler);
 
-	toggle_led(); //This is temporary for testing.
-	write_usart2((uint8_t*)MSG); //This chould be executed using the event_queue
+
+	//toggle_led(); //This is temporary for testing.
+	//write_usart2((uint8_t*)MSG); //This chould be executed using the event_queue
+
 
 }
 

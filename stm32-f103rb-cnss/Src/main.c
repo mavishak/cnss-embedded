@@ -25,7 +25,7 @@
 // #include "cmsis_gcc.h"/*for __disable/enable_irq()*/
 // #include "core_cm3.h" /*for NVIC_enableIRQ() and NVIC_SetPriority()*/
 
-/*
+
 #include "event_queue.h"
 #include "hc-sr501pir_sensor.h"
 #include "usart.h"
@@ -33,11 +33,11 @@
 #include "esp8266_WiFi.h" //for testing usart1...
 #include "timers.h"
 #include "common.h"
-*/
+
 
 /*FOR TESTING*/
-#include "event_queue.h"
-#include "gpio_signal.h" /*for testing*/
+//#include "event_queue.h"
+//#include "gpio_signal.h" /*for testing*/
 /*FOR TESTING*/
 
 
@@ -45,20 +45,21 @@ int main(void)
 {
 
 	/*FOR TESTING*/
-	init_queue();
-	init_interrupt();
+	//init_queue();
+	//init_interrupt();
 	/*FOR TESTING*/
 
-	//init_sensor_with_interrupt();
+	init_queue();
+	init_sensor_with_interrupt();
 	//init_sensor_led_response();
-	//init_usart2(); // for dbugging
+	init_usart2(); // for dbugging
 
-	//	init_timer2();
+	//init_timer2();
 	//init_timer3();
-	//init_timer4();
+	init_timer4();
 
-	//init_usart1(); // for ESP8266
-	//write_usart2((uint8_t*)("\r\n_______________\r\n"));//For test
+	init_usart1(); // for ESP8266
+	write_usart2((uint8_t*)("\r\n_______________\r\n"));//For test
 
 	//if(recordAlert()){
 	//	write_usart2((uint8_t*)(":)\r\n"));

@@ -17,6 +17,7 @@
 
 enum mode { GO, STOP };
 
+//typedef void (*Handler)(); //typedef for function that receives void and returns void
 typedef void *(*Handler)(); // typedef for function that receives void and returns void*
 
 

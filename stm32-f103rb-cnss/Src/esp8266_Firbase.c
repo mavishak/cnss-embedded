@@ -37,9 +37,6 @@
 #include "timers.h"
 
 
-//#define FALSE 0
-//#define TRUE 1
-
 #define COMMAND_SIZE 256
 #define HTTP_SIZE 512
 #define CONTENT_SIZE 128
@@ -56,8 +53,6 @@ static uint32_t content_len = 0 ;
 
 static uint8_t image_path[PATH_SIZE];
 
-//static uint32_t tries = 0;
-//static uint32_t timeout = 0;
 
 
 
@@ -65,6 +60,17 @@ void setImagePath(void){
 
 	memset((char*)image_path, '\0', PATH_SIZE*sizeof(uint8_t));
 	sprintf((char*)image_path, "image/path");
+}
+
+void *alert_Handler(void){
+
+	uint32_t i  = 3;
+	while(i > 0 && !recordAlert()){
+		i--;
+	}
+	return NULL;
+
+
 }
 
 
