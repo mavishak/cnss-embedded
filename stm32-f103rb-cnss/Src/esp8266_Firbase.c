@@ -98,7 +98,7 @@ BOOL recordAlert(void){
 	/*Default: AT+CIPMUX=0 (according to: AT instruction set- 5.2.15)*/
 
 	//Connect HOST IP
-	if(!connectFirebaseHost(3,3,3,10)){
+	if(!connectFirebaseHost(3,3,6,20)){
 		return FALSE;
 	}
 	write_usart2((uint8_t*)"3\r\n");

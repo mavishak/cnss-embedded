@@ -30,8 +30,6 @@
 #include "hc-sr501pir_sensor.h"
 #include "usart.h"
 #include "esp8266_Firebase.h"
-
-
 #include "esp8266_WiFi.h" //for testing usart1...
 #include "timers.h"
 #include "common.h"
