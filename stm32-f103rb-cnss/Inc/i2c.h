@@ -10,6 +10,8 @@
 
 void init_i2c(void);
 
-void i2c_write_single(uint8_t device_address,uint8_t mem_address, uint8_t data);
+void i2c_write(uint8_t device_address,uint8_t mem_address, uint8_t data, uint8_t length);
+
+void i2c_read(uint8_t device_address, uint8_t length);
 
 #endif /* I2C_H_ */
