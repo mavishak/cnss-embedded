@@ -10,6 +10,8 @@
 #include <string.h>
 #include <stdio.h>
 
+static uint32_t temp; //will help us clear ADDR bit
+
 /*starting our communication in I2C:
 *1.	send a start condition
 *2.	Wait until SB in I2C Status register 1 (I2C_SR1) (p.777)-> this is how we will know that the start condition is actually sent
@@ -20,84 +22,92 @@
 
 /*---------Init I2c---------*/
 void init_i2c(void){
-	RCC->APB2ENR |= RCC_APB2ENR_IOPBEN; //iO port B clock enable(P. 114)
 
-	RCC->APB1ENR |= RCC_APB1ENR_I2C2EN; //enable I2C_2(P. 115 + drawing on p.276)
+	/*Enable io port B and AFIO clk to allow comunication */
+	RCC->APB2ENR |= RCC_APB2ENR_IOPBEN | RCC_APB2ENR_AFIOEN; //(see: Ref Manual p. 114) //RCC- enable AFIO??
 
-	//RCC- enable AFIO??
+	/*Enable I2C_2 clk*/
+	RCC->APB1ENR |= RCC_APB1ENR_I2C2EN; //(see: Ref Manual p. 115 + drawing on p.276)
 
-	//NVIC_EnableIRQ(I2C2_EV_IRQn);//enable interrupt line//not in use because we use DMA in Rx
 
-	I2C2->CR2 |= 36;//NEED TO CACLCULATE! //freq value of APB1 buss=72/2=36 (p.774)
-	I2C2->CCR |= 180;//NEED TO CACLCULATE! //speed to 100kHz (standard mode max)
-	I2C2->TRISE |= 37;//NEED TO CACLCULATE! //1000 ns/ (CR2 period =1/36MHz) = TRISE +1
+	//!--NVIC_EnableIRQ(I2C2_EV_IRQn);//enable interrupt line - not in use because we use DMA in Rx
 
-	I2C2->CR1 |= I2C_CR1_ACK; //enable acknowledge
+	/*FIX - NEED TO CACLCULATE!*/
+	I2C2->CR2 |= 36; //frequency value of APB1 buss=72/2=36 (Ref Manual p.774)
+	I2C2->CCR |= 180; //speed to 100kHz (standard mode max)
+	I2C2->TRISE |= 37; // period time 1000 ns/ (CR2 period =1/36MHz) = TRISE +1
+	/*FIX - NEED TO CACLCULATE!*/
 
-	//stretch mode enabled by default
+	I2C2->CR1 |= I2C_CR1_ACK; //enable acknowledgement (Ref Manual p. 772)
 
-	//7 bit addressing mode enabled by default (reference manual p. 773)
+	//stretch mode enabled by default (Ref Manual p. 772)
 
-	/*config gpio for i2c use enable internal pull up
-	*configure to alternate function open drain mode (p. 168, Table 27 I2C ):
-	*PB10: I2C2_SCL ,PB11: I2C2_SDA (STM32 datasheet p.30)*/
-	GPIOB->CRH |=  GPIO_CRH_CNF10 | GPIO_CRH_MODE10 | GPIO_CRH_CNF11 | GPIO_CRH_MODE11; //alt function output open drain(p.172)
-	GPIOB->ODR |= (1<<10) | (1<<11);//Port output data register
+	//7 bit addressing mode enabled by default (Ref Manual p. 773)
 
+	/*
+	* config gpio for i2c use enable internal pull up
+	* configure to alternate function open drain mode (Ref Manual p. 168, Table 27 I2C ):
+	* PB10: I2C2_SCL ,PB11: I2C2_SDA (STM32 datasheet p. 30)
+	*/
+	GPIOB->CRH &= 0xFFFF00FF; // clean content in PB10, PB11 (see: Ref Manual p. 172, 9.2.2)
+	GPIOB->CRH |= 0x0000EE00; // set PB10 and PB11 to: Alternate function output Open-drain, max speed 2 MHz.
+	//It doesn't seem we need to set GPIOB->ODR, but we saw someone do it so... ??? :Q (see: Ref Manual p. 161 Table 20)
+
+	/*Enable DMA Interupts*/
 	//I2C2->CR2 |= I2C_CR2_ITBUFEN; //enable corresponding interrupts (buffer interrupts)
 	//I2C2->CR2 |= I2C_CR2_ITEVTEN; //event interrupts
 
-	I2C2->CR1 |= I2C_CR1_PE; //enable peripheral needs to be done last
+	I2C2->CR1 |= I2C_CR1_PE; //enable peripheral needs to be done last (Ref Manual p. 772, 26.6.1)
 }
+
+
 //using regular flags (not DMA)
 void i2c_write(uint8_t device_address,uint8_t mem_address, uint8_t data, uint8_t length){
 
-	uint32_t temp; //will help us clear ADDR bit
 
 	/*---------Maybe according to Reference manual p. 760, Figure 273. Transfer sequence diagram for master transmitter(7-bit master transmitter-maybe we should 10-bit???)---------*/
 
-	/*---------send a start condition---------*/
+	/*send a start condition: S (see: Ref Manual 760)*/
 	I2C2->CR1 |= I2C_CR1_START; //generate our start condition(Reference manual p. 772)
 
-	/*---------Wait until we know that the start condition arrived---------*/
-	while(!(I2C2->SR1 & I2C_SR1_SB))//until I2C_CR2 SB=1 //tells us that the start condition successfully sent(p.777)
-	{
-	}
+	/*Wait until we know that the start condition arrived: EV5 (see: Ref Manual 760)*/
+	while((I2C2->SR1 & 0x0001) == 0x0001);// wait until I2C_CR2 SB=1, start condition is sent successfully (Ref Manual p.777)
 
-	/*---------send the slave's address by writing it in the data register---------*/
-	I2C2->DR = device_address;// (Reference manual p. 777)//maybe we need to write here:0x42 because of:(OV7670/OV7171 Advanced Information Preliminary Datasheet p. 11)
 
-	/*---------Wait until we know that there was an address match---------*/
-	while(!(I2C2->SR1 & I2C_SR1_ADDR))//until I2C_CR2 ADDR=1//tells us that there was an address match(p. 777)
-	{
-	}
+	/*send the slave's address by writing it in the data register: Address (see: Ref Manual 760)*/
+	I2C2->DR = (uint8_t)(device_address & 0xFF);// (Reference manual p. 777) //maybe we need to write here:0x42 because of:(OV7670/OV7171 Advanced Information Preliminary Datasheet p. 11)
+
+	/*Wait until we know that there was an address match: EV6 (see: Ref Manual 760)*/
+	while(!(I2C2->SR1 & 0x0002) == 0x0002);//wait until I2C_CR2 ADDR=1, there was an address match( Ref Manual p. 777)
 
 	//Reading by software SR1 register followed by reading SR2  clears ADDR bit(p. 780))
 	temp = I2C2->SR2;//clears ADDR
 
-	/*---------enter the internal memory address of the slave to write to---------*/
-	I2C2->DR = mem_address;//address to write to//maybe the Address(Hex) in the table 5 in OV7670/OV7171 Advanced Information Preliminary Datasheet p. 11
 
-	/*---------wait for the address transfer to complete---------*/
-	while(!(I2C2->SR1 & I2C_SR1_TXE))
-	{
-	}
+	/*Enter the internal memory address of the slave to write to: EV8_1 - Data1 ??? (see: Ref Manual 760)*/
+	I2C2->DR = (uint8_t)(mem_address & 0xFF);//address to write to//maybe the Address(Hex) in the table 5 in OV7670/OV7171 Advanced Information Preliminary Datasheet p. 11
+
+	/*Wait for the address transfer to complete - cleared by writing DR register*/
+	while((I2C2->SR1 & 0x0080) == 0x0080); // wait until TXE = 1
+
 
 	//now we can put data in the register
-
-	for( ; length>0 ; length--)
+	while(length > 0)
 	{
-		/*---------write data to the address---------*/
-		I2C2->DR = data;//data to write in that address
+		/*write data to the address*/
+		I2C2->DR = (uint8_t)(data & 0xFF);//data to write in that address
 
-		/*---------wait for the data transfer to complete---------*/
-		while(!(I2C2->SR1 & I2C_SR1_TXE))
-		{
-		}
+		/*wait for the data transfer to complete*/
+		while((I2C2->SR1 & 0x0080) == 0x0080); // wait until TXE = 1
+
+		length--;
 	}
-	/*---------send stop condition---------*/
+
+	/*send stop condition: EV8_2 (see: Ref Manual 760)*/
 	I2C2->CR1 |=I2C_CR1_STOP;//(Reference manual p. 772)
 }
+
+
 
 //Using DMA
 void i2c_read(uint8_t device_address, uint8_t length){

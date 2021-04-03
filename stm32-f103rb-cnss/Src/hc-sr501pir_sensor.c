@@ -36,7 +36,7 @@
  */
 void init_sensor_with_interrupt(){
 
-//	/*~~~USING D6 (PB10)~~~*/
+//	/*~~~USING D6 (PB10) -> !!!NEED TO CHANGE AS IT IS USED FOR I2C !!!!~~~*/
 // ---WORKS--DO-NOT-ERASE!!! (keep to check that eventqueue is working and for later perpuses)---
 //
 //	/*Enabla RCC for GPIO Port B*/
