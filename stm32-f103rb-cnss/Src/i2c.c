@@ -54,6 +54,8 @@ void i2c_write(uint8_t device_address,uint8_t mem_address, uint8_t data, uint8_t
 
 	uint32_t temp; //will help us clear ADDR bit
 
+	/*---------Maybe according to Reference manual p. 760, Figure 273. Transfer sequence diagram for master transmitter(7-bit master transmitter-maybe we should 10-bit???)---------*/
+
 	/*---------send a start condition---------*/
 	I2C2->CR1 |= I2C_CR1_START; //generate our start condition(Reference manual p. 772)
 
@@ -70,8 +72,8 @@ void i2c_write(uint8_t device_address,uint8_t mem_address, uint8_t data, uint8_t
 	{
 	}
 
-	//We will read SR2 bit( ADDR bit is cleared by software reading SR1 register followed reading SR2(p. 780))
-	temp = I2C2->SR2;
+	//Reading by software SR1 register followed by reading SR2  clears ADDR bit(p. 780))
+	temp = I2C2->SR2;//clears ADDR
 
 	/*---------enter the internal memory address of the slave to write to---------*/
 	I2C2->DR = mem_address;//address to write to//maybe the Address(Hex) in the table 5 in OV7670/OV7171 Advanced Information Preliminary Datasheet p. 11
@@ -109,6 +111,7 @@ void i2c_read(uint8_t device_address, uint8_t length){
 	I2C2->CR1 |= I2C_CR1_ACK; //enable acknowledges
 
 	/*---------configure the DMA Channel procedure(Reference manual p.278)---------*/
+	/*Why channel 5? because of Reference manual p.281+282*/
 	//The first transfer address is the one programmed in the DMA_CPARx/DMA_CMARx registers(Reference manual p. 277)
 
 	//1.Setting the peripheral register address in the DMA_CPARx register.
