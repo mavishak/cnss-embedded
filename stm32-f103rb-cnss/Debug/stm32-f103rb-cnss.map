@@ -378,15 +378,19 @@ Discarded input sections
  .text          0x0000000000000000        0x0 Src/i2c.o
  .data          0x0000000000000000        0x0 Src/i2c.o
  .bss           0x0000000000000000        0x0 Src/i2c.o
+ .bss.temp      0x0000000000000000        0x4 Src/i2c.o
+ .bss.i2c_buff  0x0000000000000000        0x4 Src/i2c.o
  .text.init_i2c
-                0x0000000000000000        0xc Src/i2c.o
- .text.i2c_write_single
-                0x0000000000000000       0xa4 Src/i2c.o
- .debug_info    0x0000000000000000      0xa28 Src/i2c.o
+                0x0000000000000000       0x84 Src/i2c.o
+ .text.i2c_write
+                0x0000000000000000       0xa0 Src/i2c.o
+ .text.i2c_read
+                0x0000000000000000       0xe4 Src/i2c.o
+ .debug_info    0x0000000000000000      0xbf0 Src/i2c.o
  .debug_abbrev  0x0000000000000000      0x1c0 Src/i2c.o
  .debug_aranges
-                0x0000000000000000       0x28 Src/i2c.o
- .debug_ranges  0x0000000000000000       0x18 Src/i2c.o
+                0x0000000000000000       0x30 Src/i2c.o
+ .debug_ranges  0x0000000000000000       0x20 Src/i2c.o
  .debug_macro   0x0000000000000000      0x242 Src/i2c.o
  .debug_macro   0x0000000000000000      0xa66 Src/i2c.o
  .debug_macro   0x0000000000000000       0x22 Src/i2c.o
@@ -428,10 +432,10 @@ Discarded input sections
  .debug_macro   0x0000000000000000       0x3d Src/i2c.o
  .debug_macro   0x0000000000000000       0x16 Src/i2c.o
  .debug_macro   0x0000000000000000      0x145 Src/i2c.o
- .debug_line    0x0000000000000000      0x70a Src/i2c.o
- .debug_str     0x0000000000000000    0x58371 Src/i2c.o
+ .debug_line    0x0000000000000000      0x73d Src/i2c.o
+ .debug_str     0x0000000000000000    0x58407 Src/i2c.o
  .comment       0x0000000000000000       0x7c Src/i2c.o
- .debug_frame   0x0000000000000000       0x5c Src/i2c.o
+ .debug_frame   0x0000000000000000       0x84 Src/i2c.o
  .ARM.attributes
                 0x0000000000000000       0x33 Src/i2c.o
  .group         0x0000000000000000        0xc Src/main.o

@@ -11,6 +11,7 @@
 #include <stdio.h>
 
 static uint32_t temp; //will help us clear ADDR bit
+static uint32_t i2c_buff; //the address of the buffer= where we want to store the data we receive(short explanation on the reference manual p. 277)
 
 /*starting our communication in I2C:
 *1.	send a start condition
@@ -111,13 +112,13 @@ void i2c_write(uint8_t device_address,uint8_t mem_address, uint8_t data, uint8_t
 
 //Using DMA
 void i2c_read(uint8_t device_address, uint8_t length){
-	uint32_t temp = 0; //will help to clear flags
+	//uint32_t temp = 0; //will help to clear flags
 
 	/*---------enable the DMA---------*/
 	RCC->AHBENR |= RCC_AHBENR_DMA1EN;// DMA1 clock enable (Reference manual p. 111)
 	I2C2->CR2 |= I2C_CR2_DMAEN;// DMA requests enable (Reference manual p. 774)
 
-	//????????????Maybe the next line redundant because we wrote it in the init_i2c():
+	//????????????Maybe the next line redundant because we wrote it in init_i2c()???????????:
 	I2C2->CR1 |= I2C_CR1_ACK; //enable acknowledges
 
 	/*---------configure the DMA Channel procedure(Reference manual p.278)---------*/
@@ -136,11 +137,11 @@ void i2c_read(uint8_t device_address, uint8_t length){
 	//4.Configure the channel priority using the PL[1:0] bits in the DMA_CCRx register (Reference manual p.286)
 
 	//5.Configure data transfer direction, circular mode, peripheral & memory incremented mode, peripheral & memory data size, and interrupt after half and/or full transfer in the DMA_CCRx register
-	DMA1_Channel5->CCR |= DMA_CCR4_TCIE; //Transfer complete interrupt enable for the DMA (Reference manual p.286)
-	DMA1_Channel5->CCR |= DMA_CCR5_MINC; //Memory increment mode enabled (Reference manual p.286)
+	DMA1_Channel5->CCR |= DMA_CCR_TCIE; //Transfer complete interrupt enable for the DMA (Reference manual p.286)
+	DMA1_Channel5->CCR |= DMA_CCR_MINC; //Memory increment mode enabled (Reference manual p.286)
 
 	//6.Activate the channel by setting the ENABLE bit in the DMA_CCRx register.
-	DMA1_Channel5->CCR |= DMA_CCR5_EN; // Channel enable (Reference manual p.286)
+	DMA1_Channel5->CCR |= DMA_CCR_EN; // Channel enable (Reference manual p.286)
 
 	/*---------generate start condition---------*/
 	I2C2->CR1 |= I2C_CR1_START; //(Reference manual p.772)
@@ -157,7 +158,7 @@ void i2c_read(uint8_t device_address, uint8_t length){
 	temp = I2C2->SR2;//causing to clear ADDR flag
 
 	/*---------wait for the transfer to complete from the DMA---------*/
-	while((DMA1->ISR & DMA_ISR_TCIFS) == 0);
+	while((DMA1->ISR & DMA_ISR_TCIF1) == 0);
 
 	/*---------sending stop condition---------*/
 	I2C2->CR1 |= I2C_CR1_STOP;
