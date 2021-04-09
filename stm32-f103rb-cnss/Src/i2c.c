@@ -2,7 +2,11 @@
  * i2c.c
  *
  *  Created on: 28 Mar 2021
- *      Author: Owner
+ *  Author: Mayan and naomi
+ *
+ *  CCR explaned:
+ *  http://fastbitlab.com/stm32-i2c-lecture-12-i2c-serial-clock-settings-with-explanations/
+ *
  */
 
 #include "stm32f103xb.h"
@@ -21,9 +25,56 @@ static uint32_t i2c_buff; //the address of the buffer= where we want to store th
 *5.	once the drafts finds a match then you can start go ahead and you know proceed with your rx or TX whatever it is you're gonna do
 */
 
-/*---------Init I2c---------*/
-void init_i2c(void){
+void init_i2c1(void){
 
+
+	/*Enable I2C1 RCC clock*/
+	RCC->APB1ENR |= 0x00200000;
+
+	/*Enable use of SCL (PB6) and SDA (PB7)*/
+	RCC->APB2ENR |= 0x00000008;
+
+	/*Enable AFIO*/
+	RCC->APB2ENR |= 0x00000001; // ... test with and without
+
+	/*Set SCL (PB6) and SDA (PB7) [reference manual p. 168 Table  27]*/
+	GPIOB->CRL &= 0x00FFFFFF; // reset relevebt bits (see: reference manual 9.2.1)
+	GPIOB->CRL |= 0xEE000000; // set as Alternate function output Open-drain, max speed 2 MHz.
+
+
+
+
+	/*Set I2C Configurations*/
+
+	/*Enable ACK*/
+	I2C1->CR1 |= 0x0400;
+
+
+	//The following is the required sequence in master mode. [reference manual p. 758]
+
+	/*Set Peripheral clock frequency*/
+	I2C1->CR2 &= 0xFFC0; // reset relavent bits FREQ[5:0]
+	I2C1->CR2 |= 0x0008; // set frequency to 8MHz same frequency as APB1
+
+	/*Set CCR register: http://fastbitlab.com/stm32-i2c-lecture-12-i2c-serial-clock-settings-with-explanations/
+	 *See: [reference manual 26.6.8], [datasheet p. 70 Table 41]
+	 *Reminder: T=1/f
+	 *??? Ask ???*/
+
+	/* Configure the rise time register: TRISE*/
+
+
+
+
+
+
+	/*Enable I2C peripheral (PE = 1)*/
+	I2C1->CR1 |= 0x0001; //The CCR register must be configured only when the I2C is disabled (PE = 0) [reference manual p. 781 26.6.8].
+
+
+
+
+	//_________________INITIAL CODE_________________________//
 	/*Enable io port B and AFIO clk to allow comunication */
 	RCC->APB2ENR |= RCC_APB2ENR_IOPBEN | RCC_APB2ENR_AFIOEN; //(see: Ref Manual p. 114) //RCC- enable AFIO??
 
@@ -59,6 +110,8 @@ void init_i2c(void){
 	//I2C2->CR2 |= I2C_CR2_ITEVTEN; //event interrupts
 
 	I2C2->CR1 |= I2C_CR1_PE; //enable peripheral needs to be done last (Ref Manual p. 772, 26.6.1)
+
+	//_________________INITIAL CODE_________________________//
 }
 
 

@@ -9,7 +9,7 @@
 #define I2C_H_
 
 
-void init_i2c(void);
+void init_i2c1(void);
 
 /*
  * device_address: the address of the slave.
