@@ -7,43 +7,43 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, ALLOC, LOAD, READONLY, DATA
   1 .text         00001a5c  08000130  08000130  00010130  2**2
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
-  2 .rodata       000002d8  08001b8c  08001b8c  00011b8c  2**2
+  2 .rodata       000002dc  08001b8c  08001b8c  00011b8c  2**2
                   CONTENTS, ALLOC, LOAD, READONLY, DATA
-  3 .ARM.extab    00000000  08001e64  08001e64  000200d4  2**0
+  3 .ARM.extab    00000000  08001e68  08001e68  000200d4  2**0
                   CONTENTS
-  4 .ARM          00000000  08001e64  08001e64  000200d4  2**0
+  4 .ARM          00000000  08001e68  08001e68  000200d4  2**0
                   CONTENTS
-  5 .preinit_array 00000000  08001e64  08001e64  000200d4  2**0
+  5 .preinit_array 00000000  08001e68  08001e68  000200d4  2**0
                   CONTENTS, ALLOC, LOAD, DATA
-  6 .init_array   00000004  08001e64  08001e64  00011e64  2**2
+  6 .init_array   00000004  08001e68  08001e68  00011e68  2**2
                   CONTENTS, ALLOC, LOAD, DATA
-  7 .fini_array   00000004  08001e68  08001e68  00011e68  2**2
+  7 .fini_array   00000004  08001e6c  08001e6c  00011e6c  2**2
                   CONTENTS, ALLOC, LOAD, DATA
-  8 .data         000000d4  20000000  08001e6c  00020000  2**2
+  8 .data         000000d4  20000000  08001e70  00020000  2**2
                   CONTENTS, ALLOC, LOAD, DATA
-  9 .bss          00000aac  200000d4  08001f40  000200d4  2**2
+  9 .bss          00000aac  200000d4  08001f44  000200d4  2**2
                   ALLOC
- 10 ._user_heap_stack 00000600  20000b80  08001f40  00020b80  2**0
+ 10 ._user_heap_stack 00000600  20000b80  08001f44  00020b80  2**0
                   ALLOC
  11 .ARM.attributes 00000029  00000000  00000000  000200d4  2**0
                   CONTENTS, READONLY
- 12 .debug_info   00006e35  00000000  00000000  000200fd  2**0
+ 12 .debug_info   00006e24  00000000  00000000  000200fd  2**0
                   CONTENTS, READONLY, DEBUGGING
- 13 .debug_abbrev 000012db  00000000  00000000  00026f32  2**0
+ 13 .debug_abbrev 000012db  00000000  00000000  00026f21  2**0
                   CONTENTS, READONLY, DEBUGGING
- 14 .debug_aranges 00000308  00000000  00000000  00028210  2**3
+ 14 .debug_aranges 00000308  00000000  00000000  00028200  2**3
                   CONTENTS, READONLY, DEBUGGING
- 15 .debug_ranges 00000280  00000000  00000000  00028518  2**3
+ 15 .debug_ranges 00000280  00000000  00000000  00028508  2**3
                   CONTENTS, READONLY, DEBUGGING
- 16 .debug_macro  000111eb  00000000  00000000  00028798  2**0
+ 16 .debug_macro  000111eb  00000000  00000000  00028788  2**0
                   CONTENTS, READONLY, DEBUGGING
- 17 .debug_line   00003b5d  00000000  00000000  00039983  2**0
+ 17 .debug_line   00003b5d  00000000  00000000  00039973  2**0
                   CONTENTS, READONLY, DEBUGGING
- 18 .debug_str    00059273  00000000  00000000  0003d4e0  2**0
+ 18 .debug_str    0005923c  00000000  00000000  0003d4d0  2**0
                   CONTENTS, READONLY, DEBUGGING
- 19 .comment      0000007b  00000000  00000000  00096753  2**0
+ 19 .comment      0000007b  00000000  00000000  0009670c  2**0
                   CONTENTS, READONLY
- 20 .debug_frame  00000d80  00000000  00000000  000967d0  2**2
+ 20 .debug_frame  00000d80  00000000  00000000  00096788  2**2
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -364,7 +364,7 @@ BOOL setClientMode(uint32_t tries, uint32_t timeout){
  80002fe:	3708      	adds	r7, #8
  8000300:	46bd      	mov	sp, r7
  8000302:	bd80      	pop	{r7, pc}
- 8000304:	2000006c 	.word	0x2000006c
+ 8000304:	2000006d 	.word	0x2000006d
  8000308:	08001bd8 	.word	0x08001bd8
  800030c:	08001bbc 	.word	0x08001bbc
  8000310:	08001bc4 	.word	0x08001bc4
@@ -457,9 +457,9 @@ BOOL joinAccessPoint(uint32_t tries, uint32_t timeout){
  8000390:	200000f0 	.word	0x200000f0
  8000394:	08001be8 	.word	0x08001be8
  8000398:	08001bf4 	.word	0x08001bf4
- 800039c:	08001bfc 	.word	0x08001bfc
- 80003a0:	2000006c 	.word	0x2000006c
- 80003a4:	08001c14 	.word	0x08001c14
+ 800039c:	08001c00 	.word	0x08001c00
+ 80003a0:	2000006d 	.word	0x2000006d
+ 80003a4:	08001c18 	.word	0x08001c18
  80003a8:	08001bc4 	.word	0x08001bc4
 
 080003ac <connectFirebaseHost>:
@@ -640,15 +640,15 @@ BOOL connectFirebaseHost(uint32_t _ssl_tries, uint32_t _cipstart_tries , uint32_
  80004a6:	46bd      	mov	sp, r7
  80004a8:	bd80      	pop	{r7, pc}
  80004aa:	bf00      	nop
- 80004ac:	2000006c 	.word	0x2000006c
- 80004b0:	08001c1c 	.word	0x08001c1c
+ 80004ac:	2000006d 	.word	0x2000006d
+ 80004b0:	08001c20 	.word	0x08001c20
  80004b4:	08001bbc 	.word	0x08001bbc
  80004b8:	08001bc4 	.word	0x08001bc4
  80004bc:	200000f0 	.word	0x200000f0
- 80004c0:	2000002c 	.word	0x2000002c
+ 80004c0:	20000058 	.word	0x20000058
  80004c4:	20000000 	.word	0x20000000
- 80004c8:	08001c34 	.word	0x08001c34
- 80004cc:	08001c54 	.word	0x08001c54
+ 80004c8:	08001c38 	.word	0x08001c38
+ 80004cc:	08001c58 	.word	0x08001c58
 
 080004d0 <createPostMsg>:
 
@@ -714,13 +714,13 @@ void createPostMsg(void){
  800052e:	bd80      	pop	{r7, pc}
  8000530:	200003f4 	.word	0x200003f4
  8000534:	20000478 	.word	0x20000478
- 8000538:	08001c68 	.word	0x08001c68
+ 8000538:	08001c6c 	.word	0x08001c6c
  800053c:	20000474 	.word	0x20000474
  8000540:	200001f0 	.word	0x200001f0
  8000544:	20000000 	.word	0x20000000
- 8000548:	20000030 	.word	0x20000030
+ 8000548:	2000002c 	.word	0x2000002c
  800054c:	2000005c 	.word	0x2000005c
- 8000550:	08001cbc 	.word	0x08001cbc
+ 8000550:	08001cc0 	.word	0x08001cc0
  8000554:	200003f0 	.word	0x200003f0
 
 08000558 <sendRequest>:
@@ -901,14 +901,14 @@ BOOL sendRequest(uint32_t _CIPSEND_tries,uint32_t _SEND_OK_tries , uint32_t _CIP
  8000656:	bf00      	nop
  8000658:	200000f0 	.word	0x200000f0
  800065c:	200003f0 	.word	0x200003f0
- 8000660:	08001d34 	.word	0x08001d34
- 8000664:	2000006c 	.word	0x2000006c
+ 8000660:	08001d38 	.word	0x08001d38
+ 8000664:	2000006d 	.word	0x2000006d
  8000668:	08001bbc 	.word	0x08001bbc
- 800066c:	08001d48 	.word	0x08001d48
- 8000670:	08001d4c 	.word	0x08001d4c
+ 800066c:	08001d4c 	.word	0x08001d4c
+ 8000670:	08001d50 	.word	0x08001d50
  8000674:	200001f0 	.word	0x200001f0
- 8000678:	08001c14 	.word	0x08001c14
- 800067c:	08001d58 	.word	0x08001d58
+ 8000678:	08001c18 	.word	0x08001c18
+ 800067c:	08001d5c 	.word	0x08001d5c
 
 08000680 <readResponse>:
 
@@ -967,9 +967,9 @@ BOOL readResponse(uint32_t timeout){
  80006c6:	46bd      	mov	sp, r7
  80006c8:	bd80      	pop	{r7, pc}
  80006ca:	bf00      	nop
- 80006cc:	2000006c 	.word	0x2000006c
- 80006d0:	08001c14 	.word	0x08001c14
- 80006d4:	08001d4c 	.word	0x08001d4c
+ 80006cc:	2000006d 	.word	0x2000006d
+ 80006d0:	08001c18 	.word	0x08001c18
+ 80006d4:	08001d50 	.word	0x08001d50
 
 080006d8 <closeCunnection>:
 
@@ -1044,8 +1044,8 @@ BOOL closeCunnection(uint32_t tries, uint32_t timeout){
  8000736:	3708      	adds	r7, #8
  8000738:	46bd      	mov	sp, r7
  800073a:	bd80      	pop	{r7, pc}
- 800073c:	2000006c 	.word	0x2000006c
- 8000740:	08001d64 	.word	0x08001d64
+ 800073c:	2000006d 	.word	0x2000006d
+ 8000740:	08001d68 	.word	0x08001d68
  8000744:	08001bbc 	.word	0x08001bbc
  8000748:	08001bc4 	.word	0x08001bc4
 
@@ -1644,7 +1644,7 @@ int main(void)
 		do_event();
  8000a7a:	f7ff fe9d 	bl	80007b8 <do_event>
  8000a7e:	e7fc      	b.n	8000a7a <main+0x1e>
- 8000a80:	08001e04 	.word	0x08001e04
+ 8000a80:	08001e08 	.word	0x08001e08
 
 08000a84 <_sbrk>:
 /**
@@ -2866,8 +2866,8 @@ STATE search_usart1_buffer_Rx(uint8_t *pass, uint8_t *fail){
  80011b6:	bf00      	nop
  80011b8:	2000075c 	.word	0x2000075c
  80011bc:	2000095c 	.word	0x2000095c
- 80011c0:	08001e18 	.word	0x08001e18
- 80011c4:	08001e1c 	.word	0x08001e1c
+ 80011c0:	08001e1c 	.word	0x08001e1c
+ 80011c4:	08001e20 	.word	0x08001e20
 
 080011c8 <USART1_IRQHandler>:
 
@@ -3038,7 +3038,7 @@ LoopForever:
   ldr r1, =_edata
  8001294:	200000d4 	.word	0x200000d4
   ldr r2, =_sidata
- 8001298:	08001e6c 	.word	0x08001e6c
+ 8001298:	08001e70 	.word	0x08001e70
   ldr r2, =_sbss
  800129c:	200000d4 	.word	0x200000d4
   ldr r4, =_ebss
@@ -3087,10 +3087,10 @@ Infinite_Loop:
  80012e6:	4798      	blx	r3
  80012e8:	3501      	adds	r5, #1
  80012ea:	e7f2      	b.n	80012d2 <__libc_init_array+0x1e>
- 80012ec:	08001e64 	.word	0x08001e64
- 80012f0:	08001e64 	.word	0x08001e64
- 80012f4:	08001e64 	.word	0x08001e64
- 80012f8:	08001e68 	.word	0x08001e68
+ 80012ec:	08001e68 	.word	0x08001e68
+ 80012f0:	08001e68 	.word	0x08001e68
+ 80012f4:	08001e68 	.word	0x08001e68
+ 80012f8:	08001e6c 	.word	0x08001e6c
 
 080012fc <memset>:
  80012fc:	4603      	mov	r3, r0
@@ -3442,9 +3442,9 @@ Infinite_Loop:
  8001618:	f000 f882 	bl	8001720 <_printf_i>
  800161c:	e7ea      	b.n	80015f4 <_svfiprintf_r+0x1b0>
  800161e:	bf00      	nop
- 8001620:	08001e30 	.word	0x08001e30
- 8001624:	08001e36 	.word	0x08001e36
- 8001628:	08001e3a 	.word	0x08001e3a
+ 8001620:	08001e34 	.word	0x08001e34
+ 8001624:	08001e3a 	.word	0x08001e3a
+ 8001628:	08001e3e 	.word	0x08001e3e
  800162c:	00000000 	.word	0x00000000
  8001630:	08001391 	.word	0x08001391
 
@@ -3780,8 +3780,8 @@ Infinite_Loop:
  8001932:	f104 0542 	add.w	r5, r4, #66	; 0x42
  8001936:	f884 3042 	strb.w	r3, [r4, #66]	; 0x42
  800193a:	e76c      	b.n	8001816 <_printf_i+0xf6>
- 800193c:	08001e41 	.word	0x08001e41
- 8001940:	08001e52 	.word	0x08001e52
+ 800193c:	08001e45 	.word	0x08001e45
+ 8001940:	08001e56 	.word	0x08001e56
 
 08001944 <memchr>:
  8001944:	b510      	push	{r4, lr}

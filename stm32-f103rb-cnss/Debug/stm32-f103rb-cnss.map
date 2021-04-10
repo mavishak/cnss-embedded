@@ -73,7 +73,7 @@ Discarded input sections
  .debug_macro   0x0000000000000000       0x11 Src/esp8266.o
  .debug_macro   0x0000000000000000      0xa66 Src/esp8266.o
  .debug_line    0x0000000000000000       0x31 Src/esp8266.o
- .debug_str     0x0000000000000000     0x2d11 Src/esp8266.o
+ .debug_str     0x0000000000000000     0x2ce1 Src/esp8266.o
  .comment       0x0000000000000000       0x7c Src/esp8266.o
  .ARM.attributes
                 0x0000000000000000       0x33 Src/esp8266.o
@@ -131,8 +131,6 @@ Discarded input sections
                 0x0000000000000000       0x17 Src/esp8266_Firbase.o
  .data.weather_api_key
                 0x0000000000000000       0x21 Src/esp8266_Firbase.o
- .data.http_port
-                0x0000000000000000        0x4 Src/esp8266_Firbase.o
  .text.ping     0x0000000000000000       0x74 Src/esp8266_Firbase.o
  .text.reset    0x0000000000000000       0x74 Src/esp8266_Firbase.o
  .text.TestWifiConnection
@@ -380,17 +378,19 @@ Discarded input sections
  .bss           0x0000000000000000        0x0 Src/i2c.o
  .bss.temp      0x0000000000000000        0x4 Src/i2c.o
  .bss.i2c_buff  0x0000000000000000        0x4 Src/i2c.o
- .text.init_i2c
-                0x0000000000000000       0x84 Src/i2c.o
+ .text.init_i2c1
+                0x0000000000000000       0x94 Src/i2c.o
+ .text.test_communication
+                0x0000000000000000       0x30 Src/i2c.o
  .text.i2c_write
                 0x0000000000000000       0xa0 Src/i2c.o
  .text.i2c_read
                 0x0000000000000000       0xe4 Src/i2c.o
- .debug_info    0x0000000000000000      0xbf0 Src/i2c.o
+ .debug_info    0x0000000000000000      0xc01 Src/i2c.o
  .debug_abbrev  0x0000000000000000      0x1c0 Src/i2c.o
  .debug_aranges
-                0x0000000000000000       0x30 Src/i2c.o
- .debug_ranges  0x0000000000000000       0x20 Src/i2c.o
+                0x0000000000000000       0x38 Src/i2c.o
+ .debug_ranges  0x0000000000000000       0x28 Src/i2c.o
  .debug_macro   0x0000000000000000      0x242 Src/i2c.o
  .debug_macro   0x0000000000000000      0xa66 Src/i2c.o
  .debug_macro   0x0000000000000000       0x22 Src/i2c.o
@@ -432,10 +432,10 @@ Discarded input sections
  .debug_macro   0x0000000000000000       0x3d Src/i2c.o
  .debug_macro   0x0000000000000000       0x16 Src/i2c.o
  .debug_macro   0x0000000000000000      0x145 Src/i2c.o
- .debug_line    0x0000000000000000      0x73d Src/i2c.o
- .debug_str     0x0000000000000000    0x58407 Src/i2c.o
+ .debug_line    0x0000000000000000      0x75a Src/i2c.o
+ .debug_str     0x0000000000000000    0x583eb Src/i2c.o
  .comment       0x0000000000000000       0x7c Src/i2c.o
- .debug_frame   0x0000000000000000       0x84 Src/i2c.o
+ .debug_frame   0x0000000000000000       0xa4 Src/i2c.o
  .ARM.attributes
                 0x0000000000000000       0x33 Src/i2c.o
  .group         0x0000000000000000        0xc Src/main.o
@@ -619,7 +619,7 @@ Discarded input sections
  .debug_macro   0x0000000000000000       0x16 Src/syscalls.o
  .debug_macro   0x0000000000000000       0x88 Src/syscalls.o
  .debug_line    0x0000000000000000      0x739 Src/syscalls.o
- .debug_str     0x0000000000000000     0x88b5 Src/syscalls.o
+ .debug_str     0x0000000000000000     0x8885 Src/syscalls.o
  .comment       0x0000000000000000       0x7c Src/syscalls.o
  .debug_frame   0x0000000000000000      0x2ac Src/syscalls.o
  .ARM.attributes
@@ -1296,62 +1296,62 @@ LOAD c:/st/stm32cubeide_1.3.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.exte
 .iplt           0x0000000008001b8c        0x0
  .iplt          0x0000000008001b8c        0x0 c:/st/stm32cubeide_1.3.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.7-2018-q2-update.win32_1.0.0.201904181610/tools/bin/../lib/gcc/arm-none-eabi/7.3.1/thumb/v7-m/crtbegin.o
 
-.rodata         0x0000000008001b8c      0x2d8
+.rodata         0x0000000008001b8c      0x2dc
                 0x0000000008001b8c                . = ALIGN (0x4)
  *(.rodata)
- .rodata        0x0000000008001b8c      0x278 Src/esp8266_Firbase.o
- .rodata        0x0000000008001e04       0x14 Src/main.o
- .rodata        0x0000000008001e18       0x18 Src/usart.o
+ .rodata        0x0000000008001b8c      0x27c Src/esp8266_Firbase.o
+ .rodata        0x0000000008001e08       0x14 Src/main.o
+ .rodata        0x0000000008001e1c       0x18 Src/usart.o
  *(.rodata*)
  .rodata._svfprintf_r.str1.1
-                0x0000000008001e30       0x11 c:/st/stm32cubeide_1.3.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.7-2018-q2-update.win32_1.0.0.201904181610/tools/bin/../lib/gcc/arm-none-eabi/7.3.1/../../../../arm-none-eabi/lib/thumb/v7-m\libc_nano.a(lib_a-nano-svfprintf.o)
+                0x0000000008001e34       0x11 c:/st/stm32cubeide_1.3.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.7-2018-q2-update.win32_1.0.0.201904181610/tools/bin/../lib/gcc/arm-none-eabi/7.3.1/../../../../arm-none-eabi/lib/thumb/v7-m\libc_nano.a(lib_a-nano-svfprintf.o)
  .rodata._printf_i.str1.1
-                0x0000000008001e41       0x22 c:/st/stm32cubeide_1.3.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.7-2018-q2-update.win32_1.0.0.201904181610/tools/bin/../lib/gcc/arm-none-eabi/7.3.1/../../../../arm-none-eabi/lib/thumb/v7-m\libc_nano.a(lib_a-nano-vfprintf_i.o)
-                0x0000000008001e64                . = ALIGN (0x4)
- *fill*         0x0000000008001e63        0x1 
+                0x0000000008001e45       0x22 c:/st/stm32cubeide_1.3.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.7-2018-q2-update.win32_1.0.0.201904181610/tools/bin/../lib/gcc/arm-none-eabi/7.3.1/../../../../arm-none-eabi/lib/thumb/v7-m\libc_nano.a(lib_a-nano-vfprintf_i.o)
+                0x0000000008001e68                . = ALIGN (0x4)
+ *fill*         0x0000000008001e67        0x1 
 
-.rel.dyn        0x0000000008001e64        0x0
- .rel.iplt      0x0000000008001e64        0x0 c:/st/stm32cubeide_1.3.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.7-2018-q2-update.win32_1.0.0.201904181610/tools/bin/../lib/gcc/arm-none-eabi/7.3.1/thumb/v7-m/crtbegin.o
+.rel.dyn        0x0000000008001e68        0x0
+ .rel.iplt      0x0000000008001e68        0x0 c:/st/stm32cubeide_1.3.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.7-2018-q2-update.win32_1.0.0.201904181610/tools/bin/../lib/gcc/arm-none-eabi/7.3.1/thumb/v7-m/crtbegin.o
 
-.ARM.extab      0x0000000008001e64        0x0
-                0x0000000008001e64                . = ALIGN (0x4)
+.ARM.extab      0x0000000008001e68        0x0
+                0x0000000008001e68                . = ALIGN (0x4)
  *(.ARM.extab* .gnu.linkonce.armextab.*)
-                0x0000000008001e64                . = ALIGN (0x4)
+                0x0000000008001e68                . = ALIGN (0x4)
 
-.ARM            0x0000000008001e64        0x0
-                0x0000000008001e64                . = ALIGN (0x4)
-                0x0000000008001e64                __exidx_start = .
+.ARM            0x0000000008001e68        0x0
+                0x0000000008001e68                . = ALIGN (0x4)
+                0x0000000008001e68                __exidx_start = .
  *(.ARM.exidx*)
-                0x0000000008001e64                __exidx_end = .
-                0x0000000008001e64                . = ALIGN (0x4)
+                0x0000000008001e68                __exidx_end = .
+                0x0000000008001e68                . = ALIGN (0x4)
 
-.preinit_array  0x0000000008001e64        0x0
-                0x0000000008001e64                . = ALIGN (0x4)
-                0x0000000008001e64                PROVIDE (__preinit_array_start = .)
+.preinit_array  0x0000000008001e68        0x0
+                0x0000000008001e68                . = ALIGN (0x4)
+                0x0000000008001e68                PROVIDE (__preinit_array_start = .)
  *(.preinit_array*)
-                0x0000000008001e64                PROVIDE (__preinit_array_end = .)
-                0x0000000008001e64                . = ALIGN (0x4)
+                0x0000000008001e68                PROVIDE (__preinit_array_end = .)
+                0x0000000008001e68                . = ALIGN (0x4)
 
-.init_array     0x0000000008001e64        0x4
-                0x0000000008001e64                . = ALIGN (0x4)
-                0x0000000008001e64                PROVIDE (__init_array_start = .)
+.init_array     0x0000000008001e68        0x4
+                0x0000000008001e68                . = ALIGN (0x4)
+                0x0000000008001e68                PROVIDE (__init_array_start = .)
  *(SORT_BY_NAME(.init_array.*))
  *(.init_array*)
- .init_array    0x0000000008001e64        0x4 c:/st/stm32cubeide_1.3.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.7-2018-q2-update.win32_1.0.0.201904181610/tools/bin/../lib/gcc/arm-none-eabi/7.3.1/thumb/v7-m/crtbegin.o
-                0x0000000008001e68                PROVIDE (__init_array_end = .)
-                0x0000000008001e68                . = ALIGN (0x4)
+ .init_array    0x0000000008001e68        0x4 c:/st/stm32cubeide_1.3.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.7-2018-q2-update.win32_1.0.0.201904181610/tools/bin/../lib/gcc/arm-none-eabi/7.3.1/thumb/v7-m/crtbegin.o
+                0x0000000008001e6c                PROVIDE (__init_array_end = .)
+                0x0000000008001e6c                . = ALIGN (0x4)
 
-.fini_array     0x0000000008001e68        0x4
-                0x0000000008001e68                . = ALIGN (0x4)
+.fini_array     0x0000000008001e6c        0x4
+                0x0000000008001e6c                . = ALIGN (0x4)
                 [!provide]                        PROVIDE (__fini_array_start = .)
  *(SORT_BY_NAME(.fini_array.*))
  *(.fini_array*)
- .fini_array    0x0000000008001e68        0x4 c:/st/stm32cubeide_1.3.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.7-2018-q2-update.win32_1.0.0.201904181610/tools/bin/../lib/gcc/arm-none-eabi/7.3.1/thumb/v7-m/crtbegin.o
+ .fini_array    0x0000000008001e6c        0x4 c:/st/stm32cubeide_1.3.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.7-2018-q2-update.win32_1.0.0.201904181610/tools/bin/../lib/gcc/arm-none-eabi/7.3.1/thumb/v7-m/crtbegin.o
                 [!provide]                        PROVIDE (__fini_array_end = .)
-                0x0000000008001e6c                . = ALIGN (0x4)
-                0x0000000008001e6c                _sidata = LOADADDR (.data)
+                0x0000000008001e70                . = ALIGN (0x4)
+                0x0000000008001e70                _sidata = LOADADDR (.data)
 
-.data           0x0000000020000000       0xd4 load address 0x0000000008001e6c
+.data           0x0000000020000000       0xd4 load address 0x0000000008001e70
                 0x0000000020000000                . = ALIGN (0x4)
                 0x0000000020000000                _sdata = .
  *(.data)
@@ -1359,15 +1359,15 @@ LOAD c:/st/stm32cubeide_1.3.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.exte
  .data.firebase_host
                 0x0000000020000000       0x29 Src/esp8266_Firbase.o
  *fill*         0x0000000020000029        0x3 
- .data.https_port
-                0x000000002000002c        0x4 Src/esp8266_Firbase.o
  .data.firebase_auth_key
-                0x0000000020000030       0x29 Src/esp8266_Firbase.o
- *fill*         0x0000000020000059        0x3 
+                0x000000002000002c       0x29 Src/esp8266_Firbase.o
+ *fill*         0x0000000020000055        0x3 
+ .data.https_port
+                0x0000000020000058        0x4 Src/esp8266_Firbase.o
  .data.device_id
-                0x000000002000005c       0x10 Src/esp8266_Firbase.o
- .data.found    0x000000002000006c        0x1 Src/esp8266_Firbase.o
- *fill*         0x000000002000006d        0x3 
+                0x000000002000005c       0x11 Src/esp8266_Firbase.o
+ .data.found    0x000000002000006d        0x1 Src/esp8266_Firbase.o
+ *fill*         0x000000002000006e        0x2 
  .data._impure_ptr
                 0x0000000020000070        0x4 c:/st/stm32cubeide_1.3.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.7-2018-q2-update.win32_1.0.0.201904181610/tools/bin/../lib/gcc/arm-none-eabi/7.3.1/../../../../arm-none-eabi/lib/thumb/v7-m\libc_nano.a(lib_a-impure.o)
                 0x0000000020000070                _impure_ptr
@@ -1376,11 +1376,11 @@ LOAD c:/st/stm32cubeide_1.3.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.exte
                 0x00000000200000d4                . = ALIGN (0x4)
                 0x00000000200000d4                _edata = .
 
-.igot.plt       0x00000000200000d4        0x0 load address 0x0000000008001f40
+.igot.plt       0x00000000200000d4        0x0 load address 0x0000000008001f44
  .igot.plt      0x00000000200000d4        0x0 c:/st/stm32cubeide_1.3.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.7-2018-q2-update.win32_1.0.0.201904181610/tools/bin/../lib/gcc/arm-none-eabi/7.3.1/thumb/v7-m/crtbegin.o
                 0x00000000200000d4                . = ALIGN (0x4)
 
-.bss            0x00000000200000d4      0xaac load address 0x0000000008001f40
+.bss            0x00000000200000d4      0xaac load address 0x0000000008001f44
                 0x00000000200000d4                _sbss = .
                 0x00000000200000d4                __bss_start__ = _sbss
  *(.bss)
@@ -1421,7 +1421,7 @@ LOAD c:/st/stm32cubeide_1.3.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.exte
                 0x0000000020000b80                __bss_end__ = _ebss
 
 ._user_heap_stack
-                0x0000000020000b80      0x600 load address 0x0000000008001f40
+                0x0000000020000b80      0x600 load address 0x0000000008001f44
                 0x0000000020000b80                . = ALIGN (0x8)
                 0x0000000020000b80                PROVIDE (end = .)
                 [!provide]                        PROVIDE (_end = .)
@@ -1505,16 +1505,16 @@ LOAD c:/st/stm32cubeide_1.3.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.exte
                 0x0000000000000571       0x1d c:/st/stm32cubeide_1.3.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.7-2018-q2-update.win32_1.0.0.201904181610/tools/bin/../lib/gcc/arm-none-eabi/7.3.1/thumb/v7-m/crtn.o
 OUTPUT(stm32-f103rb-cnss.elf elf32-littlearm)
 
-.debug_info     0x0000000000000000     0x6e35
- .debug_info    0x0000000000000000      0xd47 Src/esp8266_Firbase.o
- .debug_info    0x0000000000000d47      0xaac Src/event_queue.o
- .debug_info    0x00000000000017f3      0xeb1 Src/gpio_signal.o
- .debug_info    0x00000000000026a4     0x106b Src/hc-sr501pir_sensor.o
- .debug_info    0x000000000000370f      0x976 Src/main.o
- .debug_info    0x0000000000004085      0x91c Src/sysmem.o
- .debug_info    0x00000000000049a1     0x127f Src/timers.o
- .debug_info    0x0000000000005c20     0x11f3 Src/usart.o
- .debug_info    0x0000000000006e13       0x22 Startup/startup_stm32f103rbtx.o
+.debug_info     0x0000000000000000     0x6e24
+ .debug_info    0x0000000000000000      0xd36 Src/esp8266_Firbase.o
+ .debug_info    0x0000000000000d36      0xaac Src/event_queue.o
+ .debug_info    0x00000000000017e2      0xeb1 Src/gpio_signal.o
+ .debug_info    0x0000000000002693     0x106b Src/hc-sr501pir_sensor.o
+ .debug_info    0x00000000000036fe      0x976 Src/main.o
+ .debug_info    0x0000000000004074      0x91c Src/sysmem.o
+ .debug_info    0x0000000000004990     0x127f Src/timers.o
+ .debug_info    0x0000000000005c0f     0x11f3 Src/usart.o
+ .debug_info    0x0000000000006e02       0x22 Startup/startup_stm32f103rbtx.o
 
 .debug_abbrev   0x0000000000000000     0x12db
  .debug_abbrev  0x0000000000000000      0x246 Src/esp8266_Firbase.o
@@ -1629,25 +1629,25 @@ OUTPUT(stm32-f103rb-cnss.elf elf32-littlearm)
  .debug_line    0x000000000000331e      0x7bb Src/usart.o
  .debug_line    0x0000000000003ad9       0x84 Startup/startup_stm32f103rbtx.o
 
-.debug_str      0x0000000000000000    0x59273
- .debug_str     0x0000000000000000    0x58503 Src/esp8266_Firbase.o
-                                      0x5883b (size before relaxing)
- .debug_str     0x0000000000058503       0x9e Src/event_queue.o
-                                      0x57288 (size before relaxing)
- .debug_str     0x00000000000585a1      0x407 Src/gpio_signal.o
-                                      0x5766f (size before relaxing)
- .debug_str     0x00000000000589a8      0x109 Src/hc-sr501pir_sensor.o
-                                      0x578d4 (size before relaxing)
- .debug_str     0x0000000000058ab1       0x13 Src/main.o
-                                      0x573c8 (size before relaxing)
- .debug_str     0x0000000000058ac4      0x4cc Src/sysmem.o
-                                       0x7b0e (size before relaxing)
- .debug_str     0x0000000000058f90      0x1b6 Src/timers.o
-                                      0x58aec (size before relaxing)
- .debug_str     0x0000000000059146       0xfc Src/usart.o
-                                      0x57899 (size before relaxing)
- .debug_str     0x0000000000059242       0x31 Startup/startup_stm32f103rbtx.o
-                                         0xa0 (size before relaxing)
+.debug_str      0x0000000000000000    0x5923c
+ .debug_str     0x0000000000000000    0x584cc Src/esp8266_Firbase.o
+                                      0x58804 (size before relaxing)
+ .debug_str     0x00000000000584cc       0x9e Src/event_queue.o
+                                      0x57258 (size before relaxing)
+ .debug_str     0x000000000005856a      0x407 Src/gpio_signal.o
+                                      0x5763f (size before relaxing)
+ .debug_str     0x0000000000058971      0x109 Src/hc-sr501pir_sensor.o
+                                      0x578a4 (size before relaxing)
+ .debug_str     0x0000000000058a7a       0x13 Src/main.o
+                                      0x57398 (size before relaxing)
+ .debug_str     0x0000000000058a8d      0x4cc Src/sysmem.o
+                                       0x7ade (size before relaxing)
+ .debug_str     0x0000000000058f59      0x1b6 Src/timers.o
+                                      0x58abc (size before relaxing)
+ .debug_str     0x000000000005910f       0xfc Src/usart.o
+                                      0x57869 (size before relaxing)
+ .debug_str     0x000000000005920b       0x31 Startup/startup_stm32f103rbtx.o
+                                         0x70 (size before relaxing)
 
 .comment        0x0000000000000000       0x7b
  .comment       0x0000000000000000       0x7b Src/esp8266_Firbase.o

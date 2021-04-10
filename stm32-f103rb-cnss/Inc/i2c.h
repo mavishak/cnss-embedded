@@ -11,6 +11,8 @@
 
 void init_i2c1(void);
 
+void test_communication(void);
+
 /*
  * device_address: the address of the slave.
  * mem_address: the address in the slave internal memory ??

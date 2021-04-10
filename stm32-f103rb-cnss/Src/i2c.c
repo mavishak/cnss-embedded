@@ -7,6 +7,11 @@
  *  CCR explaned:
  *  http://fastbitlab.com/stm32-i2c-lecture-12-i2c-serial-clock-settings-with-explanations/
  *
+ *
+ *  OV7670 git:
+ *  https://github.com/Ursadon/ov7670-stm32/blob/master/drivers/ov7670/ov7670.c
+ *  https://github.com/erikandre/stm32-ov7670/blob/master/src/OV7670_control.c
+ *
  */
 
 #include "stm32f103xb.h"
@@ -43,7 +48,6 @@ void init_i2c1(void){
 
 
 
-
 	/*Set I2C Configurations*/
 
 	/*Enable ACK*/
@@ -57,15 +61,16 @@ void init_i2c1(void){
 	I2C1->CR2 |= 0x0008; // set frequency to 8MHz same frequency as APB1
 
 	/*Set CCR register: http://fastbitlab.com/stm32-i2c-lecture-12-i2c-serial-clock-settings-with-explanations/
-	 *See: [reference manual 26.6.8], [datasheet p. 70 Table 41]
-	 *Reminder: T=1/f
-	 *??? Ask ???*/
+	 *See: [reference manual 26.6.8], [datasheet p. 59 Table 40]*/
+
+	/*Set CCR to generate 100kHz frequency in Sm mode (referance manual p. 782 "For intance"*/
+	I2C1->CCR = 0x0028;
+
 
 	/* Configure the rise time register: TRISE*/
 
-
-
-
+	/*Set TRISE to maximum allowed SCL rise time in Sm mode (referance manual p. 783 "For intance".*/
+	I2C1->TRISE = 0x0009;
 
 
 	/*Enable I2C peripheral (PE = 1)*/
@@ -74,23 +79,25 @@ void init_i2c1(void){
 
 
 
+
+
 	//_________________INITIAL CODE_________________________//
 	/*Enable io port B and AFIO clk to allow comunication */
-	RCC->APB2ENR |= RCC_APB2ENR_IOPBEN | RCC_APB2ENR_AFIOEN; //(see: Ref Manual p. 114) //RCC- enable AFIO??
+	//RCC->APB2ENR |= RCC_APB2ENR_IOPBEN | RCC_APB2ENR_AFIOEN; //(see: Ref Manual p. 114) //RCC- enable AFIO??
 
 	/*Enable I2C_2 clk*/
-	RCC->APB1ENR |= RCC_APB1ENR_I2C2EN; //(see: Ref Manual p. 115 + drawing on p.276)
+	//RCC->APB1ENR |= RCC_APB1ENR_I2C2EN; //(see: Ref Manual p. 115 + drawing on p.276)
 
 
 	//!--NVIC_EnableIRQ(I2C2_EV_IRQn);//enable interrupt line - not in use because we use DMA in Rx
 
 	/*FIX - NEED TO CACLCULATE!*/
-	I2C2->CR2 |= 36; //frequency value of APB1 buss=72/2=36 (Ref Manual p.774)
-	I2C2->CCR |= 180; //speed to 100kHz (standard mode max)
-	I2C2->TRISE |= 37; // period time 1000 ns/ (CR2 period =1/36MHz) = TRISE +1
+	//I2C2->CR2 |= 36; //frequency value of APB1 buss=72/2=36 (Ref Manual p.774)
+	//I2C2->CCR |= 180; //speed to 100kHz (standard mode max)
+	//I2C2->TRISE |= 37; // period time 1000 ns/ (CR2 period =1/36MHz) = TRISE +1
 	/*FIX - NEED TO CACLCULATE!*/
 
-	I2C2->CR1 |= I2C_CR1_ACK; //enable acknowledgement (Ref Manual p. 772)
+	//I2C2->CR1 |= I2C_CR1_ACK; //enable acknowledgement (Ref Manual p. 772)
 
 	//stretch mode enabled by default (Ref Manual p. 772)
 
@@ -101,18 +108,40 @@ void init_i2c1(void){
 	* configure to alternate function open drain mode (Ref Manual p. 168, Table 27 I2C ):
 	* PB10: I2C2_SCL ,PB11: I2C2_SDA (STM32 datasheet p. 30)
 	*/
-	GPIOB->CRH &= 0xFFFF00FF; // clean content in PB10, PB11 (see: Ref Manual p. 172, 9.2.2)
-	GPIOB->CRH |= 0x0000EE00; // set PB10 and PB11 to: Alternate function output Open-drain, max speed 2 MHz.
+	//GPIOB->CRH &= 0xFFFF00FF; // clean content in PB10, PB11 (see: Ref Manual p. 172, 9.2.2)
+	//GPIOB->CRH |= 0x0000EE00; // set PB10 and PB11 to: Alternate function output Open-drain, max speed 2 MHz.
 	//It doesn't seem we need to set GPIOB->ODR, but we saw someone do it so... ??? :Q (see: Ref Manual p. 161 Table 20)
 
 	/*Enable DMA Interupts*/
 	//I2C2->CR2 |= I2C_CR2_ITBUFEN; //enable corresponding interrupts (buffer interrupts)
 	//I2C2->CR2 |= I2C_CR2_ITEVTEN; //event interrupts
 
-	I2C2->CR1 |= I2C_CR1_PE; //enable peripheral needs to be done last (Ref Manual p. 772, 26.6.1)
+	//I2C2->CR1 |= I2C_CR1_PE; //enable peripheral needs to be done last (Ref Manual p. 772, 26.6.1)
 
 	//_________________INITIAL CODE_________________________//
 }
+
+void test_communication(void){
+
+	/*Generate start bit*/
+	I2C1->CR1 |= 0x0100; // (reference manual 26.6.1)
+
+	/*Wait until start condition is generated successfully*/
+
+	//Cleared by software by reading the SR1 register followed by writing the DR register
+	while((I2C1->SR1 & 0x0001) == 0x0001); // (refernce manual 26.6.6)
+
+	/*Send device address*/
+	I2C1->DR = (uint8_t)(43 & 0xFF);
+
+
+}
+
+
+
+
+
+
 
 
 //using regular flags (not DMA)
