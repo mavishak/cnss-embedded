@@ -10,6 +10,17 @@
 
 
 void init_i2c1(void);
+void I2C_start(uint8_t address);//, uint8_t direction);
+void I2C_write(uint8_t data);
+void I2C_stop();
+uint8_t I2C_read_nack(); //???
+
+
+
+
+
+
+
 
 void test_communication(void);
 

@@ -35,15 +35,15 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY, DEBUGGING
  15 .debug_ranges 00000280  00000000  00000000  00028508  2**3
                   CONTENTS, READONLY, DEBUGGING
- 16 .debug_macro  000111eb  00000000  00000000  00028788  2**0
+ 16 .debug_macro  000111f4  00000000  00000000  00028788  2**0
                   CONTENTS, READONLY, DEBUGGING
- 17 .debug_line   00003b5d  00000000  00000000  00039973  2**0
+ 17 .debug_line   00003b68  00000000  00000000  0003997c  2**0
                   CONTENTS, READONLY, DEBUGGING
- 18 .debug_str    0005923c  00000000  00000000  0003d4d0  2**0
+ 18 .debug_str    0005923c  00000000  00000000  0003d4e4  2**0
                   CONTENTS, READONLY, DEBUGGING
- 19 .comment      0000007b  00000000  00000000  0009670c  2**0
+ 19 .comment      0000007b  00000000  00000000  00096720  2**0
                   CONTENTS, READONLY
- 20 .debug_frame  00000d80  00000000  00000000  00096788  2**2
+ 20 .debug_frame  00000d80  00000000  00000000  0009679c  2**2
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -1058,6 +1058,7 @@ void init_queue()
 {
  800074c:	b480      	push	{r7}
  800074e:	af00      	add	r7, sp, #0
+	//write_usart2((uint8_t*)("<-init_queue->\r\n"));
 	queue.writeIndex = 0;
  8000750:	4b06      	ldr	r3, [pc, #24]	; (800076c <init_queue+0x20>)
  8000752:	2200      	movs	r2, #0
@@ -1087,12 +1088,14 @@ void add_event(Handler handler)
  8000774:	af00      	add	r7, sp, #0
  8000776:	6078      	str	r0, [r7, #4]
 
-	if(queue_isFull())
+	if(queue_isFull()){
  8000778:	f000 f844 	bl	8000804 <queue_isFull>
  800077c:	4603      	mov	r3, r0
  800077e:	2b00      	cmp	r3, #0
  8000780:	d113      	bne.n	80007aa <add_event+0x3a>
+		//write_usart2((uint8_t*)("\r\n<-queue is full->\r\n"));
 		return;
+	}
 
 	queue.eq[queue.writeIndex].handler = handler;
  8000782:	4b0c      	ldr	r3, [pc, #48]	; (80007b4 <add_event+0x44>)
@@ -1122,6 +1125,8 @@ void add_event(Handler handler)
 		return;
  80007aa:	bf00      	nop
 
+	//write_usart2((uint8_t*)("\r\n<-queue add event->\r\n"));
+
 }
  80007ac:	3708      	adds	r7, #8
  80007ae:	46bd      	mov	sp, r7
@@ -1144,6 +1149,7 @@ void *do_event()
  80007c2:	4603      	mov	r3, r0
  80007c4:	2b00      	cmp	r3, #0
  80007c6:	d001      	beq.n	80007cc <do_event+0x14>
+		//write_usart2((uint8_t*)("\r\n<-queue is empty->\r\n"));
 		return NULL;
  80007c8:	2300      	movs	r3, #0
  80007ca:	e014      	b.n	80007f6 <do_event+0x3e>
@@ -1174,6 +1180,8 @@ void *do_event()
  80007ee:	4b04      	ldr	r3, [pc, #16]	; (8000800 <do_event+0x48>)
  80007f0:	2200      	movs	r2, #0
  80007f2:	62da      	str	r2, [r3, #44]	; 0x2c
+
+   //write_usart2((uint8_t*)("\r\n<-queue do event->\r\n"));
 
    return res;
  80007f4:	687b      	ldr	r3, [r7, #4]
@@ -1618,24 +1626,26 @@ int main(void)
 	//init_interrupt();
 	/*FOR TESTING*/
 
+	init_usart2(); // for debugging
+ 8000a60:	f000 fa0c 	bl	8000e7c <init_usart2>
+
+	write_usart2((uint8_t*)("\r\n_______________\r\n"));//For test
+ 8000a64:	4806      	ldr	r0, [pc, #24]	; (8000a80 <main+0x24>)
+ 8000a66:	f000 fabb 	bl	8000fe0 <write_usart2>
+
 	init_queue();
- 8000a60:	f7ff fe74 	bl	800074c <init_queue>
+ 8000a6a:	f7ff fe6f 	bl	800074c <init_queue>
 	init_sensor_with_interrupt();
- 8000a64:	f7ff ffa0 	bl	80009a8 <init_sensor_with_interrupt>
+ 8000a6e:	f7ff ff9b 	bl	80009a8 <init_sensor_with_interrupt>
 	//init_sensor_led_response();
-	init_usart2(); // for dbugging
- 8000a68:	f000 fa08 	bl	8000e7c <init_usart2>
 
 	//init_timer2();
 	//init_timer3();
 	init_timer4();
- 8000a6c:	f000 f8a0 	bl	8000bb0 <init_timer4>
+ 8000a72:	f000 f89d 	bl	8000bb0 <init_timer4>
 
 	init_usart1(); // for ESP8266
- 8000a70:	f000 fa38 	bl	8000ee4 <init_usart1>
-	write_usart2((uint8_t*)("\r\n_______________\r\n"));//For test
- 8000a74:	4802      	ldr	r0, [pc, #8]	; (8000a80 <main+0x24>)
- 8000a76:	f000 fab3 	bl	8000fe0 <write_usart2>
+ 8000a76:	f000 fa35 	bl	8000ee4 <init_usart1>
 
 
 	while(1)

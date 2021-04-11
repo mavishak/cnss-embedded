@@ -164,6 +164,7 @@ Discarded input sections
  .group         0x0000000000000000        0xc Src/event_queue.o
  .group         0x0000000000000000        0xc Src/event_queue.o
  .group         0x0000000000000000        0xc Src/event_queue.o
+ .group         0x0000000000000000        0xc Src/event_queue.o
  .text          0x0000000000000000        0x0 Src/event_queue.o
  .data          0x0000000000000000        0x0 Src/event_queue.o
  .bss           0x0000000000000000        0x0 Src/event_queue.o
@@ -499,6 +500,7 @@ Discarded input sections
  .debug_macro   0x0000000000000000      0x32a Src/main.o
  .debug_macro   0x0000000000000000       0x16 Src/main.o
  .debug_macro   0x0000000000000000       0x29 Src/main.o
+ .debug_macro   0x0000000000000000       0x16 Src/main.o
  .debug_macro   0x0000000000000000       0x46 Src/main.o
  .group         0x0000000000000000        0xc Src/syscalls.o
  .group         0x0000000000000000        0xc Src/syscalls.o
@@ -1558,7 +1560,7 @@ OUTPUT(stm32-f103rb-cnss.elf elf32-littlearm)
  .debug_ranges  0x00000000000001f8       0x68 Src/usart.o
  .debug_ranges  0x0000000000000260       0x20 Startup/startup_stm32f103rbtx.o
 
-.debug_macro    0x0000000000000000    0x111eb
+.debug_macro    0x0000000000000000    0x111f4
  .debug_macro   0x0000000000000000      0x2bd Src/esp8266_Firbase.o
  .debug_macro   0x00000000000002bd       0x46 Src/esp8266_Firbase.o
  .debug_macro   0x0000000000000303       0x22 Src/esp8266_Firbase.o
@@ -1606,34 +1608,34 @@ OUTPUT(stm32-f103rb-cnss.elf elf32-littlearm)
  .debug_macro   0x0000000000010136       0x3d Src/esp8266_Firbase.o
  .debug_macro   0x0000000000010173       0x16 Src/esp8266_Firbase.o
  .debug_macro   0x0000000000010189      0x145 Src/esp8266_Firbase.o
- .debug_macro   0x00000000000102ce      0x18b Src/event_queue.o
- .debug_macro   0x0000000000010459      0x19d Src/gpio_signal.o
- .debug_macro   0x00000000000105f6      0x1b8 Src/hc-sr501pir_sensor.o
- .debug_macro   0x00000000000107ae       0x10 Src/hc-sr501pir_sensor.o
- .debug_macro   0x00000000000107be      0x1c3 Src/main.o
- .debug_macro   0x0000000000010981       0x16 Src/main.o
- .debug_macro   0x0000000000010997      0x1ae Src/sysmem.o
- .debug_macro   0x0000000000010b45      0x23b Src/sysmem.o
- .debug_macro   0x0000000000010d80       0x16 Src/sysmem.o
- .debug_macro   0x0000000000010d96      0x289 Src/timers.o
- .debug_macro   0x000000000001101f      0x1cc Src/usart.o
+ .debug_macro   0x00000000000102ce      0x194 Src/event_queue.o
+ .debug_macro   0x0000000000010462       0x16 Src/event_queue.o
+ .debug_macro   0x0000000000010478      0x19d Src/gpio_signal.o
+ .debug_macro   0x0000000000010615      0x1b8 Src/hc-sr501pir_sensor.o
+ .debug_macro   0x00000000000107cd       0x10 Src/hc-sr501pir_sensor.o
+ .debug_macro   0x00000000000107dd      0x1c3 Src/main.o
+ .debug_macro   0x00000000000109a0      0x1ae Src/sysmem.o
+ .debug_macro   0x0000000000010b4e      0x23b Src/sysmem.o
+ .debug_macro   0x0000000000010d89       0x16 Src/sysmem.o
+ .debug_macro   0x0000000000010d9f      0x289 Src/timers.o
+ .debug_macro   0x0000000000011028      0x1cc Src/usart.o
 
-.debug_line     0x0000000000000000     0x3b5d
+.debug_line     0x0000000000000000     0x3b68
  .debug_line    0x0000000000000000      0x95d Src/esp8266_Firbase.o
- .debug_line    0x000000000000095d      0x679 Src/event_queue.o
- .debug_line    0x0000000000000fd6      0x711 Src/gpio_signal.o
- .debug_line    0x00000000000016e7      0x718 Src/hc-sr501pir_sensor.o
- .debug_line    0x0000000000001dff      0x67c Src/main.o
- .debug_line    0x000000000000247b      0x559 Src/sysmem.o
- .debug_line    0x00000000000029d4      0x94a Src/timers.o
- .debug_line    0x000000000000331e      0x7bb Src/usart.o
- .debug_line    0x0000000000003ad9       0x84 Startup/startup_stm32f103rbtx.o
+ .debug_line    0x000000000000095d      0x684 Src/event_queue.o
+ .debug_line    0x0000000000000fe1      0x711 Src/gpio_signal.o
+ .debug_line    0x00000000000016f2      0x718 Src/hc-sr501pir_sensor.o
+ .debug_line    0x0000000000001e0a      0x67c Src/main.o
+ .debug_line    0x0000000000002486      0x559 Src/sysmem.o
+ .debug_line    0x00000000000029df      0x94a Src/timers.o
+ .debug_line    0x0000000000003329      0x7bb Src/usart.o
+ .debug_line    0x0000000000003ae4       0x84 Startup/startup_stm32f103rbtx.o
 
 .debug_str      0x0000000000000000    0x5923c
  .debug_str     0x0000000000000000    0x584cc Src/esp8266_Firbase.o
                                       0x58804 (size before relaxing)
  .debug_str     0x00000000000584cc       0x9e Src/event_queue.o
-                                      0x57258 (size before relaxing)
+                                      0x572f9 (size before relaxing)
  .debug_str     0x000000000005856a      0x407 Src/gpio_signal.o
                                       0x5763f (size before relaxing)
  .debug_str     0x0000000000058971      0x109 Src/hc-sr501pir_sensor.o

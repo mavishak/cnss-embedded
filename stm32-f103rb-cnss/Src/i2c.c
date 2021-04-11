@@ -121,18 +121,64 @@ void init_i2c1(void){
 	//_________________INITIAL CODE_________________________//
 }
 
-void test_communication(void){
+
+/*Device address 0x42 for write, 0x43 for read [OV7670 datasheet p. 12]*/
+void I2C_start(uint8_t address){//, uint8_t direction){
+
+	/*wait while communication ongoing [reference manual 26.6.7]*/
+	while((I2C1->SR2 & 0x0002) == 0x0002); // BUSY bit
 
 	/*Generate start bit*/
 	I2C1->CR1 |= 0x0100; // (reference manual 26.6.1)
 
-	/*Wait until start condition is generated successfully*/
+	/*Wait until start condition is generated successfully [refernce manual 26.6.6]*/
+	while((I2C1->SR1 & 0x0001) == 0x0001); // SB bit
+	//should this be != ??
 
-	//Cleared by software by reading the SR1 register followed by writing the DR register
-	while((I2C1->SR1 & 0x0001) == 0x0001); // (refernce manual 26.6.6)
+	//SB=1: Cleared by software by reading the SR1 register followed by writing the DR register
 
-	/*Send device address*/
-	I2C1->DR = (uint8_t)(43 & 0xFF);
+	/*Write address*/
+	I2C1->DR = (uint8_t)(device_address & 0xFF);
+
+	/*Wait until address is recieved and matched [refernce manual 26.6.6]*/
+	while(!(I2C1->SR1 & 0x0002) == 0x0002); // ADDR bit
+
+	//ADDER=1: Cleared by software reading SR1 register followed reading SR2
+
+	temp = I2C1->SR2;
+}
+
+
+/*Note: data can be mem_address [first column in OV7670 datasheet Table 5]*/
+void I2C_write(uint8_t data){
+
+	/*Send data*/
+	I2C2->DR = (uint8_t)(data & 0xFF);
+
+	/*Wait data to be received*/
+	while((I2C2->SR1 & 0x0080) == 0x0080); //TXE bit
+
+	//Cleared by software writing to the DR register (referance manual 26.26.6)
+}
+
+
+void I2C_stop(){
+
+	/*Generate stop condition*/
+	I2C2->CR1 |= 0x0200;//(reference manual 26.6.1)
+}
+
+uint8_t I2C_read_nack(){
+	//?????
+}
+
+
+
+
+
+
+
+void test_communication(void){
 
 
 }

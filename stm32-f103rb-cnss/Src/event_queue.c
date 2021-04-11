@@ -21,6 +21,7 @@
  * */
 
 #include "event_queue.h"
+#include "usart.h"
 
 
 static Queue queue;
@@ -28,6 +29,7 @@ static Queue queue;
 
 void init_queue()
 {
+	//write_usart2((uint8_t*)("<-init_queue->\r\n"));
 	queue.writeIndex = 0;
 	queue.readIndex = 0;
 	queue.accept = GO;
@@ -37,8 +39,10 @@ void init_queue()
 void add_event(Handler handler)
 {
 
-	if(queue_isFull())
+	if(queue_isFull()){
+		//write_usart2((uint8_t*)("\r\n<-queue is full->\r\n"));
 		return;
+	}
 
 	queue.eq[queue.writeIndex].handler = handler;
 
@@ -46,6 +50,8 @@ void add_event(Handler handler)
 		queue.writeIndex++;
 	else
 		queue.writeIndex = 0;
+
+	//write_usart2((uint8_t*)("\r\n<-queue add event->\r\n"));
 
 }
 
@@ -55,6 +61,7 @@ void *do_event()
 	void *res;
 
 	if(queue_isEmpty()){
+		//write_usart2((uint8_t*)("\r\n<-queue is empty->\r\n"));
 		return NULL;
 	}
 
@@ -64,6 +71,8 @@ void *do_event()
       queue.readIndex++;
    else
       queue.readIndex = 0;
+
+   //write_usart2((uint8_t*)("\r\n<-queue do event->\r\n"));
 
    return res;
 

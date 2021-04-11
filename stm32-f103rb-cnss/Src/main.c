@@ -49,17 +49,20 @@ int main(void)
 	//init_interrupt();
 	/*FOR TESTING*/
 
+	init_usart2(); // for debugging
+
+	write_usart2((uint8_t*)("\r\n_______________\r\n"));//For test
+
 	init_queue();
 	init_sensor_with_interrupt();
 	//init_sensor_led_response();
-	init_usart2(); // for dbugging
 
 	//init_timer2();
 	//init_timer3();
 	init_timer4();
 
 	init_usart1(); // for ESP8266
-	write_usart2((uint8_t*)("\r\n_______________\r\n"));//For test
+
 
 	//if(recordAlert()){
 	//	write_usart2((uint8_t*)(":)\r\n"));
