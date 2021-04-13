@@ -378,21 +378,24 @@ Discarded input sections
  .data          0x0000000000000000        0x0 Src/i2c.o
  .bss           0x0000000000000000        0x0 Src/i2c.o
  .bss.temp      0x0000000000000000        0x4 Src/i2c.o
- .bss.i2c_buff  0x0000000000000000        0x4 Src/i2c.o
  .text.init_i2c1
                 0x0000000000000000       0x94 Src/i2c.o
- .text.test_communication
+ .text.I2C_start
+                0x0000000000000000       0x60 Src/i2c.o
+ .text.I2C_write
                 0x0000000000000000       0x30 Src/i2c.o
- .text.i2c_write
-                0x0000000000000000       0xa0 Src/i2c.o
- .text.i2c_read
-                0x0000000000000000       0xe4 Src/i2c.o
- .debug_info    0x0000000000000000      0xc01 Src/i2c.o
- .debug_abbrev  0x0000000000000000      0x1c0 Src/i2c.o
+ .text.I2C_stop
+                0x0000000000000000       0x1c Src/i2c.o
+ .text.I2C_read_nack
+                0x0000000000000000       0x20 Src/i2c.o
+ .text.test_communication
+                0x0000000000000000        0xc Src/i2c.o
+ .debug_info    0x0000000000000000      0xb64 Src/i2c.o
+ .debug_abbrev  0x0000000000000000      0x1ee Src/i2c.o
  .debug_aranges
-                0x0000000000000000       0x38 Src/i2c.o
- .debug_ranges  0x0000000000000000       0x28 Src/i2c.o
- .debug_macro   0x0000000000000000      0x242 Src/i2c.o
+                0x0000000000000000       0x48 Src/i2c.o
+ .debug_ranges  0x0000000000000000       0x38 Src/i2c.o
+ .debug_macro   0x0000000000000000      0x24c Src/i2c.o
  .debug_macro   0x0000000000000000      0xa66 Src/i2c.o
  .debug_macro   0x0000000000000000       0x22 Src/i2c.o
  .debug_macro   0x0000000000000000       0x22 Src/i2c.o
@@ -434,9 +437,9 @@ Discarded input sections
  .debug_macro   0x0000000000000000       0x16 Src/i2c.o
  .debug_macro   0x0000000000000000      0x145 Src/i2c.o
  .debug_line    0x0000000000000000      0x75a Src/i2c.o
- .debug_str     0x0000000000000000    0x583eb Src/i2c.o
+ .debug_str     0x0000000000000000    0x583b6 Src/i2c.o
  .comment       0x0000000000000000       0x7c Src/i2c.o
- .debug_frame   0x0000000000000000       0xa4 Src/i2c.o
+ .debug_frame   0x0000000000000000       0xe0 Src/i2c.o
  .ARM.attributes
                 0x0000000000000000       0x33 Src/i2c.o
  .group         0x0000000000000000        0xc Src/main.o
