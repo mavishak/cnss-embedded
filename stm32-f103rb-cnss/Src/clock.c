@@ -9,6 +9,7 @@
 //#include "system_stm32f1xx.h"
 
 
+/*This function should be called before any other function in this project*/
 void set_sys_clock_to_32MHz(void){
 
 
@@ -28,11 +29,9 @@ void set_sys_clock_to_32MHz(void){
 	 Once the PLL is enabled, these parameters
 	 can not be changed.
 
-	 ???
 	 When changing the entry clock source of the main PLL, the original clock source must be
 	 switched off only after the selection of the new clock source (done through bit PLLSRC in
 	 the Clock configuration register (RCC_CFGR)).
-	 ???
 
 	 [reference manual p. 130 section 8.2.6]::System clock
 
@@ -77,7 +76,24 @@ void set_sys_clock_to_32MHz(void){
 	//The function evaluates the clock register settings and calculates the current core clock.
 
 
+}
 
+
+void init_MCO(void){
+
+	/*Enable Port A RCC clock (PA8 corresponds to MCO) [Datasheet p. 31 Table 5.] */
+	RCC->APB2ENR |= 0x00000004; // set IOPAEN [reference manual section 8.3.7]
+
+	/*Clock enable AFIO*/
+	RCC->APB2ENR |= 0x00000001; // set AFIOEN [reference manual section 8.3.7]
+
+	/*Configure PA8 as Alternate function mode push pull [reference manual p. 170 Table 33.]*/
+	GPIOA->CRH &= 0xFFFFFFF0; // reset CNF8 and MODE8 [reference manual 9.2.2]
+	GPIOA->CRH |= 0x0000000A; // set PA8 as Alternate function push-pull | frequency of 2 MHz
+
+	/*Set clock src for Microcontorller clock output (MCO) [refernce manual section 8.3.2 p. 135]*/
+	RCC->CFGR &= F0FFFFFF; // reset MCO
+	RCC->CFGR |= 04000000; // 0100: System clock (SYSCLK) selected
 
 }
 

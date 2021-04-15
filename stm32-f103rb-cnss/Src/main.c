@@ -46,6 +46,7 @@
 int main(void)
 {
 	set_sys_clock_to_32MHz();
+	init_MCO();
 
 	/*FOR TESTING*/
 	//init_queue();
