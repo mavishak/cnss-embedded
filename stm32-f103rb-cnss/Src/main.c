@@ -34,6 +34,8 @@
 #include "timers.h"
 #include "common.h"
 
+#include "clock.h"
+
 
 /*FOR TESTING*/
 //#include "event_queue.h"
@@ -43,6 +45,7 @@
 
 int main(void)
 {
+	set_sys_clock_to_32MHz();
 
 	/*FOR TESTING*/
 	//init_queue();

@@ -6,6 +6,7 @@
  */
 
 #include "stm32f103xb.h"
+//#include "system_stm32f1xx.h"
 
 
 void set_sys_clock_to_32MHz(void){
@@ -70,8 +71,12 @@ void set_sys_clock_to_32MHz(void){
 
 	while((RCC->CFGR & 0x00000008) != 0x00000008); // wait while system clock is not PLL: SWS != 10
 
-	SystemCoreClockUpdate();//must be called whenever the core clock is changed during program execution.
+
+	//THIS FUNCTION IS NOT ALLOWING BUILD - WE DON"T KNOW IF IT IS REALY NEEDED
+	//SystemCoreClockUpdate();//must be called whenever the core clock is changed during program execution.
 	//The function evaluates the clock register settings and calculates the current core clock.
+
+
 
 
 }
