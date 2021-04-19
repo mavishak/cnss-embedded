@@ -138,16 +138,16 @@ uint8_t I2C1_Read1Byte(uint8_t DeviceAddr, uint8_t addr){
 	/*generate START [reference manual p. 760 | Figure 273. [S]]*/
 	I2C1->CR1 |= 0x0100; // START bit [reference manual 26.6.1]
 
-	/*wait EV5: wait until start condition arrived [refernce manual p. 760 | Figure 273. [EV5]]*/
-	while((I2C1->SR1 & 0x0001) == 0x0001); // SB bit [reference manual 26.6.6]
+	/*wait EV5: wait until start condition generated [reference manual p. 760 | Figure 273. [EV5]]*/
+	while((I2C1->SR1 & 0x0001) != 0x0001); // SB bit [reference manual 26.6.6]
 
 	//SB=1: Cleared by software by reading the SR1 register followed by writing the DR register
 
-	/*send device addr [refernce manual p. 760 | Figure 273. [EV5]]*/
+	/*send device addr [reference manual p. 760 | Figure 273. [EV5]]*/
 	I2C1->DR = (uint8_t)((DeviceAddr & ~(0x01))); // [reference manual p. 759 'To enter Transmitter mode']
 
-	/*wait EV6: wait until address is recieved and matched [refernce manual p. 760 | Figure 273. [EV6]]*/
-	while((I2C1->SR1 & 0x0002) != 0x0002); // ADDR bit [refernce manual 26.6.6]
+	/*wait EV6: wait until address is received and matched [reference manual p. 760 | Figure 273. [EV6]]*/
+	while((I2C1->SR1 & 0x0002) != 0x0002); // ADDR bit [reference manual 26.6.6]
 
 	//ADDER=1: Cleared by software reading SR1 register followed reading SR2
 
@@ -168,10 +168,10 @@ uint8_t I2C1_Read1Byte(uint8_t DeviceAddr, uint8_t addr){
 	/*generate START [reference manual p. 761 | Figure 274. [S]]*/
 	I2C1->CR1 |= 0x0100; // START bit [reference manual 26.6.1]
 
-	/*wait EV5: wait until start condition arrived [refernce manual p. 761 | Figure 274. [EV5]]*/
+	/*wait EV5: wait until start condition arrived [reference manual p. 761 | Figure 274. [EV5]]*/
 	while((I2C1->SR1 & 0x0001) == 0x0001); // SB bit [reference manual 26.6.6]
 
-	/*send device addr [refernce manual p. 760 | Figure 273. [EV5]]*/
+	/*send device addr [reference manual p. 760 | Figure 273. [EV5]]*/
 	I2C1->DR = (uint8_t)((DeviceAddr | 0x01)); // [reference manual p. 759 'To enter Receiver mode']
 
 	/*wait EV6: wait until address is recieved and matched [refernce manual p. 761 | Figure 274. [EV6]]*/

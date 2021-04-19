@@ -33,7 +33,7 @@
 #include "esp8266_WiFi.h" //for testing usart1...
 #include "timers.h"
 #include "common.h"
-
+#include "i2c.h"
 #include "clock.h"
 
 
@@ -61,7 +61,7 @@ int main(void)
 	init_sensor_with_interrupt();
 	//init_sensor_led_response();
 
-	//init_timer2();
+	init_timer2();//for testing i2c
 	//init_timer3();
 	init_timer4();
 
@@ -75,11 +75,26 @@ int main(void)
 	//	write_usart2((uint8_t*)(":(\r\n"));
 	//}
 
+	init_i2c1();
+
 
 	while(1)
 	{
+		/*Testing I2C with camera module*/
+		if(I2C1_Read1Byte(0x43, 0x0A) == 0x76)
+		{
+			write_usart2((uint8_t*)("\r\nI2C Test Pass\r\n"));//For test
+		}
+		else
+		{
+			write_usart2((uint8_t*)("\r\nI2C Test Failed\r\n"));//For test
+		}
+		delay_with_timer2(500);//0.5 second
+
+		/*Testing I2C with camera module*/
+
 		/*FOR TESTING*/
-		do_event();
+		//do_event();
 		/*FOR TESTING*/
 
 		//if(recordAlert()){
