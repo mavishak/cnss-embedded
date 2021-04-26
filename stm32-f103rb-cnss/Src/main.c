@@ -38,34 +38,33 @@
 
 
 /*FOR TESTING*/
-//#include "event_queue.h"
 //#include "gpio_signal.h" /*for testing*/
 /*FOR TESTING*/
 
 
 int main(void)
 {
-	set_sys_clock_to_32MHz();
+	//set_sys_clock_to_32MHz();
 	init_MCO();
 
-	/*FOR TESTING*/
-	//init_queue();
-	//init_interrupt();
-	/*FOR TESTING*/
-
+//	/*FOR TESTING*/
+//	init_queue();
+//	//init_interrupt();
+//	/*FOR TESTING*/
+//
 	init_usart2(); // for debugging
-
+//
 	write_usart2((uint8_t*)("\r\n_______________\r\n"));//For test
-
-	init_queue();
-	init_sensor_with_interrupt();
-	//init_sensor_led_response();
-
+//
+//	init_queue();
+//	init_sensor_with_interrupt();
+//	//init_sensor_led_response();
+//
 	init_timer2();//for testing i2c
-	//init_timer3();
-	init_timer4();
-
-	init_usart1(); // for ESP8266
+//	//init_timer3();
+//	init_timer4();
+//
+//	init_usart1(); // for ESP8266
 
 
 	//if(recordAlert()){
@@ -94,18 +93,18 @@ int main(void)
 		/*Testing I2C with camera module*/
 
 		/*FOR TESTING*/
-		//do_event();
+//		do_event();
 		/*FOR TESTING*/
 
-		//if(recordAlert()){
-		//	write_usart2((uint8_t*)(":)\r\n"));
-		//}
-		//else{
-		//	write_usart2((uint8_t*)(":(\r\n"));
-		//}
-		//
-		//write_usart2((uint8_t*)("\r\n.....................\r\n"));
-		//write_usart2((uint8_t*)("\r\n\r\n"));
+//		if(recordAlert()){
+//			write_usart2((uint8_t*)(":)\r\n"));
+//		}
+//		else{
+//			write_usart2((uint8_t*)(":(\r\n"));
+//		}
+//
+//		write_usart2((uint8_t*)("\r\n.....................\r\n"));
+//		write_usart2((uint8_t*)("\r\n\r\n"));
 
 	}
 }

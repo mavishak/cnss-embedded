@@ -89,10 +89,12 @@ void init_MCO(void){
 
 	/*Configure PA8 as Alternate function mode push pull [reference manual p. 170 Table 33.]*/
 	GPIOA->CRH &= 0xFFFFFFF0; // reset CNF8 and MODE8 [reference manual 9.2.2]
-	GPIOA->CRH |= 0x0000000A; // set PA8 as Alternate function push-pull | frequency of 2 MHz
+	GPIOA->CRH |= 0x0000000B; // set PA8 (data sheet p.31) as Alternate function push-pull | frequency of 50 MHz
 
 	/*Set clock src for Microcontorller clock output (MCO) [refernce manual section 8.3.2 p. 135]*/
-	RCC->CFGR &= 0xF0FFFFFF; // reset MCO
+	RCC->CFGR &= 0xF8FFFFFF; // reset MCO
+
+//	RCC->CFGR |= 0x07000000; //  Pllclk/2 selected
 	RCC->CFGR |= 0x04000000; // 0100: System clock (SYSCLK) selected
 
 }

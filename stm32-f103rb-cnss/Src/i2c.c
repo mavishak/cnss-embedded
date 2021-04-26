@@ -46,8 +46,11 @@ void init_i2c1(void){
 
 	/*Set SCL (PB6) and SDA (PB7) [reference manual p. 168 Table  27]*/
 	GPIOB->CRL &= 0x00FFFFFF; // reset relevent bits [reference manual 9.2.1]
-	GPIOB->CRL |= 0xEE000000; // set as Alternate function output Open-drain, max speed 2 MHz.
+//	GPIOB->CRL |= 0xEE000000; // set as Alternate function output Open-drain, max speed 2 MHz.
+	GPIOB->CRL |= 0x55000000; // set as General purpose open drain, max speed 2 MHz.//For Debug
 
+	GPIOB->ODR |= 0x000000C0;//set
+	GPIOB->ODR &= ~(0x000000C0);//reset
 
 
 	//Set I2C Configurations
