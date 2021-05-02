@@ -25,7 +25,8 @@ void enable_timer3(void);
 void disable_timer3(void);
 void delay_with_timer3(uint32_t num_of_millis);
 BOOL timeout_with_timer3(uint32_t num_of_millis);
-
+void set_timeout_timer3(uint32_t num_of_millis);//added 1.5.21
+BOOL timeout_done_timer3(void);//added 1.5.21
 
 //Timer 4
 void init_timer4(void);

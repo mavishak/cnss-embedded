@@ -45,26 +45,26 @@
 int main(void)
 {
 	//set_sys_clock_to_32MHz();
-	init_MCO();
+	//init_MCO();
 
-//	/*FOR TESTING*/
-//	init_queue();
-//	//init_interrupt();
-//	/*FOR TESTING*/
-//
+	/*FOR TESTING*/
+	init_queue();
+	//init_interrupt();
+	/*FOR TESTING*/
+
 	init_usart2(); // for debugging
-//
-	write_usart2((uint8_t*)("\r\n_______________\r\n"));//For test
+
 //
 //	init_queue();
-//	init_sensor_with_interrupt();
+	init_sensor_with_interrupt();
 //	//init_sensor_led_response();
 //
-	init_timer2();//for testing i2c
-//	//init_timer3();
-//	init_timer4();
-//
-//	init_usart1(); // for ESP8266
+	//init_timer2();//for testing i2c
+
+	init_timer3();//for sensor delay
+	init_timer4();//for ESP8266 timeout
+
+	init_usart1(); // for ESP8266
 
 
 	//if(recordAlert()){
@@ -74,26 +74,26 @@ int main(void)
 	//	write_usart2((uint8_t*)(":(\r\n"));
 	//}
 
-	init_i2c1();
+	//init_i2c1();
+	write_usart2((uint8_t*)("\r\n_______________\r\n"));//For test
 
 
 	while(1)
 	{
 		/*Testing I2C with camera module*/
-		if(I2C1_Read1Byte(0x43, 0x0A) == 0x76)
-		{
-			write_usart2((uint8_t*)("\r\nI2C Test Pass\r\n"));//For test
-		}
-		else
-		{
-			write_usart2((uint8_t*)("\r\nI2C Test Failed\r\n"));//For test
-		}
-		delay_with_timer2(500);//0.5 second
-
+//		if(I2C1_Read1Byte(0x43, 0x0A) == 0x76)
+//		{
+//			write_usart2((uint8_t*)("\r\nI2C Test Pass\r\n"));//For test
+//		}
+//		else
+//		{
+//			write_usart2((uint8_t*)("\r\nI2C Test Failed\r\n"));//For test
+//		}
+//		delay_with_timer2(500);//0.5 second
 		/*Testing I2C with camera module*/
 
 		/*FOR TESTING*/
-//		do_event();
+		do_event();
 		/*FOR TESTING*/
 
 //		if(recordAlert()){

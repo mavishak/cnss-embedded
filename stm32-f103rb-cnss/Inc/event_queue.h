@@ -13,7 +13,7 @@
 #include "stm32f103xb.h" //this file is included to every header file
 #include <stdlib.h>
 #include "common.h"
-#define QUEUE_SIZE 10 //128
+#define QUEUE_SIZE 10//64 //128
 
 enum mode { GO, STOP };
 

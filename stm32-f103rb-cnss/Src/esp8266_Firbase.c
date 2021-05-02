@@ -53,7 +53,7 @@ static uint32_t content_len = 0 ;
 
 static uint8_t image_path[PATH_SIZE];
 
-
+static BOOL connection_closed;//added 30.4.21
 
 
 void setImagePath(void){
@@ -65,7 +65,8 @@ void setImagePath(void){
 void *alert_Handler(void){
 
 	uint32_t i  = 3;
-	while(i > 0 && !recordAlert()){
+	//while(i > 0 && !recordAlert() ){ //original line (until 30.4.21)
+	while(i > 0  && !recordAlert() && connection_closed){ //added 30.4.21
 		i--;
 	}
 	return NULL;
@@ -74,11 +75,12 @@ void *alert_Handler(void){
 }
 
 
-/*This function sends an alert to realtime DB in containig the time of the alert firebase
- * before useing this function
+/*This function sends an alert to realtime DB in containing the time of the alert firebase
+ * before using this function
  * init_usart1(), init_usart2() and init_timer4() must be executed.*/
 BOOL recordAlert(void){
 
+	connection_closed = TRUE;//added 30.4.21
 
 	//Reset ESP8266
 //	if(!reset(3,1)){ //!TODO THIS FUNCTIONALITY NEEDS FIXING!!!
@@ -121,14 +123,16 @@ BOOL recordAlert(void){
 
 	//Send number of data bytes
 	if(!sendRequest(3,3,30,60)){
-		closeCunnection(3,3);
+		//closeCunnection(3,3);//original line (until 30.4.21)
+		connection_closed = closeCunnection(3,3);//added 30.4.21
 		return FALSE;
 	}
 	write_usart2((uint8_t*)"6\r\n");
 
 	//Read response
 	if(!readResponse(180)){//timeout set t0 3 minutes
-		closeCunnection(3,3);
+		//closeCunnection(3,3);//original line (until 30.4.21)
+		connection_closed = closeCunnection(3,3);//added 30.4.21
 		return FALSE;
 	}
 

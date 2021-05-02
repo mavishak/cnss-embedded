@@ -14,6 +14,11 @@ static TIMER timer2;
 static TIMER timer3;
 static TIMER timer4;
 
+
+static uint32_t num_of_millis_timer3;//added 1.5.21
+
+
+
 /*init's timer2 to  interrupt once a milli second when enabled*/
 void init_timer2(void){
 
@@ -82,6 +87,8 @@ void init_timer3(void){
 	timer3.timeout_count = 0;
 	timer3.delay = FALSE;
 	timer3.timeout = FALSE;
+
+	num_of_millis_timer3 = 0;//added 1.5.21
 }
 
 /*init's timer4 to  interrupt once a second when enabled*/
@@ -258,6 +265,32 @@ BOOL timeout_with_timer4(uint32_t num_of_sec)
 	else{
 		return FALSE;
 	}
+}
+
+
+/*This function sets timer3 num_of_millis_timer3 to param num_of_millis, and enables timer3 timeout*/
+void set_timeout_timer3(uint32_t num_of_millis)//added 1.5.21
+{
+	enable_timer3();
+
+	timer3.timeout = TRUE;
+	num_of_millis_timer3 = num_of_millis;
+}
+/*returns true if timeout is done, otherwise returns false*/
+BOOL timeout_done_timer3(void){//added 1.5.21
+
+	if(timer3.timeout_count >= num_of_millis_timer3){
+			if(!timer3.delay){
+				disable_timer3();
+			}
+			timer3.timeout = FALSE;
+			timer3.timeout_count = 0;
+			num_of_millis_timer3 = 0;
+			return TRUE;
+		}
+		else{
+			return FALSE;
+		}
 }
 
 
