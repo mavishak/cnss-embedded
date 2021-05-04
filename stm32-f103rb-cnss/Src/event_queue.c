@@ -56,6 +56,7 @@ void add_event(Handler handler)
 }
 
 
+
 void *do_event()
 {
 	void *res;
@@ -66,6 +67,8 @@ void *do_event()
 	}
 
    res = queue.eq[queue.readIndex].handler();
+   queue.eq[queue.readIndex].handler = NULL; // cleanup
+
 
    if(queue.readIndex < (QUEUE_SIZE - 1))//changed from < QUEUE_SIZE
       queue.readIndex++;

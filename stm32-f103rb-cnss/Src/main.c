@@ -47,18 +47,11 @@ int main(void)
 	//set_sys_clock_to_32MHz();
 	//init_MCO();
 
-	/*FOR TESTING*/
-	init_queue();
-	//init_interrupt();
-	/*FOR TESTING*/
-
 	init_usart2(); // for debugging
 
-//
-//	init_queue();
+	init_queue();
 	init_sensor_with_interrupt();
-//	//init_sensor_led_response();
-//
+
 	//init_timer2();//for testing i2c
 
 	init_timer3();//for sensor delay
@@ -67,19 +60,13 @@ int main(void)
 	init_usart1(); // for ESP8266
 
 
-	//if(recordAlert()){
-	//	write_usart2((uint8_t*)(":)\r\n"));
-	//}
-	//else{
-	//	write_usart2((uint8_t*)(":(\r\n"));
-	//}
-
 	//init_i2c1();
 	write_usart2((uint8_t*)("\r\n_______________\r\n"));//For test
 
 
 	while(1)
 	{
+
 		/*Testing I2C with camera module*/
 //		if(I2C1_Read1Byte(0x43, 0x0A) == 0x76)
 //		{
@@ -96,15 +83,6 @@ int main(void)
 		do_event();
 		/*FOR TESTING*/
 
-//		if(recordAlert()){
-//			write_usart2((uint8_t*)(":)\r\n"));
-//		}
-//		else{
-//			write_usart2((uint8_t*)(":(\r\n"));
-//		}
-//
-//		write_usart2((uint8_t*)("\r\n.....................\r\n"));
-//		write_usart2((uint8_t*)("\r\n\r\n"));
 
 	}
 }

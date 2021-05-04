@@ -135,7 +135,7 @@ void EXTI4_IRQHandler(void)
 	{
 		EXTI->PR |= 0x00000010; //reset flag by writing 1 to bit 4 (reference manual 10.3.6)
 		add_event(alert_Handler);
-		set_timeout_timer3(60000);//60000 Milliseconds = 1 minute//added 1.5.21 (in timers.c)
+		set_timeout_timer3(60000); //60000 Milliseconds = 1 minute //added 1.5.21 (in timers.c)
 	}
 
 	//toggle_led(); //This is temporary for testing.
