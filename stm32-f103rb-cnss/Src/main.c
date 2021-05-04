@@ -67,6 +67,9 @@ int main(void)
 	while(1)
 	{
 
+		checkSwitchState();
+		delay_with_timer4(20);//20 seconds
+
 		/*Testing I2C with camera module*/
 //		if(I2C1_Read1Byte(0x43, 0x0A) == 0x76)
 //		{
@@ -80,7 +83,7 @@ int main(void)
 		/*Testing I2C with camera module*/
 
 		/*FOR TESTING*/
-		do_event();
+		//do_event();
 		/*FOR TESTING*/
 
 

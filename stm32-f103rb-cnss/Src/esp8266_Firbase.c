@@ -80,6 +80,8 @@ void *alert_Handler(void){
  * init_usart1(), init_usart2() and init_timer4() must be executed.*/
 BOOL recordAlert(void){
 
+	write_usart2((uint8_t*)"In recordAlert()\r\n"); // for debugging
+
 	connection_closed = TRUE;//added 30.4.21
 
 	//Reset ESP8266
@@ -143,6 +145,76 @@ BOOL recordAlert(void){
 	//write_usart2((uint8_t*)"8\r\n");
 
 	return TRUE;
+
+}
+
+
+/*This function retreaves 'on/off' state from realtime DB
+ * init_usart1(), init_usart2() and init_timer4() must be executed.*/
+BOOL checkSwitchState(void){
+
+	write_usart2((uint8_t*)"In checkSwitchState()\r\n"); // for debugging
+
+	connection_closed = TRUE;//added 30.4.21
+
+	//Reset ESP8266
+//	if(!reset(3,1)){ //!TODO THIS FUNCTIONALITY NEEDS FIXING!!!
+//		return FALSE;
+//	}
+//	delay_with_timer4(1);
+
+	//write_usart2((uint8_t*)"0\r\n"); //with this it reaches AT+CWJAP
+
+
+	//Set client mode
+	if(!setClientMode(3,6)){
+		return FALSE;
+	}
+	write_usart2((uint8_t*)"1\r\n");
+
+	//Join access point
+	if(!joinAccessPoint(3,6)){
+		return FALSE;
+	}
+	write_usart2((uint8_t*)"2\r\n");
+
+	/*Default: AT+CIPMUX=0 (according to: AT instruction set- 5.2.15)*/
+
+	//Connect HOST IP
+	if(!connectFirebaseHost(3,3,6,20)){
+		return FALSE;
+	}
+	write_usart2((uint8_t*)"3\r\n");
+
+
+	//Create HTTP request
+	createGetMsg();
+	write_usart2((uint8_t*)"4\r\n");
+
+
+	//Send number of data bytes
+	if(!sendRequest(3,3,30,60)){
+		//closeCunnection(3,3);//original line (until 30.4.21)
+		connection_closed = closeCunnection(3,3);//added 30.4.21
+		return FALSE;
+	}
+	write_usart2((uint8_t*)"5\r\n");
+
+	//Read response
+	if(!parseResponse(180)){//timeout set t0 3 minutes
+		//closeCunnection(3,3);//original line (until 30.4.21)
+		connection_closed = closeCunnection(3,3);//added 30.4.21
+		return FALSE;
+	}
+
+	write_usart2((uint8_t*)"6\r\n");
+
+	//Close cunnection with firebase - this might be useless as firebase already closes connection with "CLOSED" response
+	//closeCunnection(3,3);
+	//write_usart2((uint8_t*)"7\r\n");
+
+	return TRUE;
+
 
 }
 
@@ -254,7 +326,7 @@ BOOL joinAccessPoint(uint32_t tries, uint32_t timeout){
 
 
 /*This function cunnects to firebase via secure HTTP (HTTPS) using SSL,
- * returns upon success.
+ * returns TRUE upon success.
  * tries: number of times to send ping incase of timeout or failure.
  * timeout (in seconds): number of seconds to wait for response
  * need to enter tries and timout for both SSL AT_command and CIPSTART AT_command*/
@@ -319,13 +391,20 @@ void createPostMsg(void){
 	memset((char*)content, '\0', CONTENT_SIZE*sizeof(uint8_t));
 	sprintf((char*)content,"{\"image_path\": \"%s\", \"notes\": \"alarm went off!\", \"timestamp\": {\".sv\": \"timestamp\"}}",(char*)image_path);
 	content_len = strlen((char*)content);
-	//content_len = strlen("{\"image_path\": \"\", \"notes\": \"alarm went off!\", \"timestamp\": {\".sv\": \"timestamp\"}}") + strlen((char*)image_path);
-
 
 	//Set HTTP request
 	memset((char*)http, '\0', HTTP_SIZE*sizeof(uint8_t));
 	sprintf((char*)http,"POST /devices/%s/history.json?auth=%s HTTP/1.0\r\nHost: %s\r\nContent-Type: application/json\r\nContent-Length: %ld\r\n\r\n%s\r\n",(char*)device_id,(char*)firebase_auth_key,(char*)firebase_host,content_len,(char*)content); // HTTP/1.0- Allow only one request
 	//sprintf((char*)http,"POST /devices/%s/history.json?auth=%s&print=silent HTTP/1.1\r\nHost: %s\r\nContent-Type: application/json\r\nContent-Length: %ld\r\n\r\n{\"image_path\": \"%s\", \"notes\": \"alarm went off\", \"timestamp\": {\".sv\": \"timestamp\"}}\r\n",(char*)device_id,(char*)firebase_auth_key,(char*)firebase_host,content_len,(char*)image_path); // HTTP/1.0- Allow only one request
+	http_len = strlen((char*)http)-strlen("\r\n"); // the last \r\n is for the AT command, and not included in the request's length
+
+}
+
+void createGetMsg(void){
+
+	//Set HTTP request
+	memset((char*)http, '\0', HTTP_SIZE*sizeof(uint8_t));
+	sprintf((char*)http,"GET /devices/%s/control/state.json?auth=%s HTTP/1.0\r\nHost: %s\r\n\r\n\r\n",(char*)device_id,(char*)firebase_auth_key,(char*)firebase_host); // HTTP/1.0- Allow only one request
 	http_len = strlen((char*)http)-strlen("\r\n"); // the last \r\n is for the AT command, and not included in the request's length
 
 }
@@ -391,6 +470,23 @@ BOOL sendRequest(uint32_t _CIPSEND_tries,uint32_t _SEND_OK_tries , uint32_t _CIP
  * and returns once response is recieved.
  * timeout (in seconds): number of seconds to wait for response*/
 BOOL readResponse(uint32_t timeout){
+
+	found = STANDBY;
+	while(found == STANDBY && !timeout_with_timer4(timeout)){
+		found = search_usart1_buffer_Rx((uint8_t *)"CLOSED\r\n", (uint8_t *)AT_FAIL);
+	}
+	if(found == PASS){
+		return TRUE;
+	}
+	else{
+		return FALSE;
+	}
+
+}
+
+
+// THIS NEEDS TO CHANGE NEED TO CHECK WETHER IT'S ON OR OFF for that we need to retreive the content.
+BOOL parseResponse(uint32_t timeout){
 
 	found = STANDBY;
 	while(found == STANDBY && !timeout_with_timer4(timeout)){

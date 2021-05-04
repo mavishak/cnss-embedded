@@ -15,7 +15,7 @@
 
 
 //void ESPinit(void);
-void TestWifiConnection(void);
+void TestWifiConnection(void); // for testing
 
 
 BOOL ping(uint32_t tries, uint32_t timeout);
@@ -33,5 +33,14 @@ void setImagePath(void);
 void connectFirbase(void);
 BOOL recordAlert(void);
 void *alert_Handler(void);
+
+
+// IN PROGRESS
+void createGetMsg(void);
+BOOL parseResponse(uint32_t timeout);
+BOOL checkSwitchState(void);
+/*This function is incharge of getting the 'on/off' state from fribase*/
+//void *control_Handler(voide);
+// IN PROGRESS
 
 #endif /* ESP8266_FIREBASE_H_ */
