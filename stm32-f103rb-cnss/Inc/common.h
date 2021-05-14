@@ -21,4 +21,12 @@ enum _state{
 };
 typedef enum _state STATE;
 
+enum _switch_state {
+	OFF,
+	ON,
+	NO_PATH,
+	NON
+};
+typedef enum _switch_state SWITCH_STATE;
+
 #endif /* COMMON_H_ */

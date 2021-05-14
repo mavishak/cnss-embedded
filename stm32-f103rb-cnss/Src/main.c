@@ -35,6 +35,7 @@
 #include "common.h"
 #include "i2c.h"
 #include "clock.h"
+#include "system_control.h"
 
 
 /*FOR TESTING*/
@@ -50,12 +51,11 @@ int main(void)
 	init_usart2(); // for debugging
 
 	init_queue();
-	init_sensor_with_interrupt();
+	init_sensor_with_interrupt(); // sensor interrupts are not inabled
 
-	//init_timer2();//for testing i2c
-
-	init_timer3();//for sensor delay
-	init_timer4();//for ESP8266 timeout
+	init_timer2(); // for monitoring switch state.
+	init_timer3(); // for sensor delay
+	init_timer4(); // for ESP8266 timeout
 
 	init_usart1(); // for ESP8266
 
@@ -67,25 +67,8 @@ int main(void)
 	while(1)
 	{
 
-		checkSwitchState();
-		delay_with_timer4(20);//20 seconds
-
-		/*Testing I2C with camera module*/
-//		if(I2C1_Read1Byte(0x43, 0x0A) == 0x76)
-//		{
-//			write_usart2((uint8_t*)("\r\nI2C Test Pass\r\n"));//For test
-//		}
-//		else
-//		{
-//			write_usart2((uint8_t*)("\r\nI2C Test Failed\r\n"));//For test
-//		}
-//		delay_with_timer2(500);//0.5 second
-		/*Testing I2C with camera module*/
-
-		/*FOR TESTING*/
-		//do_event();
-		/*FOR TESTING*/
-
+		do_event();
+		monitor_switch_state(120); // every 2 minutes
 
 	}
 }

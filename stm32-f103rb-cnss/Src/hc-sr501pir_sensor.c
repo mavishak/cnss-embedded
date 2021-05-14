@@ -4,20 +4,6 @@
  *  Created on: 21 December  2020
  *      Author: Mayan and Naomi
  *
- *  Notes:
- *  21.12.2020: Sensor works using D6 interrupt and LD2 as response.
- *  			TBD: Change D6 (PB10) to D5 (PB4) and change response to UART, and play with sensor.
- *
- *  22.12.2020: D5 (PB4) is set as input pin.
- *  			TBD: Change response to UART, and play with sensor.
- *
- *  03.01.2021: USART2 is now configured to respond to the sensor interrupt.
- *  			TBD: Implement triggring of USART with event_queue.
- *  			Question: Should the handler init the uart() and then trigger write() or should UART be initiolized in advance.
- *  					  My gut tells me that the handler should do both...
- *
- *  28.01.2021: Added NVIC_SetPriorityGrouping(7); to init_sensor_with_interrupt()
- *  			need to check that it is not causing problems...
  */
 
 
@@ -28,12 +14,13 @@
 #include "core_cm3.h" /*for NVIC_enableIRQ() and NVIC_SetPriority()*/
 #include "esp8266_Firebase.h"
 #include "event_queue.h"
-#include "timers.h"//added 1.5.21
+#include "timers.h"
 
 /*
  * This functions intiolizes pin D5
  * to listen for sensors change in mode.
  * If motion is sensed an iterrupt occurs and triggers EXTI4_IRQHandler(void)
+ * Inorder to enable sensor, one must call enable_sensor().
  */
 void init_sensor_with_interrupt(){
 
@@ -84,16 +71,32 @@ void init_sensor_with_interrupt(){
 	//NOTE: EXTICR2 is reachable via the index 1
 	AFIO->EXTICR[1] |= 0x00000001; // Allow interupts for line_4 (see reference manual 9.4.4 and pg. 210)
 	EXTI->IMR |= 0x00000010; //Enable iterrupt with mask for port B pin 4 (see reference manual 10.3.1)
-	EXTI->RTSR |= 0x00000010 ; //rising trigger selection register - to anable full button press before reacting ((see reference manual 10.3.3)
+	EXTI->RTSR |= 0x00000010 ; //rising trigger selection register (see reference manual 10.3.3)
 	NVIC_SetPriorityGrouping(7); //?//This should disable interrupt nesting(priority wont be not allowed)//->MABY IT'S THE DEFAULT
 	NVIC_SetPriority(EXTI4_IRQn,0); //set all interrupt priotity to zero so that no preemption uccors.
-	NVIC_EnableIRQ(EXTI4_IRQn); //enable handler
+	//NVIC_EnableIRQ(EXTI4_IRQn); //enable handler - enable handler later
 	__enable_irq();
 
 	/*~~~______________~~~*/
 
 }
 
+void enable_sensor(){
+
+	__disable_irq();
+	NVIC_ClearPendingIRQ(EXTI4_IRQn); // clear pending interrupts from before enable
+	NVIC_EnableIRQ(EXTI4_IRQn); // enable handler - enable handler later
+	__enable_irq();
+
+}
+
+void disable_sensor(){
+
+	__disable_irq();
+	NVIC_DisableIRQ(EXTI4_IRQn); //disable handler
+	__enable_irq();
+
+}
 
 void init_sensor_led_response(){
 
@@ -107,7 +110,7 @@ void init_sensor_led_response(){
 	GPIOA->CRL |= 0x00200000; //PA5 configured to General purpose output push-pull | Output mode, max speed 2 MHz
 
 	/*Init state*/
-	state = OFF;
+	s = OFF;
 
 
 }
@@ -116,26 +119,26 @@ void init_sensor_led_response(){
 void toggle_led()
 {
 
-	if(state == OFF)
+	if(s == OFF)
 	{
 		GPIOA->ODR |= 0x0020;
-		state=ON;
+		s=ON;
 	}
 	else
 	{
 		GPIOA->ODR &= ~(0x0020);
-		state=OFF;
+		s=OFF;
 	}
 }
 
 /*Interrupt service routine for sensor using pin D5 (PB4) as input mode*/
 void EXTI4_IRQHandler(void)
 {
-	if(timeout_done_timer3())//added 1.5.21 (in timers.c)
+	if(timeout_done_timer3())
 	{
 		EXTI->PR |= 0x00000010; //reset flag by writing 1 to bit 4 (reference manual 10.3.6)
 		add_event(alert_Handler);
-		set_timeout_timer3(60000); //60000 Milliseconds = 1 minute //added 1.5.21 (in timers.c)
+		set_timeout_timer3(60); //60 seconds = 1 minute
 	}
 
 	//toggle_led(); //This is temporary for testing.

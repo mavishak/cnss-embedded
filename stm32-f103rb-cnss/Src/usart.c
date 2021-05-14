@@ -4,90 +4,6 @@
  *  Created on: December 22 2020
  *      Author: Mayan and Naomi
  *
- *  23.12.2020: We dubuged usart_init(), and write() it seems that they work as they are supposed to
- *  			But we haven't manged to view the transmited letter on screen.
- *  			Need to dig deeper - and solve the problem.
- *
- *  27.12.2020: USART2->DR is not changing and so is TXE. This might be normal.
- *  			There might be a problem with ST-LINK/v.2
- *  			Note: Changed to branch main_v.2 because of problems in main branch
- *
- *  27.12.2020: We maneged to connect TeraTerm and USART2 by enabling PA2.
- *  			Problem: TeraTerm is not displaying Character correctly.
- *
- *  28.12.2020: Interrupt TXE enabled. Need
- *  			TBD: to enable TC=1 interrupt.
- *  			Problem: TeraTerm still dislaying garbage.
- *
- *  30.12.2020: Good News: Got TeraTerm To work!
- *  			Bad News: I have no Idea why it's working... :/
- *  			Basically the problem is in the setting of the BAUD RATE.
- *  			We need to get a better understanding of it's calculation and of the clock tree.
- *  			How is it working:
- *  			TeraTerm speed is set to 2400 and USART_BRR is set to 0xD05.
- *  			(I don't know if it matters but - GPIOA is configured to a speed of 2 MHz.)
- *  			Note: Interrupt is now disabled - Instructions from above.
- *
- * 03.01.2021: A message is now sent to screen rather than one letter.
- * 			   The problems listed above are still valid :/
- *
- * 08.01.2021: SOLVED!!! The USART2 clock is PCLK1 which is by default only 8MHz NOT 36MHz.
- * 			   (see RM p.798 for BRR calculation and RM p.93 Fig.8 for clock tree).
- * 			   So, basically our problem was that we thought that PCLK1 was set to 36MHz by default.
- * 			   For later practice follow the clock tree and default initiolization of clock registers.
- *
- * 22.01.2021: Setting the base lines for USART1 for communication with ESP8266
- * 			   MADE A FEW SMALL CHANGES TO USART2 init:
- * 			   1. commented out RCC->APB2ENR |= 0x00000001;
- * 			   2. changed static USART_2 usart2; //changed from buff
- * 			   need to check that it is still working...
- *
- * 23.01.2021: Writing code for USART1  - comunication with ESP8266
- * 			   NOTE: Code not Tested yet.
- *  		   Questions:
- *  		   1. How to know Rx is complete/receive? assumption: "\r\n" or "\r\n\r\n"
- *  		   2. When disabling Rx should we disable Rx interrupts as  well?
- *			   3. Maybe it will be smarter to call the set functions from the init?
- *			   4. What to do incase of buffer overflow in Receive interrupt?
- *			   5. Is it correct to have USART1_IRQHandler do all that it is doing now?
- *			   	  Our idea is that only when \r\n
- *			   	  is found and command is read handler will be se in queue to avoid over running response
- *
- * 24.01.2021: We haven't succeded to create a connection with ESP8266.
- * 			   the interrupt is not accessed.
- * 			   (We accessed it by mistake after tuching the pins)
- * 			   What we tried and didn't work:
- * 			   1. We tried clearing USART1-SR (TC - transmit complete) by reseting it's value
- * 			   2. input_floating instead os pull-up
- * 			   3. waiting
- * 			   4. Enable RCC for Alternate funcion for PINs - Highly unlikely... we don't think it should be enabled at all.
- *
- * 			   On another subject - The init_usart1() test prints are printed twice even though they are supposed to print once.
- * 			   We are pertty sure that the BRR is set currectly (but it might be worth the review...)
- *
- * 25.01.2021: We are maneging to get input from ESP8266 but not the currect one:
- * 			   1. It might not actually be input - maybe the \0 is printed again and again
- * 			      hard to believe- because the input grows each time.
- * 			   2. There is probably a problum of a buffer overflow or another programble problem that is not being taken care
- * 			      of since the computer is 'blinging'.
- * 			      blings - every time there is a \r\n on screen.
- * 			   3. Maybe we are enterring the ISR repitedly because the iterrupt flag is not being cleered.
- * 			      WHY ARE WE ENTERRING THE ISR SO MANT TIMES WE ONLY WANT TO GET OK??
- * 			   4. BRR problem with USART1 - maybe it shouldn't be similar to USART2.
- * 			   5. problem with jumper attachments - very likely. The ISR is entered only after connecting CH_PD (EN) to 3.3v
- * 			      powering it, playing and then reconnecting the USB.
- * 			   6. Tx in STM32 is using 5V - should be 3.3V.  Use a logic level shifter or voltage divider between it??
- *
- * 28.01.2021: THE ESP8266 IS ALIIIIIVE!
- * 			   The 2 main things we changed:
- * 			   1. We added NVIC_SetPriorityGrouping(7) to init_usart1() function
- * 			   2. We allowed Rx and Tx to be enabled all the time
- *
- * 			   One strange thing, it seems the ESP8266 Response is AT\r\n\r\nOK\r\n"
- *
- * 21.03.2021: We modified 'search_usart1_buffer_Rx' funcion to return a STATE rather than true OR False.
- * 			   See: Common.h
- *
  */
 
 #include "usart.h"
@@ -99,10 +15,6 @@
 #include <stdlib.h>
 
 
-
-
-//#define FALSE 0
-//#define TRUE 1
 
 static USART_2 usart2;
 static USART_1 usart1;
@@ -320,12 +232,12 @@ STATE search_usart1_buffer_Rx(uint8_t *pass, uint8_t *fail){
 	if((usart1.Rx_len + 1) < BUFF_SIZE){
 
 		if(strstr((const char*)usart1.Rx , (const char*)pass)){
-			write_usart2((uint8_t*)usart1.Rx); //write response to screen
+			write_usart2((uint8_t*)usart1.Rx); // write response to screen
 			set_usart1_buffer_Rx();
 			return (uint32_t)PASS;
 		}
 		else if(strstr((const char*)usart1.Rx , (const char*)fail)){
-			write_usart2((uint8_t*)usart1.Rx); //write response to screen
+			write_usart2((uint8_t*)usart1.Rx); // write response to screen
 			set_usart1_buffer_Rx();
 			return (uint32_t)FAIL;
 		}
@@ -347,26 +259,62 @@ STATE search_usart1_buffer_Rx(uint8_t *pass, uint8_t *fail){
 
 }
 
+/*this function searches USART1 buffer Rx for on or off, to be used
+ * in esp8266_Firebase.c in searchSwitchState() -> parseResponse.
+ * This function does NOT clean buffer*/
+SWITCH_STATE find_state_usart1_Buffer_Rx(uint8_t *on, uint8_t *off,uint8_t *no_path){
+
+	/*!TODO:need to check that usart1.Rx buffer wasn't overflow*/
+	if((usart1.Rx_len + 1) < BUFF_SIZE){
+
+		if(strstr((const char*)usart1.Rx , (const char*)on)){
+			write_usart2((uint8_t*)usart1.Rx); //write response to screen
+			return (uint32_t)ON;
+		}
+		else if(strstr((const char*)usart1.Rx , (const char*)off)){
+			write_usart2((uint8_t*)usart1.Rx); //write response to screen
+			return (uint32_t)OFF;
+		}
+		else if(strstr((const char*)usart1.Rx , (const char*)no_path)){
+			write_usart2((uint8_t*)usart1.Rx); //write response to screen
+			return (uint32_t)NO_PATH;
+		}
+		else{
+			write_usart2((uint8_t*)usart1.Rx);//for debuging
+			return (uint32_t)NON;
+		}
+
+	}
+
+	else{
+		/*!TODO: when usart1.Rx buffer is overflown start check from end??*/
+		write_usart2((uint8_t*)"\r\nBUFFER_OVERFLOW\r\n");
+		write_usart2((uint8_t*)usart1.Rx);
+		return (uint32_t)NON;
+	}
+
+}
+
 /*USART1 Interrupt Handler - Only Rx is set to have interrupts*/
 void USART1_IRQHandler(void){
 
 	if(((USART1->SR) & 0x00000020) == 0x00000020){ //Check if RXNE=1, this means that Rx interrupt occurred (see RM 27.6.1)
 
 		c = USART1->DR; //This clear RXNE bit
-		if((usart1.Rx_len + 1) < BUFF_SIZE){
-			usart1.Rx[usart1.read_index] = (uint8_t)(c & 0xFF);
-		}
-		else{
-			//Restart index
+		if((usart1.read_index + 1) >= BUFF_SIZE){
 			usart1.read_index = 0;
-			usart1.Rx[usart1.read_index] = (uint8_t)(c & 0xFF);
 		}
+		usart1.Rx[usart1.read_index] = (uint8_t)(c & 0xFF);
 		usart1.read_index++;
-		usart1.Rx_len++;
+		usart1.Rx_len++; // count total chars received
 	}
 
 
 }
+
+
+
+
 
 
 /*USART2 intterupt handler*/

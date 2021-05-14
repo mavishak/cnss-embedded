@@ -13,7 +13,7 @@
 #include "stm32f103xb.h" //this file is included to every header file
 #include <stdlib.h>
 #include "common.h"
-#define QUEUE_SIZE 10//64 //128
+#define QUEUE_SIZE 64 //128
 
 enum mode { GO, STOP };
 
@@ -29,9 +29,9 @@ typedef struct event{
 typedef struct queue{
 
 	Event eq[QUEUE_SIZE];// declare queue
-	uint32_t writeIndex; //The index to write a new event to from an ISR
-	uint32_t readIndex; //Index to read event from and run handler
-	enum mode accept; //This variable indicates when we should stop accepting because system is to be shut down.
+	uint32_t writeIndex; // The index to write a new event to from an ISR
+	uint32_t readIndex; // Index to read event from and run handler
+	enum mode accept; // This variable indicates when we should stop accepting because system is to be shut down.
 
 } Queue;
 

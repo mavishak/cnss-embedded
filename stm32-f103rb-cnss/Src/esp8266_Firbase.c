@@ -4,29 +4,6 @@
  *  Created on: 09/02/2021
  *      Author: mayan and naomi
  *
- *  12.02.2021: AT_RST works after that stuck in while loop of AT+CWJAP
- *  			!TODO: Need to debug
- *  			Note: DO NOT PUT NULL AS FAIL DEFAULT
- *
- *  15.02.2021: Problems:
- *  			1. Reset when downloading code to modul -> Not so bad... ()
- *  			2. AT + RESET stops program from continuing to run -> BAD - > why is this happening?
- *  			3. Not receiving > after AT+CIPSEND
- *
- *  04.03.2021: We succeed to send a POST message to Real-time database! (using AT commands, HTTPS and SSL)
- *  			1. We needed to write: AT+CIPSSLSIZE=4096
- *  			2. We needed to write: sprintf((char*)command, "AT+CIPSTART=\"SSL\",\"%s\",%ld\r\n",(char*)firebase_host, https_port)
- *  			3. The POST message was:
- *  			    POST /rest/test/posts.json? HTTP/1.1\r\n
- *					Host: %s\r\n
- *					Content-Type: application/json\r\n
- *					Content-Length: 49\r\n\r\n
- *					{"author": "Nemo Resh", "title": "Fish are blue"}
- *					\r\n
- *
- * 21.03.2021: See __LINE__ 285:
- * 			   found = search_usart1_buffer_Rx((uint8_t *)AT_OK, (uint8_t *)AT_ALREADY_CONNECTED);
- * 			   //NO IDEA WHY THIS IS SO CRITICAL BUT IT IS!
  */
 
 #include "esp8266_Firebase.h"
@@ -35,6 +12,7 @@
 #include <string.h>
 #include <stdio.h>
 #include "timers.h"
+#include "hc-sr501pir_sensor.h"
 
 
 #define COMMAND_SIZE 256
@@ -53,7 +31,8 @@ static uint32_t content_len = 0 ;
 
 static uint8_t image_path[PATH_SIZE];
 
-static BOOL connection_closed;//added 30.4.21
+static BOOL connection_closed;
+static SWITCH_STATE state;
 
 
 void setImagePath(void){
@@ -65,10 +44,36 @@ void setImagePath(void){
 void *alert_Handler(void){
 
 	uint32_t i  = 3;
-	//while(i > 0 && !recordAlert() ){ //original line (until 30.4.21)
-	while(i > 0  && !recordAlert() && connection_closed){ //added 30.4.21
+	while(i > 0  && !recordAlert() && connection_closed){
 		i--;
 	}
+	return NULL;
+
+}
+
+void *control_Handler(void){
+
+	state = NON; // this will change in checkSwitchState()
+
+	uint32_t i  = 3;
+	while(i > 0  && !checkSwitchState() && connection_closed){
+		i--;
+	}
+
+	if(state == OFF || state == NO_PATH){
+		disable_sensor();
+		write_usart2((uint8_t*)("\r\nOFF/NO_PATH\r\n"));
+	}
+
+	else if(state == ON){
+		enable_sensor();
+		write_usart2((uint8_t*)("\r\nON\r\n"));
+	}
+	else{ //NON
+		disable_sensor(); // As there is no comunication with Firebase there is no sence for the sensor to be on and send alerts.
+		write_usart2((uint8_t*)("\r\nNON\r\n"));
+	}
+
 	return NULL;
 
 
@@ -82,13 +87,13 @@ BOOL recordAlert(void){
 
 	write_usart2((uint8_t*)"In recordAlert()\r\n"); // for debugging
 
-	connection_closed = TRUE;//added 30.4.21
+	connection_closed = TRUE;
 
-	//Reset ESP8266
-//	if(!reset(3,1)){ //!TODO THIS FUNCTIONALITY NEEDS FIXING!!!
-//		return FALSE;
-//	}
-//	delay_with_timer4(1);
+	// Reset ESP8266
+	// if(!reset(3,1)){ //!TODO THIS FUNCTIONALITY NEEDS FIXING!!!
+	//	return FALSE;
+	// }
+	// delay_with_timer4(1);
 
 	//write_usart2((uint8_t*)"0\r\n"); //with this it reaches AT+CWJAP
 
@@ -125,16 +130,16 @@ BOOL recordAlert(void){
 
 	//Send number of data bytes
 	if(!sendRequest(3,3,30,60)){
-		//closeCunnection(3,3);//original line (until 30.4.21)
-		connection_closed = closeCunnection(3,3);//added 30.4.21
+		//closeCunnection(3,3); // original line
+		connection_closed = closeCunnection(3,3);
 		return FALSE;
 	}
 	write_usart2((uint8_t*)"6\r\n");
 
 	//Read response
-	if(!readResponse(180)){//timeout set t0 3 minutes
-		//closeCunnection(3,3);//original line (until 30.4.21)
-		connection_closed = closeCunnection(3,3);//added 30.4.21
+	if(!readResponse(180)){ //timeout set t0 3 minutes
+		//closeCunnection(3,3); //original line
+		connection_closed = closeCunnection(3,3);
 		return FALSE;
 	}
 
@@ -489,8 +494,12 @@ BOOL readResponse(uint32_t timeout){
 BOOL parseResponse(uint32_t timeout){
 
 	found = STANDBY;
+	state = NON;
 	while(found == STANDBY && !timeout_with_timer4(timeout)){
-		found = search_usart1_buffer_Rx((uint8_t *)"CLOSED\r\n", (uint8_t *)AT_FAIL);
+		state = find_state_usart1_Buffer_Rx((uint8_t *)"\"on\"CLOSED", (uint8_t *)"\"off\"CLOSED", (uint8_t *)"nullCLOSED");
+		if(state != NON){
+			found = search_usart1_buffer_Rx((uint8_t *)"CLOSED\r\n", (uint8_t *)AT_FAIL);
+		}
 	}
 	if(found == PASS){
 		return TRUE;

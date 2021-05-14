@@ -7,11 +7,15 @@
 
 #ifndef HC_SR501PIR_SENSOR_H_
 #define HC_SR501PIR_SENSOR_H_
+#include "common.h"
 
 void init_sensor_with_interrupt();
 void init_sensor_led_response();
+void enable_sensor(void);
+void disable_sensor(void);
 void toggle_led();
 
-enum {OFF, ON} state;
+//enum {OFF, ON} state;
+SWITCH_STATE s;
 
 #endif /* HC_SR501PIR_SENSOR_H_ */

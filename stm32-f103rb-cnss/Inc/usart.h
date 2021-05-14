@@ -20,6 +20,7 @@ void init_usart1();
 void set_usart1_buffer_Tx(uint8_t *command);
 void set_usart1_buffer_Rx();
 STATE search_usart1_buffer_Rx(uint8_t *pass, uint8_t *fail);
+SWITCH_STATE find_state_usart1_Buffer_Rx(uint8_t *on, uint8_t *off,uint8_t *no_path);
 void write_usart1(uint8_t *command);//This function should call set_usart1_buffer_Tx
 
 
