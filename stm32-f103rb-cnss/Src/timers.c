@@ -10,6 +10,8 @@
 #include <string.h>
 #include <stdio.h>
 
+
+
 static TIMER timer2;
 static TIMER timer3;
 static TIMER timer4;
@@ -251,8 +253,8 @@ BOOL timeout_with_timer4(uint32_t num_of_sec)
 
 void set_timeout_timer2(uint32_t num_of_sec)
 {
-	enable_timer2();
 	timer2.targetTick = num_of_sec;
+	enable_timer2();
 }
 
 BOOL timeout_done_timer2(void){
@@ -272,8 +274,8 @@ BOOL timeout_done_timer2(void){
 /*This function sets timer3 num_of_sec_timer3 to param num_of_sec, and enables timer3 timeout*/
 void set_timeout_timer3(uint32_t num_of_sec)
 {
-	enable_timer3();
 	timer3.targetTick = num_of_sec;
+	enable_timer3();
 }
 
 /*returns true if timeout is done, otherwise returns false*/
@@ -294,8 +296,8 @@ BOOL timeout_done_timer3(void){
 /*This function sets timer3 num_of_sec_timer3 to param num_of_sec, and enables timer3 timeout*/
 void set_timeout_timer4(uint32_t num_of_seconds)
 {
-	enable_timer4();
 	timer4.targetTick = num_of_seconds;
+	enable_timer4();
 }
 
 /*returns true if timeout is done, otherwise returns false*/
@@ -322,6 +324,8 @@ void TIM2_IRQHandler(void)
 		timer2.countTicks++;
 
 	}
+
+
 }
 
 void TIM3_IRQHandler(void)
@@ -332,6 +336,8 @@ void TIM3_IRQHandler(void)
 		timer3.countTicks++;
 
 	}
+
+
 }
 
 void TIM4_IRQHandler(void)
@@ -342,5 +348,6 @@ void TIM4_IRQHandler(void)
 		timer4.countTicks++;
 
 	}
+
 }
 

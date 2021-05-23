@@ -20,11 +20,26 @@ static USART_2 usart2;
 static USART_1 usart1;
 static uint8_t c; // for holding the USART->DR value
 
+
+static BOOL USART1_NEW_LINE_FOUND; // This variable flags a new line in USART1 Rx
+static BOOL USART1_NEW_LINE_READ;
+
+BOOL USART1_NEW_LINE_FOUND_get(void){
+	return USART1_NEW_LINE_FOUND;
+}
+
+void USART1_NEW_LINE_READ_set(void){
+	USART1_NEW_LINE_READ = TRUE;
+}
+
+static uint8_t *START; // for search
+static uint8_t *END;
+
 /*This functions Inits all registors that have to do with enabling USART2 (ST-LINK/V.2)
  *inorder to send message to computer.
  *Note: Interrupts are not enabled intentionally.
  *This program works when TeraTerm speed is set to 9600*/
-void init_usart2(){
+void USART2_init(){
 
 	/*This program works when TeraTerm speed is set to 9600 and USART_BRR is set to 0x34D.*/
 
@@ -74,8 +89,7 @@ void init_usart2(){
 
 
 /* Usart1 will be use for communication with esp8266. */
-void init_usart1(){
-
+void USART1_init(){
 
 	/*Enabla RCC for GPIO Port A*/
 	RCC->APB2ENR |= 0x00000004; // (see RM 8.3.7)
@@ -116,8 +130,6 @@ void init_usart1(){
 	/*Enable Tx*/
 	USART1->CR1 |= 0x00000008; // Set the TE bit in USART_CR1 to send an idle frame as first transmission. see RM 27.6.4)
 
-	/*Init Receive buffer*/
-	set_usart1_buffer_Rx();
 
 	/*Enable USART Receive*/
 	USART1->CR1 |= 0x00000004;// Set the RE bit in USART_CR1 to enable USART Receive  (see RM 27.6.4)
@@ -174,12 +186,53 @@ void write_usart2(uint8_t* msg){
 }
 
 
+void USART2_write_line(uint8_t *start, uint8_t *end){
+
+	// Set buffer Tx
+	memset(usart2.Tx, '\0', BUFF_SIZE*sizeof(uint8_t));
+	if((BUFF_SIZE - (end - start) + 1) < 0){
+		strcpy((char*)usart2.Tx,"Error msg to Long\r\n");
+		usart2.Tx_len = strlen((char*)"Error msg to Long\r\n");
+	}
+	else{
+		uint32_t i = 0;
+		usart2.Tx_len = end - start;
+		while(start < end){
+			usart2.Tx[i] = *start;
+			start++;
+			i++;
+		}
+
+	}
+
+	// Write to screen
+	usart2.write_index = 0;
+
+	while(usart2.write_index < usart2.Tx_len)
+	{
+		while(((USART2->SR) & 0x00000080) == 0x00000000);// wait while data is not yet transfered (TXE != 1)(see RM 27.6.1)
+		USART2->DR = (uint8_t)(usart2.Tx[usart2.write_index] & 0xFF); //send data (see RM 27.6.2)
+		usart2.write_index++;
+	}
+	while(((USART2->SR) & 0x00000040) !=  0x00000040); //wait until transmission is complete TC=1 (see RM 27.6.1)
+	usart2.write_index = 0;
+	usart2.Tx_len = 0;
+}
+
+
 /*USART1 write function with no interrupt.*/
 void write_usart1(uint8_t *command){
 
 
 	/*Set usart1_buffer_Tx with command*/
 	set_usart1_buffer_Tx(command);
+
+	/*Prepare buffer Rx for response*/
+	set_usart1_buffer_Rx();
+
+	// set initial values to Rx interrupt flags
+	USART1_NEW_LINE_FOUND = FALSE;
+	USART1_NEW_LINE_READ = TRUE;
 
 	/*Send command*/
 	while(usart1.write_index < usart1.Tx_len)
@@ -219,42 +272,46 @@ void set_usart1_buffer_Rx(){
 	usart1.Rx_len = 0;
 	usart1.read_index = 0;
 
+	// FOR DEBUGGING SEARCH BUFFER RX //
+	START = usart1.Rx;
+	END = usart1.Rx;
+
 }
+
 
 
 /*This function returns 3 values type STATE - defined by common.h:
  * PASS - when pass param is found.
  * FAIL - when fail param is found.
  * STANDBY - when neither pass param or fail param are found.*/
-STATE search_usart1_buffer_Rx(uint8_t *pass, uint8_t *fail){
+STATE USART1_search_buffer_Rx(uint8_t *pass, uint8_t *fail){
 
 	/*!TODO:need to check that usart1.Rx buffer wasn't overflow*/
 	if((usart1.Rx_len + 1) < BUFF_SIZE){
 
+		START = END;
+		END = usart1.Rx + usart1.Rx_len;
+
 		if(strstr((const char*)usart1.Rx , (const char*)pass)){
-			write_usart2((uint8_t*)usart1.Rx); // write response to screen
-			set_usart1_buffer_Rx();
+			USART2_write_line((uint8_t*)START, (uint8_t*)END); // write response to screen
 			return (uint32_t)PASS;
 		}
 		else if(strstr((const char*)usart1.Rx , (const char*)fail)){
-			write_usart2((uint8_t*)usart1.Rx); // write response to screen
-			set_usart1_buffer_Rx();
+			USART2_write_line((uint8_t*)START, (uint8_t*)END); // write response to screen
 			return (uint32_t)FAIL;
 		}
 		else{
-			write_usart2((uint8_t*)usart1.Rx);//for debuging
-			write_usart2((uint8_t*)"\r\n"); //for debuging
+			USART2_write_line((uint8_t*)START, (uint8_t*)END); // write response to screen
 			return (uint32_t)STANDBY;
 		}
 
 	}
 
 	else{
-		/*!TODO: when usart1.Rx buffer is overflown start check from end??*/
-		write_usart2((uint8_t*)"\r\nBUFFER_OVERFLOW\r\n");
+		/*!TODO: when usart1.Rx buffer is overflown start check from end?*/
+		write_usart2((uint8_t*)"\r\nBUFFER_OVERFLOW::RX BUFFER CONTENT\r\n");
 		write_usart2((uint8_t*)usart1.Rx);
-		set_usart1_buffer_Rx();
-		return (uint32_t)STANDBY;
+		return (uint32_t)FAIL;
 	}
 
 }
@@ -300,20 +357,30 @@ void USART1_IRQHandler(void){
 
 	if(((USART1->SR) & 0x00000020) == 0x00000020){ //Check if RXNE=1, this means that Rx interrupt occurred (see RM 27.6.1)
 
-		c = USART1->DR; //This clear RXNE bit
+		c = USART1->DR; // clear RXNE bit
 		if((usart1.read_index + 1) >= BUFF_SIZE){
 			usart1.read_index = 0;
 		}
 		usart1.Rx[usart1.read_index] = (uint8_t)(c & 0xFF);
 		usart1.read_index++;
 		usart1.Rx_len++; // count total chars received
+
+
+		//***
+
+		if(c == (uint8_t)'\n' && USART1_NEW_LINE_READ){
+			USART1_NEW_LINE_FOUND = TRUE;
+			USART1_NEW_LINE_READ = FALSE;
+		}
+		else if(c != (uint8_t)'\n' && USART1_NEW_LINE_READ){
+			USART1_NEW_LINE_FOUND = FALSE;
+		}
+
+
 	}
 
 
 }
-
-
-
 
 
 

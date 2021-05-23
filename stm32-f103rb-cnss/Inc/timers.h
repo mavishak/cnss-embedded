@@ -9,6 +9,8 @@
 #define TIMERS_H_
 
 #include "common.h"
+#include "event_queue.h"
+#include "esp8266_Firebase.h"
 
 
 //Timer 2
@@ -38,6 +40,7 @@ void delay_with_timer4(uint32_t num_of_sec);
 BOOL timeout_with_timer4(uint32_t num_of_sec);
 void set_timeout_timer4(uint32_t num_of_sec);
 BOOL timeout_done_timer4(void);
+
 
 typedef struct timer{
 

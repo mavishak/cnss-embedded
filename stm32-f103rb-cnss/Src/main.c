@@ -48,7 +48,7 @@ int main(void)
 	//set_sys_clock_to_32MHz();
 	//init_MCO();
 
-	init_usart2(); // for debugging
+	USART2_init(); // for debugging
 
 	init_queue();
 	init_sensor_with_interrupt(); // sensor interrupts are not inabled
@@ -57,18 +57,30 @@ int main(void)
 	init_timer3(); // for sensor delay
 	init_timer4(); // for ESP8266 timeout
 
-	init_usart1(); // for ESP8266
+	USART1_init(); // for ESP8266
 
 
 	//init_i2c1();
 	write_usart2((uint8_t*)("\r\n_______________\r\n"));//For test
 
 
+	enable_sensor(); // FOR TESTING
+
 	while(1)
 	{
 
-		do_event();
-		monitor_switch_state(120); // every 2 minutes
+
+
+
+
+			//add_event(alert_Handler);
+			alert_Handler();
+			delay_with_timer2(10);
+
+
+
+		//do_event();
+//		monitor_switch_state(120); // every 2 minutes
 
 	}
 }
