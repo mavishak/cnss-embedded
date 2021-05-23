@@ -316,24 +316,28 @@ STATE USART1_search_buffer_Rx(uint8_t *pass, uint8_t *fail){
 
 }
 
+
 /*this function searches USART1 buffer Rx for on or off, to be used
  * in esp8266_Firebase.c in searchSwitchState() -> parseResponse.
  * This function does NOT clean buffer*/
-SWITCH_STATE find_state_usart1_Buffer_Rx(uint8_t *on, uint8_t *off,uint8_t *no_path){
+SWITCH_STATE USART1_check_state_buffer_Rx(uint8_t *on, uint8_t *off,uint8_t *no_path){
 
 	/*!TODO:need to check that usart1.Rx buffer wasn't overflow*/
 	if((usart1.Rx_len + 1) < BUFF_SIZE){
 
+		START = END;
+		END = usart1.Rx + usart1.Rx_len;
+
 		if(strstr((const char*)usart1.Rx , (const char*)on)){
-			write_usart2((uint8_t*)usart1.Rx); //write response to screen
+			USART2_write_line((uint8_t*)START, (uint8_t*)END); //write response to screen
 			return (uint32_t)ON;
 		}
 		else if(strstr((const char*)usart1.Rx , (const char*)off)){
-			write_usart2((uint8_t*)usart1.Rx); //write response to screen
+			USART2_write_line((uint8_t*)START, (uint8_t*)END);  //write response to screen
 			return (uint32_t)OFF;
 		}
 		else if(strstr((const char*)usart1.Rx , (const char*)no_path)){
-			write_usart2((uint8_t*)usart1.Rx); //write response to screen
+			USART2_write_line((uint8_t*)START, (uint8_t*)END);  //write response to screen
 			return (uint32_t)NO_PATH;
 		}
 		else{
@@ -345,9 +349,9 @@ SWITCH_STATE find_state_usart1_Buffer_Rx(uint8_t *on, uint8_t *off,uint8_t *no_p
 
 	else{
 		/*!TODO: when usart1.Rx buffer is overflown start check from end??*/
-		write_usart2((uint8_t*)"\r\nBUFFER_OVERFLOW\r\n");
+		write_usart2((uint8_t*)"\r\nBUFFER_OVERFLOW::RX BUFFER CONTENT\r\n");
 		write_usart2((uint8_t*)usart1.Rx);
-		return (uint32_t)NON;
+		return (uint32_t)NO_PATH;
 	}
 
 }
@@ -364,9 +368,6 @@ void USART1_IRQHandler(void){
 		usart1.Rx[usart1.read_index] = (uint8_t)(c & 0xFF);
 		usart1.read_index++;
 		usart1.Rx_len++; // count total chars received
-
-
-		//***
 
 		if(c == (uint8_t)'\n' && USART1_NEW_LINE_READ){
 			USART1_NEW_LINE_FOUND = TRUE;

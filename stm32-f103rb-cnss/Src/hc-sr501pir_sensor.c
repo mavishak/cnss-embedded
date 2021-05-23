@@ -137,9 +137,14 @@ void EXTI4_IRQHandler(void)
 	EXTI->PR |= 0x00000010; //reset flag by writing 1 to bit 4 (reference manual 10.3.6)
 	if(timeout_done_timer3())
 	{
+		write_usart2((uint8_t*)("\r\nSENSOR_IF\r\n"));//For test
 		add_event(alert_Handler);
 		set_timeout_timer3(60); //60 seconds = 1 minute
 	}
+	else{
+		write_usart2((uint8_t*)("\r\nSENSOR_ELSE\r\n"));//For test
+	}
+
 
 }
 

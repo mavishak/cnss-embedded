@@ -23,14 +23,14 @@ void USART1_init();
 void set_usart1_buffer_Tx(uint8_t *command);
 void set_usart1_buffer_Rx();
 STATE USART1_search_buffer_Rx(uint8_t *pass, uint8_t *fail);
-SWITCH_STATE find_state_usart1_Buffer_Rx(uint8_t *on, uint8_t *off,uint8_t *no_path);
+SWITCH_STATE USART1_check_state_buffer_Rx(uint8_t *on, uint8_t *off,uint8_t *no_path);
 void write_usart1(uint8_t *command);//This function should call set_usart1_buffer_Tx
 
 
 /*returns TRUE if a new line was found in Rx buffer*/
 BOOL USART1_NEW_LINE_FOUND_get(void);
 
-/*sets flag NEW_LINE_READ - must be called after using: USART1_search_buffer_Rx and find_state_usart1_Buffer_Rx*/
+/*sets flag NEW_LINE_READ - must be called after using: USART1_search_buffer_Rx and USART1_check_state_buffer_Rx*/
 void USART1_NEW_LINE_READ_set(void);
 
 /*special function writes content in USART1 Rx buffer: from start to end to the screen*/

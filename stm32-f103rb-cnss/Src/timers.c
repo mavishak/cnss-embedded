@@ -324,6 +324,7 @@ void TIM2_IRQHandler(void)
 		timer2.countTicks++;
 
 	}
+	write_usart2((uint8_t*)("\r\nTIMER2\r\n"));//For test
 
 
 }
@@ -336,6 +337,7 @@ void TIM3_IRQHandler(void)
 		timer3.countTicks++;
 
 	}
+	write_usart2((uint8_t*)("\r\nTIMER3\r\n"));//For test
 
 
 }
@@ -348,6 +350,7 @@ void TIM4_IRQHandler(void)
 		timer4.countTicks++;
 
 	}
+	write_usart2((uint8_t*)("\r\nTIMER4\r\n"));//For test
 
 }
 

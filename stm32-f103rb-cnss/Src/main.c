@@ -64,23 +64,13 @@ int main(void)
 	write_usart2((uint8_t*)("\r\n_______________\r\n"));//For test
 
 
-	enable_sensor(); // FOR TESTING
+	//enable_sensor(); // FOR TESTING
 
 	while(1)
 	{
 
-
-
-
-
-			//add_event(alert_Handler);
-			alert_Handler();
-			delay_with_timer2(10);
-
-
-
-		//do_event();
-//		monitor_switch_state(120); // every 2 minutes
+		do_event();
+		monitor_switch_state(120); // every 2 minutes
 
 	}
 }

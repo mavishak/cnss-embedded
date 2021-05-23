@@ -44,28 +44,16 @@ void setImagePath(void){
 void *alert_Handler(void){
 
 
-//	disable_timer2();
-//	disable_timer3();
-//	disable_sensor();
-
 	uint32_t i  = 3;
 	while(i > 0  && !recordAlert() && connection_closed){
 		i--;
 	}
 
-
-//	enable_timer2();
-//	enable_timer3();
-//	enable_sensor();
 	return NULL;
 
 }
 
 void *control_Handler(void){
-
-//	disable_timer2();
-//	disable_timer3();
-//	disable_sensor();
 
 	state = NON; // this will change in checkSwitchState()
 
@@ -76,6 +64,7 @@ void *control_Handler(void){
 
 	if(state == OFF || state == NO_PATH){
 		disable_sensor();
+		disable_timer3(); // otherwise the timer will keep going for ever and an overflow will occur
 		write_usart2((uint8_t*)("\r\nOFF/NO_PATH\r\n"));
 	}
 
@@ -85,12 +74,10 @@ void *control_Handler(void){
 	}
 	else{ //NON
 		disable_sensor(); // As there is no comunication with Firebase there is no sence for the sensor to be on and send alerts.
+		disable_timer3(); // otherwise the timer will keep going for ever and an overflow will occur
 		write_usart2((uint8_t*)("\r\nNON\r\n"));
 	}
 
-//	enable_timer2();
-//	enable_timer3();
-//	enable_sensor();
 	return NULL;
 
 
@@ -107,7 +94,7 @@ BOOL recordAlert(void){
 	connection_closed = TRUE;
 
 	// Reset ESP8266
-//	 if(!reset(3,6)){ //!TODO THIS FUNCTIONALITY NEEDS FIXING!!!
+//	 if(!reset(3,6)){
 //		return FALSE;
 //	 }
 //	 delay_with_timer4(1);
@@ -116,13 +103,13 @@ BOOL recordAlert(void){
 
 
 	//Set client mode
-	if(!setClientMode(2,10)){
+	if(!setClientMode(2,6)){
 		return FALSE;
 	}
 	write_usart2((uint8_t*)"1\r\n");
 
 	//Join access point
-	if(!joinAccessPoint(2,6)){
+	if(!joinAccessPoint(2,10)){
 		return FALSE;
 	}
 	write_usart2((uint8_t*)"2\r\n");
@@ -180,22 +167,22 @@ BOOL checkSwitchState(void){
 	connection_closed = TRUE;//added 30.4.21
 
 	//Reset ESP8266
-	if(!reset(3,1)){ //!TODO THIS FUNCTIONALITY NEEDS FIXING!!!
-		return FALSE;
-	}
-	delay_with_timer4(1);
+//	if(!reset(3,6)){
+//		return FALSE;
+//	}
+//	delay_with_timer4(1);
 
 	//write_usart2((uint8_t*)"0\r\n"); //with this it reaches AT+CWJAP
 
 
 	//Set client mode
-	if(!setClientMode(3,6)){
+	if(!setClientMode(2,6)){
 		return FALSE;
 	}
 	write_usart2((uint8_t*)"1\r\n");
 
 	//Join access point
-	if(!joinAccessPoint(3,6)){
+	if(!joinAccessPoint(2,10)){
 		return FALSE;
 	}
 	write_usart2((uint8_t*)"2\r\n");
@@ -203,7 +190,7 @@ BOOL checkSwitchState(void){
 	/*Default: AT+CIPMUX=0 (according to: AT instruction set- 5.2.15)*/
 
 	//Connect HOST IP
-	if(!connectFirebaseHost(3,3,6,20)){
+	if(!connectFirebaseHost(2,2,6,30)){
 		return FALSE;
 	}
 	write_usart2((uint8_t*)"3\r\n");
@@ -215,17 +202,15 @@ BOOL checkSwitchState(void){
 
 
 	//Send number of data bytes
-	if(!sendRequest(3,3,30,60)){
-		//closeConnection(3,3);//original line (until 30.4.21)
-		connection_closed = closeConnection(3,3);//added 30.4.21
+	if(!sendRequest(2,2,30,40)){
+		connection_closed = closeConnection(2,6);
 		return FALSE;
 	}
 	write_usart2((uint8_t*)"5\r\n");
 
 	//Read response
-	if(!parseResponse(180)){//timeout set t0 3 minutes
-		//closeConnection(3,3);//original line (until 30.4.21)
-		connection_closed = closeConnection(3,3);//added 30.4.21
+	if(!parseResponse(120)){//timeout set t0 3 minutes
+		connection_closed = closeConnection(2,6);//added 30.4.21
 		return FALSE;
 	}
 
@@ -403,13 +388,10 @@ BOOL connectFirebaseHost(uint32_t _ssl_tries, uint32_t _cipstart_tries , uint32_
 		while(found == STANDBY && !timeout_with_timer4(_cipstart_timeout)){
 			if(USART1_NEW_LINE_FOUND_get()){
 				found = USART1_search_buffer_Rx((uint8_t *)AT_OK, (uint8_t *)AT_ERROR);
-				USART1_NEW_LINE_READ_set();
-			}
-			if(found == STANDBY){
-				if(USART1_NEW_LINE_FOUND_get()){
+				if(found == STANDBY){
 					found = USART1_search_buffer_Rx((uint8_t *)AT_ALREADY_CONNECTED, (uint8_t *)AT_ERROR);// CRITICAL!
-					USART1_NEW_LINE_READ_set();
 				}
+				USART1_NEW_LINE_READ_set();
 			}
 		}
 		if(found == PASS){
@@ -473,13 +455,10 @@ BOOL sendRequest(uint32_t _CIPSEND_tries,uint32_t _SEND_OK_tries , uint32_t _CIP
 		while(found == STANDBY && !timeout_with_timer4(_CIPSEND_timeout)){
 			if(USART1_NEW_LINE_FOUND_get()){
 				found = USART1_search_buffer_Rx((uint8_t *)">", (uint8_t *)AT_ERROR);
-				USART1_NEW_LINE_READ_set();
-			}
-			if(found == STANDBY){
-				if(USART1_NEW_LINE_FOUND_get()){
+				if(found == STANDBY){
 					found = USART1_search_buffer_Rx((uint8_t *)">", (uint8_t *)"CLOSED\r\n");
-					USART1_NEW_LINE_READ_set();
 				}
+				USART1_NEW_LINE_READ_set();
 			}
 		}
 		if(found == PASS){
@@ -549,14 +528,11 @@ BOOL parseResponse(uint32_t timeout){
 	state = NON;
 	while(found == STANDBY && !timeout_with_timer4(timeout)){
 		if(USART1_NEW_LINE_FOUND_get()){
-			state = find_state_usart1_Buffer_Rx((uint8_t *)"\"on\"CLOSED", (uint8_t *)"\"off\"CLOSED", (uint8_t *)"nullCLOSED");
-			USART1_NEW_LINE_READ_set();
-		}
-		if(state != NON){
-			if(USART1_NEW_LINE_FOUND_get()){
+			state = USART1_check_state_buffer_Rx((uint8_t *)"\"on\"CLOSED", (uint8_t *)"\"off\"CLOSED", (uint8_t *)"nullCLOSED");
+			if(state != NON){
 				found = USART1_search_buffer_Rx((uint8_t *)"CLOSED\r\n", (uint8_t *)AT_FAIL);
-				USART1_NEW_LINE_READ_set();
 			}
+			USART1_NEW_LINE_READ_set();
 		}
 	}
 	if(found == PASS){

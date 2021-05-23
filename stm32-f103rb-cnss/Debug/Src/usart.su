@@ -12,5 +12,5 @@ usart.c:224:6:write_usart1	16	static
 usart.c:251:6:set_usart1_buffer_Tx	16	static
 usart.c:269:6:set_usart1_buffer_Rx	8	static
 usart.c:287:7:USART1_search_buffer_Rx	16	static
-usart.c:322:14:find_state_usart1_Buffer_Rx	24	static
-usart.c:356:6:USART1_IRQHandler	4	static
+usart.c:323:14:USART1_check_state_buffer_Rx	24	static
+usart.c:360:6:USART1_IRQHandler	4	static
