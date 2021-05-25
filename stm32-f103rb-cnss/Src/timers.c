@@ -17,8 +17,7 @@ static TIMER timer3;
 static TIMER timer4;
 
 
-/*init's timer2 to  interrupt once a second when enabled*/
-void init_timer2(void){
+void TIMER2_init(void){
 
 	/* APB1 peripheral clock enable register (RCC_APB1ENR) {p.148 in the reference manual} */
 	RCC->APB1ENR |= 0x00000001; // TIM2EN: TIM2 timer clock enable
@@ -61,8 +60,7 @@ void init_timer2(void){
 
 }
 
-/*init's timer3 to  interrupt once a milli second when enabled*/
-void init_timer3(void){
+void TIMER3_init(void){
 	/* APB1 peripheral clock enable register (RCC_APB1ENR) {p.148 in the reference manual} */
 	RCC->APB1ENR |= 0x00000002; // TIM3EN: TIM3 timer clock enable
 
@@ -104,8 +102,7 @@ void init_timer3(void){
 
 }
 
-/*init's timer4 to  interrupt once a second when enabled*/
-void init_timer4(void)
+void TIMER4_init(void)
 {
 	/* APB1 peripheral clock enable register (RCC_APB1ENR) {p.148 in the reference manual} */
 	RCC->APB1ENR |= 0x00000004; // TIM4EN: TIM4 timer clock enable
@@ -139,153 +136,104 @@ void init_timer4(void)
 }
 
 
-void enable_timer2(void)
+void TIMER2_enable(void)
 {
 	TIM2->CR1 |= 0x0001; // CEN: Counter enable
 }
 
-void enable_timer3(void)
+void TIMER3_enable(void)
 {
 	TIM3->CR1 |= 0x0001; // CEN: Counter enable
 }
 
-void enable_timer4(void)
+void TIMER4_enable(void)
 {
 	TIM4->CR1 |= 0x0001; // CEN: Counter enable
 }
 
 
-void disable_timer2(void)
+void TIMER2_disable(void)
 {
 	TIM2->CR1 &= ~(0x0001); // CEN: Counter disable
 }
 
-void disable_timer3(void)
+void TIMER3_disable(void)
 {
 	TIM3->CR1 &= ~(0x0001); // CEN: Counter disable
 }
 
-void disable_timer4(void)
+void TIMER4_disable(void)
 {
 	TIM4->CR1 &= ~(0x0001); // CEN: Counter disable
 
 }
 
 
-void delay_with_timer2(uint32_t num_of_sec)
+void TIMER2_delay(uint32_t num_of_sec)
 {
-	enable_timer2();
+	TIMER2_enable();
 
 	timer2.countTicks = 0;
 	while(timer2.countTicks < num_of_sec);
 
-	disable_timer2();
+	TIMER2_disable();
 
 }
 
-void delay_with_timer3(uint32_t num_of_sec)
+void TIMER3_delay(uint32_t num_of_sec)
 {
-	enable_timer3();
+	TIMER3_enable();
 
 	timer3.countTicks = 0;
 	while(timer3.countTicks < num_of_sec);
-	disable_timer3();
+	TIMER3_disable();
 
 }
 
-void delay_with_timer4(uint32_t num_of_sec)
+void TIMER4_delay(uint32_t num_of_sec)
 {
-	enable_timer4();
+	TIMER4_enable();
 
 	timer4.countTicks = 0;
 	while(timer4.countTicks < num_of_sec);
 
-	disable_timer4();
+	TIMER4_disable();
 
 }
 
 
-/*when the function reaches the timeout, it returns TRUE (=1).
- Else returns false*/
-BOOL timeout_with_timer2(uint32_t num_of_sec)
-{
-	enable_timer2();
-
-	if(timer2.countTicks >= num_of_sec){
-		disable_timer2();
-		timer2.countTicks = 0;
-		return TRUE;
-	}
-	return FALSE;
-
-}
-
-/*when the function reaches the timeout, it returns TRUE (=1).
- Else returns false*/
-BOOL timeout_with_timer3(uint32_t num_of_sec)
-{
-	enable_timer3();
-
-	if(timer3.countTicks >= num_of_sec){
-		disable_timer3();
-		timer3.countTicks = 0;
-		return TRUE;
-	}
-	return FALSE;
-
-}
-
-/*when the function reaches the timeout, it returns TRUE (=1).
- Else returns false*/
-BOOL timeout_with_timer4(uint32_t num_of_sec)
-{
-	enable_timer4();
-
-	if(timer4.countTicks >= num_of_sec){
-		disable_timer4();
-		timer4.countTicks = 0;
-		return TRUE;
-	}
-	return FALSE;
-
-}
-
-
-void set_timeout_timer2(uint32_t num_of_sec)
+void TIMER2_set_timeout(uint32_t num_of_sec)
 {
 	timer2.targetTick = num_of_sec;
-	enable_timer2();
+	timer2.countTicks = 0;
+	TIMER2_enable();
 }
 
-BOOL timeout_done_timer2(void){
+BOOL TIMER2_timeout_done(void){
 
 
 	if(timer2.countTicks >= timer2.targetTick){
 
-		disable_timer2();
-		timer2.countTicks = 0;
-		timer2.targetTick = 0; // cleanup
+		TIMER2_disable();
 		return TRUE;
 	}
 	return FALSE;
 
 }
 
-/*This function sets timer3 num_of_sec_timer3 to param num_of_sec, and enables timer3 timeout*/
-void set_timeout_timer3(uint32_t num_of_sec)
+
+void TIMER3_set_timeout(uint32_t num_of_sec)
 {
 	timer3.targetTick = num_of_sec;
-	enable_timer3();
+	timer3.countTicks = 0;
+	TIMER3_enable();
 }
 
-/*returns true if timeout is done, otherwise returns false*/
-BOOL timeout_done_timer3(void){
+BOOL TIMER3_timeout_done(void){
 
 	if(timer3.countTicks >= timer3.targetTick){
 
-		disable_timer3();
-		timer3.countTicks = 0;
-		timer3.targetTick = 0; // cleanup
+		TIMER3_disable();
 		return TRUE;
 	}
 	return FALSE;
@@ -293,27 +241,23 @@ BOOL timeout_done_timer3(void){
 }
 
 
-/*This function sets timer3 num_of_sec_timer3 to param num_of_sec, and enables timer3 timeout*/
-void set_timeout_timer4(uint32_t num_of_seconds)
+void TIMER4_set_timeout(uint32_t num_of_seconds)
 {
 	timer4.targetTick = num_of_seconds;
-	enable_timer4();
+	timer4.countTicks = 0;
+	TIMER4_enable();
 }
 
-/*returns true if timeout is done, otherwise returns false*/
-BOOL timeout_done_timer4(void){
+BOOL TIMER4_timeout_done(void){
 
 	if(timer4.countTicks >= timer4.targetTick){
 
-		disable_timer4();
-		timer4.countTicks = 0;
-		timer4.targetTick = 0; // cleanup
+		TIMER4_disable();
 		return TRUE;
 	}
 	return FALSE;
 
 }
-
 
 
 void TIM2_IRQHandler(void)
@@ -323,8 +267,13 @@ void TIM2_IRQHandler(void)
 		TIM2->SR &= ~(0x0001);
 		timer2.countTicks++;
 
+		// avoid overflow
+		if(timer2.countTicks == MAX_COUNT){
+			timer2.countTicks = 0;
+		}
+
 	}
-	write_usart2((uint8_t*)("\r\nTIMER2\r\n"));//For test
+	// USART2_write((uint8_t*)("\r\nTIMER2\r\n"));//For test
 
 
 }
@@ -336,8 +285,13 @@ void TIM3_IRQHandler(void)
 		TIM3->SR &= ~(0x0001);
 		timer3.countTicks++;
 
+		// avoid overflow
+		if(timer3.countTicks == MAX_COUNT){
+			timer3.countTicks = 0;
+		}
+
 	}
-	write_usart2((uint8_t*)("\r\nTIMER3\r\n"));//For test
+	// USART2_write((uint8_t*)("\r\nTIMER3\r\n"));//For test
 
 
 }
@@ -349,8 +303,13 @@ void TIM4_IRQHandler(void)
 		TIM4->SR &= ~(0x0001);
 		timer4.countTicks++;
 
+		// avoid overflow
+		if(timer4.countTicks == MAX_COUNT){
+			timer4.countTicks = 0;
+		}
+
 	}
-	write_usart2((uint8_t*)("\r\nTIMER4\r\n"));//For test
+	// USART2_write((uint8_t*)("\r\nTIMER4\r\n"));//For test
 
 }
 

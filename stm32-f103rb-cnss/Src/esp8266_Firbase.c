@@ -39,6 +39,7 @@ void setImagePath(void){
 
 	memset((char*)image_path, '\0', PATH_SIZE*sizeof(uint8_t));
 	sprintf((char*)image_path, "image/path");
+
 }
 
 void *alert_Handler(void){
@@ -48,6 +49,8 @@ void *alert_Handler(void){
 	while(i > 0  && !recordAlert() && connection_closed){
 		i--;
 	}
+
+	TIMER4_disable(); // timer 4 is used as timeout for AT commands
 
 	return NULL;
 
@@ -64,22 +67,23 @@ void *control_Handler(void){
 
 	if(state == OFF || state == NO_PATH){
 		disable_sensor();
-		disable_timer3(); // otherwise the timer will keep going for ever and an overflow will occur
-		write_usart2((uint8_t*)("\r\nOFF/NO_PATH\r\n"));
+		TIMER3_disable(); // otherwise the timer will keep going for ever and an overflow will occur
+		USART2_write((uint8_t*)("\r\nOFF/NO_PATH\r\n"));
 	}
 
 	else if(state == ON){
 		enable_sensor();
-		write_usart2((uint8_t*)("\r\nON\r\n"));
+		USART2_write((uint8_t*)("\r\nON\r\n"));
 	}
 	else{ //NON
 		disable_sensor(); // As there is no comunication with Firebase there is no sence for the sensor to be on and send alerts.
-		disable_timer3(); // otherwise the timer will keep going for ever and an overflow will occur
-		write_usart2((uint8_t*)("\r\nNON\r\n"));
+		TIMER3_disable(); // otherwise the timer will keep going for ever and an overflow will occur
+		USART2_write((uint8_t*)("\r\nNON\r\n"));
 	}
 
-	return NULL;
+	TIMER4_disable(); // timer 4 is used as timeout for AT commands
 
+	return NULL;
 
 }
 
@@ -89,30 +93,30 @@ void *control_Handler(void){
  * init_usart1(), init_usart2() and init_timer4() must be executed.*/
 BOOL recordAlert(void){
 
-	write_usart2((uint8_t*)"In recordAlert()\r\n"); // for debugging
+	USART2_write((uint8_t*)"In recordAlert()\r\n"); // for debugging
 
 	connection_closed = TRUE;
 
 	// Reset ESP8266
-//	 if(!reset(3,6)){
-//		return FALSE;
-//	 }
-//	 delay_with_timer4(1);
+	 if(!reset(3,6)){
+		return FALSE;
+	 }
+	 TIMER4_delay(1);
 
-	write_usart2((uint8_t*)"0\r\n"); //with this it reaches AT+CWJAP
+	USART2_write((uint8_t*)"0\r\n"); //with this it reaches AT+CWJAP
 
 
 	//Set client mode
 	if(!setClientMode(2,6)){
 		return FALSE;
 	}
-	write_usart2((uint8_t*)"1\r\n");
+	USART2_write((uint8_t*)"1\r\n");
 
 	//Join access point
 	if(!joinAccessPoint(2,10)){
 		return FALSE;
 	}
-	write_usart2((uint8_t*)"2\r\n");
+	USART2_write((uint8_t*)"2\r\n");
 
 	/*Default: AT+CIPMUX=0 (according to: AT instruction set- 5.2.15)*/
 
@@ -120,16 +124,16 @@ BOOL recordAlert(void){
 	if(!connectFirebaseHost(2,2,6,30)){
 		return FALSE;
 	}
-	write_usart2((uint8_t*)"3\r\n");
+	USART2_write((uint8_t*)"3\r\n");
 
 
 	//Set Image Path
 	//setImagePath(); //Need to check params later
-	//write_usart2((uint8_t*)"4\r\n");
+	//USART2_write((uint8_t*)"4\r\n");
 
 	//Create HTTP request
 	createPostMsg();
-	write_usart2((uint8_t*)"4\r\n");
+	USART2_write((uint8_t*)"4\r\n");
 
 
 	//Send number of data bytes
@@ -138,7 +142,7 @@ BOOL recordAlert(void){
 		connection_closed = closeConnection(2,6);
 		return FALSE;
 	}
-	write_usart2((uint8_t*)"5\r\n");
+	USART2_write((uint8_t*)"5\r\n");
 
 	//Read response
 	if(!readResponse(120)){ //timeout set t0 3 minutes
@@ -147,11 +151,11 @@ BOOL recordAlert(void){
 		return FALSE;
 	}
 
-	write_usart2((uint8_t*)"6\r\n");
+	USART2_write((uint8_t*)"6\r\n");
 
 	//Close cunnection with firebase -  firebase already closes connection with "CLOSED" response
 	//closeConnection(3,3);
-	//write_usart2((uint8_t*)"7\r\n");
+	//USART2_write((uint8_t*)"7\r\n");
 
 	return TRUE;
 
@@ -162,30 +166,30 @@ BOOL recordAlert(void){
  * init_usart1(), init_usart2() and init_timer4() must be executed.*/
 BOOL checkSwitchState(void){
 
-	write_usart2((uint8_t*)"In checkSwitchState()\r\n"); // for debugging
+	USART2_write((uint8_t*)"In checkSwitchState()\r\n"); // for debugging
 
 	connection_closed = TRUE;//added 30.4.21
 
 	//Reset ESP8266
-//	if(!reset(3,6)){
-//		return FALSE;
-//	}
-//	delay_with_timer4(1);
+	if(!reset(3,6)){
+		return FALSE;
+	}
+	TIMER4_delay(1);
 
-	//write_usart2((uint8_t*)"0\r\n"); //with this it reaches AT+CWJAP
+	USART2_write((uint8_t*)"0\r\n"); //with this it reaches AT+CWJAP
 
 
 	//Set client mode
 	if(!setClientMode(2,6)){
 		return FALSE;
 	}
-	write_usart2((uint8_t*)"1\r\n");
+	USART2_write((uint8_t*)"1\r\n");
 
 	//Join access point
 	if(!joinAccessPoint(2,10)){
 		return FALSE;
 	}
-	write_usart2((uint8_t*)"2\r\n");
+	USART2_write((uint8_t*)"2\r\n");
 
 	/*Default: AT+CIPMUX=0 (according to: AT instruction set- 5.2.15)*/
 
@@ -193,12 +197,12 @@ BOOL checkSwitchState(void){
 	if(!connectFirebaseHost(2,2,6,30)){
 		return FALSE;
 	}
-	write_usart2((uint8_t*)"3\r\n");
+	USART2_write((uint8_t*)"3\r\n");
 
 
 	//Create HTTP request
 	createGetMsg();
-	write_usart2((uint8_t*)"4\r\n");
+	USART2_write((uint8_t*)"4\r\n");
 
 
 	//Send number of data bytes
@@ -206,7 +210,7 @@ BOOL checkSwitchState(void){
 		connection_closed = closeConnection(2,6);
 		return FALSE;
 	}
-	write_usart2((uint8_t*)"5\r\n");
+	USART2_write((uint8_t*)"5\r\n");
 
 	//Read response
 	if(!parseResponse(120)){//timeout set t0 3 minutes
@@ -214,11 +218,11 @@ BOOL checkSwitchState(void){
 		return FALSE;
 	}
 
-	write_usart2((uint8_t*)"6\r\n");
+	USART2_write((uint8_t*)"6\r\n");
 
 	//Close cunnection with firebase - this might be useless as firebase already closes connection with "CLOSED" response
 	//closeConnection(3,3);
-	//write_usart2((uint8_t*)"7\r\n");
+	//USART2_write((uint8_t*)"7\r\n");
 
 	return TRUE;
 
@@ -226,7 +230,6 @@ BOOL checkSwitchState(void){
 }
 
 
-//-------------------------------------------------------------------------------------------------------------
 
 
 /*This function pings ESP8266 modem with AT test command,
@@ -236,9 +239,10 @@ BOOL checkSwitchState(void){
 BOOL ping(uint32_t tries, uint32_t timeout){
 
 	found = STANDBY;
-	write_usart1((uint8_t*)AT_COMMAND);
+	USART1_write((uint8_t*)AT_COMMAND);
 	while(tries > 0){
-		while(found == STANDBY && !timeout_with_timer4(timeout)){
+		TIMER4_set_timeout(timeout);
+		while(found == STANDBY && !TIMER4_timeout_done()){
 			if(USART1_NEW_LINE_FOUND_get()){
 				found = USART1_search_buffer_Rx((uint8_t *)AT_OK, (uint8_t *)AT_ERROR); //returns true only if AT_OK is found
 				USART1_NEW_LINE_READ_set();
@@ -250,7 +254,7 @@ BOOL ping(uint32_t tries, uint32_t timeout){
 		}
 		else{ // FAIL OR TIMEOUT
 			tries--;
-			write_usart1((uint8_t*)AT_COMMAND);
+			USART1_write((uint8_t*)AT_COMMAND);
 		}
 	}
 	return FALSE;
@@ -266,9 +270,10 @@ BOOL ping(uint32_t tries, uint32_t timeout){
 BOOL reset(uint32_t tries, uint32_t timeout){
 
 	found = STANDBY;
-	write_usart1((uint8_t*)AT_RST);
+	USART1_write((uint8_t*)AT_RST);
 	while(tries > 0){
-		while(found == STANDBY && !timeout_with_timer4(timeout)){
+		TIMER4_set_timeout(timeout);
+		while(found == STANDBY && !TIMER4_timeout_done()){
 			if(USART1_NEW_LINE_FOUND_get()){
 				found = USART1_search_buffer_Rx((uint8_t *)AT_OK, (uint8_t *)AT_ERROR);
 				USART1_NEW_LINE_READ_set();
@@ -279,7 +284,7 @@ BOOL reset(uint32_t tries, uint32_t timeout){
 		}
 		else{ // FAIL OR TIMEOUT
 			tries--;
-			write_usart1((uint8_t*)AT_RST);
+			USART1_write((uint8_t*)AT_RST);
 		}
 	}
 	return FALSE;
@@ -294,9 +299,10 @@ BOOL reset(uint32_t tries, uint32_t timeout){
 BOOL setClientMode(uint32_t tries, uint32_t timeout){
 
 	found = STANDBY;
-	write_usart1((uint8_t*)AT_CWMODE);
+	USART1_write((uint8_t*)AT_CWMODE);
 	while(tries > 0){
-		while(found == STANDBY && !timeout_with_timer4(timeout)){
+		TIMER4_set_timeout(timeout);
+		while(found == STANDBY && !TIMER4_timeout_done()){
 			if(USART1_NEW_LINE_FOUND_get()){
 				found = USART1_search_buffer_Rx((uint8_t *)AT_OK, (uint8_t *)AT_ERROR); //returns true only if AT_OK is found
 				USART1_NEW_LINE_READ_set();
@@ -307,7 +313,7 @@ BOOL setClientMode(uint32_t tries, uint32_t timeout){
 		}
 		else{ // FAIL OR TIMEOUT
 			tries--;
-			write_usart1((uint8_t*)AT_CWMODE);
+			USART1_write((uint8_t*)AT_CWMODE);
 		}
 	}
 	return FALSE;
@@ -324,9 +330,10 @@ BOOL joinAccessPoint(uint32_t tries, uint32_t timeout){
 	sprintf((char*)command, "AT+CWJAP=\"%s\",\"%s\"\r\n",SSID,PWD);
 
 	found = STANDBY;
-	write_usart1((uint8_t*)command);
+	USART1_write((uint8_t*)command);
 	while(tries > 0){
-		while(found == STANDBY && !timeout_with_timer4(timeout)){
+		TIMER4_set_timeout(timeout);
+		while(found == STANDBY && !TIMER4_timeout_done()){
 			if(USART1_NEW_LINE_FOUND_get()){
 				found = USART1_search_buffer_Rx((uint8_t *)AT_OK, (uint8_t *)AT_FAIL);
 				USART1_NEW_LINE_READ_set();
@@ -337,7 +344,7 @@ BOOL joinAccessPoint(uint32_t tries, uint32_t timeout){
 		}
 		else{ // FAIL OR TIMEOUT
 			tries--;
-			write_usart1((uint8_t*)command);
+			USART1_write((uint8_t*)command);
 		}
 	}
 	return FALSE;
@@ -355,9 +362,10 @@ BOOL connectFirebaseHost(uint32_t _ssl_tries, uint32_t _cipstart_tries , uint32_
 
 	//Create secure cunnection via SSL
 	found = STANDBY;
-	write_usart1((uint8_t*)"AT+CIPSSLSIZE=4096\r\n");//at_instruction: 5.2.4 page 50
+	USART1_write((uint8_t*)"AT+CIPSSLSIZE=4096\r\n");//at_instruction: 5.2.4 page 50
 	while(_ssl_tries > 0){
-		while(found == STANDBY && !timeout_with_timer4(_ssl_timeout)){
+		TIMER4_set_timeout(_ssl_timeout);
+		while(found == STANDBY && !TIMER4_timeout_done()){
 			if(USART1_NEW_LINE_FOUND_get()){
 				found = USART1_search_buffer_Rx((uint8_t *)AT_OK, (uint8_t *)AT_ERROR);
 				USART1_NEW_LINE_READ_set();
@@ -368,7 +376,7 @@ BOOL connectFirebaseHost(uint32_t _ssl_tries, uint32_t _cipstart_tries , uint32_
 		}
 		else{ // FAIL OR TIMEOUT
 			_ssl_tries--;
-			write_usart1((uint8_t*)"AT+CIPSSLSIZE=4096\r\n");
+			USART1_write((uint8_t*)"AT+CIPSSLSIZE=4096\r\n");
 		}
 	}
 
@@ -383,9 +391,10 @@ BOOL connectFirebaseHost(uint32_t _ssl_tries, uint32_t _cipstart_tries , uint32_
 	sprintf((char*)command, "AT+CIPSTART=\"SSL\",\"%s\",%ld\r\n",(char*)firebase_host, https_port);
 
 	found = STANDBY;
-	write_usart1((uint8_t*)command);
+	USART1_write((uint8_t*)command);
 	while(_cipstart_tries > 0){
-		while(found == STANDBY && !timeout_with_timer4(_cipstart_timeout)){
+		TIMER4_set_timeout(_cipstart_timeout);
+		while(found == STANDBY && !TIMER4_timeout_done()){
 			if(USART1_NEW_LINE_FOUND_get()){
 				found = USART1_search_buffer_Rx((uint8_t *)AT_OK, (uint8_t *)AT_ERROR);
 				if(found == STANDBY){
@@ -399,7 +408,7 @@ BOOL connectFirebaseHost(uint32_t _ssl_tries, uint32_t _cipstart_tries , uint32_
 		}
 		else{ // FAIL OR TIMEOUT
 			_cipstart_tries--;
-			write_usart1((uint8_t*)command);
+			USART1_write((uint8_t*)command);
 		}
 	}
 	return FALSE;
@@ -450,9 +459,10 @@ BOOL sendRequest(uint32_t _CIPSEND_tries,uint32_t _SEND_OK_tries , uint32_t _CIP
 	sprintf((char*)command, "AT+CIPSEND=%ld\r\n",http_len);
 
 	found = STANDBY;
-	write_usart1((uint8_t*)command);
+	USART1_write((uint8_t*)command);
 	while(_CIPSEND_tries > 0){
-		while(found == STANDBY && !timeout_with_timer4(_CIPSEND_timeout)){
+		TIMER4_set_timeout(_CIPSEND_timeout);
+		while(found == STANDBY && !TIMER4_timeout_done()){
 			if(USART1_NEW_LINE_FOUND_get()){
 				found = USART1_search_buffer_Rx((uint8_t *)">", (uint8_t *)AT_ERROR);
 				if(found == STANDBY){
@@ -466,7 +476,7 @@ BOOL sendRequest(uint32_t _CIPSEND_tries,uint32_t _SEND_OK_tries , uint32_t _CIP
 		}
 		else{ // FAIL OR TIMEOUT
 			_CIPSEND_tries--;
-			write_usart1((uint8_t*)command);
+			USART1_write((uint8_t*)command);
 		}
 	}
 	if(found == FAIL || found == STANDBY){
@@ -476,11 +486,12 @@ BOOL sendRequest(uint32_t _CIPSEND_tries,uint32_t _SEND_OK_tries , uint32_t _CIP
 
 	/*Send HTTP request*/
 	found = STANDBY;
-	write_usart1((uint8_t*)http);
+	USART1_write((uint8_t*)http);
 
 	/*Wait for SEND_OK after this a response will come*/
 	while(_SEND_OK_tries > 0){
-		while(found == STANDBY && !timeout_with_timer4(_SEND_OK_timeout)){
+		TIMER4_set_timeout(_SEND_OK_timeout);
+		while(found == STANDBY && !TIMER4_timeout_done()){
 			if(USART1_NEW_LINE_FOUND_get()){
 				found = USART1_search_buffer_Rx((uint8_t *)SEND_OK, (uint8_t *)AT_FAIL);
 				USART1_NEW_LINE_READ_set();
@@ -491,7 +502,7 @@ BOOL sendRequest(uint32_t _CIPSEND_tries,uint32_t _SEND_OK_tries , uint32_t _CIP
 		}
 		else{
 			_SEND_OK_tries--;
-			write_usart1((uint8_t*)http);
+			USART1_write((uint8_t*)http);
 		}
 	}
 	return FALSE;
@@ -505,7 +516,8 @@ BOOL sendRequest(uint32_t _CIPSEND_tries,uint32_t _SEND_OK_tries , uint32_t _CIP
 BOOL readResponse(uint32_t timeout){
 
 	found = STANDBY;
-	while(found == STANDBY && !timeout_with_timer4(timeout)){
+	TIMER4_set_timeout(timeout);
+	while(found == STANDBY && !TIMER4_timeout_done()){
 		if(USART1_NEW_LINE_FOUND_get()){
 			found = USART1_search_buffer_Rx((uint8_t *)"CLOSED\r\n", (uint8_t *)AT_FAIL);
 			USART1_NEW_LINE_READ_set();
@@ -526,7 +538,8 @@ BOOL parseResponse(uint32_t timeout){
 
 	found = STANDBY;
 	state = NON;
-	while(found == STANDBY && !timeout_with_timer4(timeout)){
+	TIMER4_set_timeout(timeout);
+	while(found == STANDBY && !TIMER4_timeout_done()){
 		if(USART1_NEW_LINE_FOUND_get()){
 			state = USART1_check_state_buffer_Rx((uint8_t *)"\"on\"CLOSED", (uint8_t *)"\"off\"CLOSED", (uint8_t *)"nullCLOSED");
 			if(state != NON){
@@ -551,9 +564,10 @@ BOOL parseResponse(uint32_t timeout){
 BOOL closeConnection(uint32_t tries, uint32_t timeout){
 
 	found = STANDBY;
-	write_usart1((uint8_t*)AT_CIPCLOSE);
+	USART1_write((uint8_t*)AT_CIPCLOSE);
 	while(tries > 0){
-		while(found == STANDBY && !timeout_with_timer4(timeout)){
+		TIMER4_set_timeout(timeout);
+		while(found == STANDBY && !TIMER4_timeout_done()){
 			if(USART1_NEW_LINE_FOUND_get()){
 				found = USART1_search_buffer_Rx((uint8_t *)AT_OK, (uint8_t *)AT_ERROR);
 				USART1_NEW_LINE_READ_set();
@@ -564,7 +578,7 @@ BOOL closeConnection(uint32_t tries, uint32_t timeout){
 		}
 		else{ // FAIL OR TIMEOUT
 			tries--;
-			write_usart1((uint8_t*)AT_CIPCLOSE);
+			USART1_write((uint8_t*)AT_CIPCLOSE);
 		}
 	}
 	return FALSE;
@@ -580,22 +594,22 @@ void TestWifiConnection(void){
 
 
 	//Reset ESP8266
-//	write_usart1((uint8_t*)AT_RST);
+//	USART1_write((uint8_t*)AT_RST);
 //
 //	while(!found){
 //		found = USART1_search_buffer_Rx((uint8_t *)AT_OK, (uint8_t *)AT_ERROR);
 //	}
-//	write_usart2((uint8_t*)"AT_RST PASSED\r\n");
+//	USART2_write((uint8_t*)"AT_RST PASSED\r\n");
 //	found = FALSE;
 
 
 	//Set client mode
-	write_usart1((uint8_t*)AT_CWMODE);
-	write_usart2((uint8_t*)"BEFORE AT_CWMODE WHILE\r\n");
+	USART1_write((uint8_t*)AT_CWMODE);
+	USART2_write((uint8_t*)"BEFORE AT_CWMODE WHILE\r\n");
 	while(!found){
 		found = USART1_search_buffer_Rx((uint8_t *)AT_OK, (uint8_t *)AT_ERROR);
 	}
-	write_usart2((uint8_t*)"AT_CWMODE PASSED\r\n");
+	USART2_write((uint8_t*)"AT_CWMODE PASSED\r\n");
 	found = FALSE;
 
 
@@ -603,7 +617,7 @@ void TestWifiConnection(void){
 	memset((char*)command, '\0', COMMAND_SIZE*sizeof(uint8_t));
 	sprintf((char*)command, "AT+CWJAP=\"%s\",\"%s\"\r\n",SSID,PWD);
 
-	write_usart1((uint8_t*)command);
+	USART1_write((uint8_t*)command);
 
 	while(!found){
 		found = USART1_search_buffer_Rx((uint8_t *)AT_OK, (uint8_t *)AT_FAIL);
@@ -618,14 +632,14 @@ void TestWifiConnection(void){
 	memset((char*)command, '\0', COMMAND_SIZE*sizeof(uint8_t));
 	sprintf((char*)command, "AT+CIPSTART=\"TCP\",\"%s\",80\r\n", (char*)weather_api);
 
-	//write_usart2((uint8_t*)command); // test
-	write_usart1((uint8_t*)command);
+	//USART2_write((uint8_t*)command); // test
+	USART1_write((uint8_t*)command);
 
 	while(!found){
 		found = USART1_search_buffer_Rx((uint8_t *)AT_OK, (uint8_t *)AT_FAIL);
 		found = USART1_search_buffer_Rx((uint8_t *)AT_OK, (uint8_t *)AT_ALREADY_CONNECTED);
 	}
-	//write_usart2((uint8_t*)"AT+CIPSTART PASSED\r\n");
+	//USART2_write((uint8_t*)"AT+CIPSTART PASSED\r\n");
 	found = FALSE;
 
 
@@ -639,15 +653,15 @@ void TestWifiConnection(void){
 	sprintf((char*)command, "AT+CIPSEND=%ld\r\n",http_len);
 
 
-	//write_usart2((uint8_t*)command); // test
-	write_usart1((uint8_t*)command);
+	//USART2_write((uint8_t*)command); // test
+	USART1_write((uint8_t*)command);
 
 	while(!found){
 		found = USART1_search_buffer_Rx((uint8_t *)">", (uint8_t *)AT_ERROR);
 	}
 	found = FALSE;
 
-	write_usart1((uint8_t*)http);
+	USART1_write((uint8_t*)http);
 
 	// SEND OK
 	while(!found){
@@ -663,7 +677,7 @@ void TestWifiConnection(void){
 	found = FALSE;
 
 	//Close TCP connection: THIS MIGHT BE UNESESARY BECAUSE HTTP is vs 1.0 wich allows one request
-	write_usart1((uint8_t*)AT_CIPCLOSE);
+	USART1_write((uint8_t*)AT_CIPCLOSE);
 	while(!found){
 		found = USART1_search_buffer_Rx((uint8_t *)AT_OK, (uint8_t *)AT_ERROR);
 	}

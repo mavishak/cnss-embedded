@@ -53,15 +53,15 @@ int main(void)
 	init_queue();
 	init_sensor_with_interrupt(); // sensor interrupts are not inabled
 
-	init_timer2(); // for monitoring switch state.
-	init_timer3(); // for sensor delay
-	init_timer4(); // for ESP8266 timeout
+	TIMER2_init(); // for monitoring switch state.
+	TIMER3_init(); // for sensor delay
+	TIMER4_init(); // for ESP8266 timeout
 
 	USART1_init(); // for ESP8266
 
 
 	//init_i2c1();
-	write_usart2((uint8_t*)("\r\n_______________\r\n"));//For test
+	USART2_write((uint8_t*)("\r\n_______________\r\n"));//For test
 
 
 	//enable_sensor(); // FOR TESTING

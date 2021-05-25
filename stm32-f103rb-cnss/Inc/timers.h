@@ -12,41 +12,48 @@
 #include "event_queue.h"
 #include "esp8266_Firebase.h"
 
+#define MAX_COUNT 0x7FFFFFFF // largest posotive uint32
 
 //Timer 2
-void init_timer2(void);
-void enable_timer2(void);
-void disable_timer2(void);
-void delay_with_timer2(uint32_t num_of_sec); //polling
-BOOL timeout_with_timer2(uint32_t num_of_sec); // for use in while loops
-void set_timeout_timer2(uint32_t num_of_sec); // for use in if statements
-BOOL timeout_done_timer2(void); // for use in if statements
 
+/*init's timer to  interrupt once a second when enabled*/
+void TIMER2_init(void);
+void TIMER2_enable(void);
+void TIMER2_disable(void);
+
+/*Sets a timer delay to num_of_secs, blocks until done.
+ *For polling */
+void TIMER2_delay(uint32_t num_of_sec);
+
+/*This function sets a target as num_of_sec, and enables timer.
+ * For use in if statements*/
+void TIMER2_set_timeout(uint32_t num_of_sec);
+
+/*returns true if timer reached set_timouts target, otherwise returns false
+ *  For use in if statements*/
+BOOL TIMER2_timeout_done(void);
 
 //Timer 3
-void init_timer3(void);
-void enable_timer3(void);
-void disable_timer3(void);
-void delay_with_timer3(uint32_t num_of_sec);
-BOOL timeout_with_timer3(uint32_t num_of_sec);
-void set_timeout_timer3(uint32_t num_of_sec);
-BOOL timeout_done_timer3(void);
+void TIMER3_init(void);
+void TIMER3_enable(void);
+void TIMER3_disable(void);
+void TIMER3_delay(uint32_t num_of_sec);
+void TIMER3_set_timeout(uint32_t num_of_sec);
+BOOL TIMER3_timeout_done(void);
 
 //Timer 4
-void init_timer4(void);
-void enable_timer4(void);
-void disable_timer4(void);
-void delay_with_timer4(uint32_t num_of_sec);
-BOOL timeout_with_timer4(uint32_t num_of_sec);
-void set_timeout_timer4(uint32_t num_of_sec);
-BOOL timeout_done_timer4(void);
+void TIMER4_init(void);
+void TIMER4_enable(void);
+void TIMER4_disable(void);
+void TIMER4_delay(uint32_t num_of_sec);
+void TIMER4_set_timeout(uint32_t num_of_sec);
+BOOL TIMER4_timeout_done(void);
 
-
-typedef struct timer{
+typedef struct timer {
 
 	uint32_t countTicks;
 	uint32_t targetTick;
 
-}TIMER;
+} TIMER;
 
 #endif /* TIMERS_H_ */

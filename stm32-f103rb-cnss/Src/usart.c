@@ -22,7 +22,7 @@ static uint8_t c; // for holding the USART->DR value
 
 
 static BOOL USART1_NEW_LINE_FOUND; // This variable flags a new line in USART1 Rx
-static BOOL USART1_NEW_LINE_READ;
+static BOOL USART1_NEW_LINE_READ; // This variable needs to be set when new line in USART1 Rx is read
 
 BOOL USART1_NEW_LINE_FOUND_get(void){
 	return USART1_NEW_LINE_FOUND;
@@ -32,20 +32,14 @@ void USART1_NEW_LINE_READ_set(void){
 	USART1_NEW_LINE_READ = TRUE;
 }
 
-static uint8_t *START; // for search
-static uint8_t *END;
 
-/*This functions Inits all registors that have to do with enabling USART2 (ST-LINK/V.2)
- *inorder to send message to computer.
- *Note: Interrupts are not enabled intentionally.
- *This program works when TeraTerm speed is set to 9600*/
+static uint8_t *START;  // for search UART2_write_line
+static uint8_t *END;  // for search
+
+
 void USART2_init(){
 
 	/*This program works when TeraTerm speed is set to 9600 and USART_BRR is set to 0x34D.*/
-
-	/*ADDED...*/
-	/*Enable RCC for Alternate Funcion for PINs*/
-	//RCC->APB2ENR |= 0x00000001; //  (see RM 8.3.7) //I don't think this line is needed...
 
 	/*Enabla RCC for GPIO Port A*/
 	RCC->APB2ENR |= 0x00000004; // (see RM 8.3.7)
@@ -53,9 +47,6 @@ void USART2_init(){
 	/*Configure USART2 Tx (PA2) as Output */
 	GPIOA->CRL &= 0xFFFFF0FF; //Leave all bits as they are except for bit 2 (see RM 9.2.1)
 	GPIOA->CRL |= 0x00000A00; //Configure as Alternate function output Push-pull | Speed 2 MHz (see RM 9.2.1)
-	//supposedly this is supposed to be better:
-	//GPIOA->CRL |= 0x00000B00; //Configure as Alternate function output Push-pull | Speed 50 MHz (see RM 9.2.1)
-	/*...ADDED*/
 
 
 	/*Enable RCC for USART2*/
@@ -88,7 +79,6 @@ void USART2_init(){
 }
 
 
-/* Usart1 will be use for communication with esp8266. */
 void USART1_init(){
 
 	/*Enabla RCC for GPIO Port A*/
@@ -97,16 +87,13 @@ void USART1_init(){
 	/*Configure USART1 Tx (PA9) as Output*/
 	GPIOA->CRH &= 0xFFFFFF0F; //Leave all bits as they are except for bit 9 (see RM 9.2.2)
 	GPIOA->CRH |= 0x000000A0; //Configure as Alternate function output Push-pull | max speed 2 MHz (See RM 9.2.2 and pg.181).
-	//Maybe this is supposed to be better:
-	//GPIOA->CRH |= 0x000000B0; //Configure as Alternate function output Push-pull | Speed 50 MHz (see RM 9.2.2)
+
 
 	/*Configure USART1 Rx (PA10) as Input*/
 	GPIOA->CRH &= 0xFFFFF0FF; //Leave all bits as they are except for bit 10 (see RM 9.2.2)
 	//For Input Pull-Up (See RM pg.167)
 	GPIOA->CRH |= 0x00000800; //Configure as input with pull up/pull down (See RM 9.2.2).
 	GPIOA->ODR |= 0x00000400;//(See RM pg.161 and 9.2.4)
-	//For floating input (See RM pg.167)
-	//GPIOA->CRH |= 0x00000400; //Configure as floating input (See RM 9.2.2)- might be better?
 
 
 	/*Enable RCC for USART1*/
@@ -146,9 +133,7 @@ void USART1_init(){
 }
 
 
-/*This function sets the Tx buffer up with chosen message.
- * One may choose to use the default MSG defined in usart.h*/
-void set_usart2_buffer_Tx(uint8_t *msg){
+void USART2_set_buffer_Tx(uint8_t *msg){
 
 
 	memset(usart2.Tx, '\0', BUFF_SIZE*sizeof(uint8_t));
@@ -166,12 +151,10 @@ void set_usart2_buffer_Tx(uint8_t *msg){
 }
 
 
-/*USART2 write function with no interrupt.
- *This function writes msg written in buffet_Tx to USART2_DR.*/
-void write_usart2(uint8_t* msg){
+void USART2_write(uint8_t* msg){
 
 
-	set_usart2_buffer_Tx(msg);
+	USART2_set_buffer_Tx(msg);
 
 	while(usart2.write_index < usart2.Tx_len)
 	{
@@ -220,15 +203,14 @@ void USART2_write_line(uint8_t *start, uint8_t *end){
 }
 
 
-/*USART1 write function with no interrupt.*/
-void write_usart1(uint8_t *command){
+void USART1_write(uint8_t *command){
 
 
 	/*Set usart1_buffer_Tx with command*/
-	set_usart1_buffer_Tx(command);
+	USART1_set_buffer_Tx(command);
 
 	/*Prepare buffer Rx for response*/
-	set_usart1_buffer_Rx();
+	USART1_set_buffer_Rx();
 
 	// set initial values to Rx interrupt flags
 	USART1_NEW_LINE_FOUND = FALSE;
@@ -248,7 +230,7 @@ void write_usart1(uint8_t *command){
 }
 
 
-void set_usart1_buffer_Tx(uint8_t *command){
+void USART1_set_buffer_Tx(uint8_t *command){
 
 	/*Write command into usart1_buffer_Tx*/
 	memset(usart1.Tx, '\0', BUFF_SIZE*sizeof(uint8_t));
@@ -265,8 +247,7 @@ void set_usart1_buffer_Tx(uint8_t *command){
 }
 
 
-/*This function inits Rx buffer variables - should be called in init_usart1*/
-void set_usart1_buffer_Rx(){
+void USART1_set_buffer_Rx(){
 
 	memset(usart1.Rx, '\0', BUFF_SIZE*sizeof(uint8_t));
 	usart1.Rx_len = 0;
@@ -279,11 +260,6 @@ void set_usart1_buffer_Rx(){
 }
 
 
-
-/*This function returns 3 values type STATE - defined by common.h:
- * PASS - when pass param is found.
- * FAIL - when fail param is found.
- * STANDBY - when neither pass param or fail param are found.*/
 STATE USART1_search_buffer_Rx(uint8_t *pass, uint8_t *fail){
 
 	/*!TODO:need to check that usart1.Rx buffer wasn't overflow*/
@@ -309,17 +285,14 @@ STATE USART1_search_buffer_Rx(uint8_t *pass, uint8_t *fail){
 
 	else{
 		/*!TODO: when usart1.Rx buffer is overflown start check from end?*/
-		write_usart2((uint8_t*)"\r\nBUFFER_OVERFLOW::RX BUFFER CONTENT\r\n");
-		write_usart2((uint8_t*)usart1.Rx);
+		USART2_write((uint8_t*)"\r\nBUFFER_OVERFLOW::RX BUFFER CONTENT\r\n");
+		USART2_write((uint8_t*)usart1.Rx);
 		return (uint32_t)FAIL;
 	}
 
 }
 
 
-/*this function searches USART1 buffer Rx for on or off, to be used
- * in esp8266_Firebase.c in searchSwitchState() -> parseResponse.
- * This function does NOT clean buffer*/
 SWITCH_STATE USART1_check_state_buffer_Rx(uint8_t *on, uint8_t *off,uint8_t *no_path){
 
 	/*!TODO:need to check that usart1.Rx buffer wasn't overflow*/
@@ -341,7 +314,7 @@ SWITCH_STATE USART1_check_state_buffer_Rx(uint8_t *on, uint8_t *off,uint8_t *no_
 			return (uint32_t)NO_PATH;
 		}
 		else{
-			write_usart2((uint8_t*)usart1.Rx);//for debuging
+			USART2_write((uint8_t*)usart1.Rx);//for debuging
 			return (uint32_t)NON;
 		}
 
@@ -349,8 +322,8 @@ SWITCH_STATE USART1_check_state_buffer_Rx(uint8_t *on, uint8_t *off,uint8_t *no_
 
 	else{
 		/*!TODO: when usart1.Rx buffer is overflown start check from end??*/
-		write_usart2((uint8_t*)"\r\nBUFFER_OVERFLOW::RX BUFFER CONTENT\r\n");
-		write_usart2((uint8_t*)usart1.Rx);
+		USART2_write((uint8_t*)"\r\nBUFFER_OVERFLOW::RX BUFFER CONTENT\r\n");
+		USART2_write((uint8_t*)usart1.Rx);
 		return (uint32_t)NO_PATH;
 	}
 

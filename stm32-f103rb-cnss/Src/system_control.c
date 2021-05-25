@@ -1,7 +1,7 @@
 /*
  * system_control.c
  *
- *  Created on: 6 במאי 2021
+ *  Created on: 6 05 2021
  *      Author: mayan
  */
 
@@ -13,9 +13,9 @@
 
 void monitor_switch_state(uint32_t seconds){
 
-	if(timeout_done_timer2()){
+	if(TIMER2_timeout_done()){
 		add_event(control_Handler);
-		set_timeout_timer2(seconds);
+		TIMER2_set_timeout(seconds);
 	}
 }
 
