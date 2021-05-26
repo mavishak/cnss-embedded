@@ -41,5 +41,9 @@ BOOL checkSwitchState(void);
 /*This function is incharge of getting the 'on/off' state from fribase*/
 void *control_Handler(void);
 
+void createPutMsg(void);
+BOOL registerDeviceID(void);
+BOOL registeration_Handler(void);
+
 
 #endif /* ESP8266_FIREBASE_H_ */

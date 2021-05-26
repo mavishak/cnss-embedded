@@ -16,25 +16,32 @@
 
 
 
-static USART_2 usart2;
-static USART_1 usart1;
+static USART usart2;
+static USART usart1;
 static uint8_t c; // for holding the USART->DR value
-
-
-static BOOL USART1_NEW_LINE_FOUND; // This variable flags a new line in USART1 Rx
-static BOOL USART1_NEW_LINE_READ; // This variable needs to be set when new line in USART1 Rx is read
-
-BOOL USART1_NEW_LINE_FOUND_get(void){
-	return USART1_NEW_LINE_FOUND;
-}
-
-void USART1_NEW_LINE_READ_set(void){
-	USART1_NEW_LINE_READ = TRUE;
-}
 
 
 static uint8_t *START;  // for search UART2_write_line
 static uint8_t *END;  // for search
+
+
+BOOL USART1_NEW_LINE_FOUND_get(void){
+	return usart1.new_line_found;
+}
+
+void USART1_NEW_LINE_READ_set(void){
+	usart1.new_line_read = TRUE;
+}
+
+
+BOOL USART2_NEW_LINE_FOUND_get(void){
+	return usart2.new_line_found;
+}
+
+void USART2_NEW_LINE_READ_set(void){
+	usart2.new_line_read = TRUE;
+}
+
 
 
 void USART2_init(){
@@ -48,12 +55,22 @@ void USART2_init(){
 	GPIOA->CRL &= 0xFFFFF0FF; //Leave all bits as they are except for bit 2 (see RM 9.2.1)
 	GPIOA->CRL |= 0x00000A00; //Configure as Alternate function output Push-pull | Speed 2 MHz (see RM 9.2.1)
 
+	/*Configure USART2 Rx (PA3) as Input*/
+	GPIOA->CRL &= 0xFFFF0FFF; //Leave all bits as they are except for bit 3 (see reference manual 9.2.2)
+	//For Input Pull-Up (See reference manual p. 167)
+	GPIOA->CRL |= 0x00008000; //configure as input with pull up/pull down (see reference manual 9.2.2).
+	GPIOA->ODR |= 0x00000008;//(reference manual p. 161 and 9.2.4)
+
 
 	/*Enable RCC for USART2*/
-	RCC->APB1ENR |= 0x00020000; // (see RM 8.3.8) IS THIS REALLY NEEDED??
+	RCC->APB1ENR |= 0x00020000; // (see reference manual 8.3.8)
+
+	/*Enable RCC for Alternate funcion for PINs*/
+	//RCC->APB2ENR |= 0x00000001; //  (see RM 8.3.7) //Is this line needed?? NO
 
 
-	/*Following directions RM pg.792 */
+	/*Following directions RM p. 792 (Setting Tx procesure)*/
+	/*Following directions RM p. 795 (Setting Rx procesure) */
 	USART2->CR1 |= 0x00002000; //Enable the USART by writing the UE bit in USART_CR1 register to 1 (see RM 27.6.4)
 	//USART2->CR1 &= ~(0x00001000); //Program the M bit in USART_CR1 to define the word length to 8 (by default) (see RM 27.6.4)
 	//USART2->CR1 &= ~(0x00000400); //Parity Controle Disable (by default) (see RM 27.6.4)
@@ -62,22 +79,21 @@ void USART2_init(){
 	/*Set Baude rate*/
 	USART2->BRR = 0x34D; //9600 bps (see RM p.798 for BRR calculation and RM p.93 Fig.8 for clock tree)
 
-	/*Enable Uart Transmit*/
+	/*Enable USART Transmit*/
 	USART2->CR1 |= 0x00000008; // Set the TE bit in USART_CR1 to send an idle frame as first transmission. see RM 27.6.4)
 
-	/*Enable Uart Transmit Interrupt*/
-	/*__disable_irq();
-	USART2->CR1 |= 0x00000080; // Set TXEIE (see RM 27.6.4)
-	// Should we set TCIE (Transmission complete interrupt eneble) interrupt??
-	//	- according to RM when Tx is done we need to wait until TC=1.
-	NVIC_SetPriority(USART2_IRQn,0); //set all interrupt priotity to zero so that no preemption uccors.
+
+	/*Enable USART Receive*/
+	//USART2->CR1 |= 0x00000004;// Set the RE bit in USART_CR1 to enable USART Receive  (see RM 27.6.4)
+
+	/*Enable USART Receive Interrupt*/
+	 __disable_irq();
+	USART2->CR1 |= 0x00000020; // Set RXNEIE to enable Rx interrupt(see RM 27.6.4)
+	NVIC_SetPriorityGrouping(7); //This should disable interrupt nesting(priority wont be not allowed)//->MABY IT'S THE DEFAULT
+	NVIC_SetPriority(USART2_IRQn,0); //set all interrupt priority to zero so that no preemption occurs.//->MABY IT'S THE DEFAULT
 	NVIC_EnableIRQ(USART2_IRQn); //enable handler
-	__enable_irq();*/
-
-	/*Enable Uart Recirve*/
-	//Maybe afterwords - as of now don't need
+	__enable_irq();
 }
-
 
 void USART1_init(){
 
@@ -133,6 +149,19 @@ void USART1_init(){
 }
 
 
+
+void USART2_enable_Rx(void){
+
+	USART2->CR1 |= 0x00000004;// set the RE bit in USART_CR1 to enable USART Receive  (see RM 27.6.4)
+
+}
+
+void USART2_disable_Rx(void){
+
+	USART2->CR1 &= ~(0x00000004);// reset the RE bit in USART_CR1 to enable USART Receive  (see RM 27.6.4)
+
+}
+
 void USART2_set_buffer_Tx(uint8_t *msg){
 
 
@@ -150,11 +179,26 @@ void USART2_set_buffer_Tx(uint8_t *msg){
 
 }
 
+void USART2_set_buffer_Rx(){
+
+	memset(usart2.Rx, '\0', BUFF_SIZE*sizeof(uint8_t));
+	usart2.Rx_len = 0;
+	usart2.read_index = 0;
+
+}
 
 void USART2_write(uint8_t* msg){
 
 
+	/*Set usart1_buffer_Tx with msg*/
 	USART2_set_buffer_Tx(msg);
+
+	/*Prepare buffer Rx for response*/
+	USART2_set_buffer_Rx();
+
+	// set initial values to Rx interrupt flags
+	usart2.new_line_found = FALSE;
+	usart2.new_line_read = TRUE;
 
 	while(usart2.write_index < usart2.Tx_len)
 	{
@@ -167,7 +211,6 @@ void USART2_write(uint8_t* msg){
 	usart2.Tx_len = 0;
 
 }
-
 
 void USART2_write_line(uint8_t *start, uint8_t *end){
 
@@ -202,6 +245,41 @@ void USART2_write_line(uint8_t *start, uint8_t *end){
 	usart2.Tx_len = 0;
 }
 
+BOOL USART2_read_buffer_Rx(uint32_t dest_size, uint8_t *dest){
+
+
+	memset(dest, '\0', dest_size*sizeof(uint8_t));
+	if((usart2.Rx_len + 1) < dest_size){
+
+		uint32_t i = 0; // Rx index
+		while(usart2.Rx[i] != '\r'){
+			dest[i] = usart2.Rx[i];
+			i++;
+		}
+		return TRUE;
+	}
+	return FALSE;
+
+}
+
+BOOL USART2_ok(void){
+
+	if(strstr((const char*)usart2.Rx , (const char*)"ok\r\n")){
+		return TRUE;
+	}
+	if(strstr((const char*)usart2.Rx , (const char*)"OK\r\n")){
+		return TRUE;
+	}
+	if(strstr((const char*)usart2.Rx , (const char*)"Ok\r\n")){
+		return TRUE;
+	}
+	return FALSE;
+
+}
+
+
+
+
 
 void USART1_write(uint8_t *command){
 
@@ -213,8 +291,8 @@ void USART1_write(uint8_t *command){
 	USART1_set_buffer_Rx();
 
 	// set initial values to Rx interrupt flags
-	USART1_NEW_LINE_FOUND = FALSE;
-	USART1_NEW_LINE_READ = TRUE;
+	usart1.new_line_found = FALSE;
+	usart1.new_line_read = TRUE;
 
 	/*Send command*/
 	while(usart1.write_index < usart1.Tx_len)
@@ -228,7 +306,6 @@ void USART1_write(uint8_t *command){
 	usart1.Tx_len = 0;
 
 }
-
 
 void USART1_set_buffer_Tx(uint8_t *command){
 
@@ -246,7 +323,6 @@ void USART1_set_buffer_Tx(uint8_t *command){
 
 }
 
-
 void USART1_set_buffer_Rx(){
 
 	memset(usart1.Rx, '\0', BUFF_SIZE*sizeof(uint8_t));
@@ -259,7 +335,6 @@ void USART1_set_buffer_Rx(){
 
 }
 
-
 STATE USART1_search_buffer_Rx(uint8_t *pass, uint8_t *fail){
 
 	/*!TODO:need to check that usart1.Rx buffer wasn't overflow*/
@@ -270,15 +345,15 @@ STATE USART1_search_buffer_Rx(uint8_t *pass, uint8_t *fail){
 
 		if(strstr((const char*)usart1.Rx , (const char*)pass)){
 			USART2_write_line((uint8_t*)START, (uint8_t*)END); // write response to screen
-			return (uint32_t)PASS;
+			return PASS;
 		}
 		else if(strstr((const char*)usart1.Rx , (const char*)fail)){
 			USART2_write_line((uint8_t*)START, (uint8_t*)END); // write response to screen
-			return (uint32_t)FAIL;
+			return FAIL;
 		}
 		else{
 			USART2_write_line((uint8_t*)START, (uint8_t*)END); // write response to screen
-			return (uint32_t)STANDBY;
+			return STANDBY;
 		}
 
 	}
@@ -287,11 +362,10 @@ STATE USART1_search_buffer_Rx(uint8_t *pass, uint8_t *fail){
 		/*!TODO: when usart1.Rx buffer is overflown start check from end?*/
 		USART2_write((uint8_t*)"\r\nBUFFER_OVERFLOW::RX BUFFER CONTENT\r\n");
 		USART2_write((uint8_t*)usart1.Rx);
-		return (uint32_t)FAIL;
+		return FAIL;
 	}
 
 }
-
 
 SWITCH_STATE USART1_check_state_buffer_Rx(uint8_t *on, uint8_t *off,uint8_t *no_path){
 
@@ -329,6 +403,7 @@ SWITCH_STATE USART1_check_state_buffer_Rx(uint8_t *on, uint8_t *off,uint8_t *no_
 
 }
 
+
 /*USART1 Interrupt Handler - Only Rx is set to have interrupts*/
 void USART1_IRQHandler(void){
 
@@ -342,29 +417,42 @@ void USART1_IRQHandler(void){
 		usart1.read_index++;
 		usart1.Rx_len++; // count total chars received
 
-		if(c == (uint8_t)'\n' && USART1_NEW_LINE_READ){
-			USART1_NEW_LINE_FOUND = TRUE;
-			USART1_NEW_LINE_READ = FALSE;
+		if(c == (uint8_t)'\n' && usart1.new_line_read){
+			usart1.new_line_found = TRUE;
+			usart1.new_line_read = FALSE;
 		}
-		else if(c != (uint8_t)'\n' && USART1_NEW_LINE_READ){
-			USART1_NEW_LINE_FOUND = FALSE;
+		else if(c != (uint8_t)'\n' && usart1.new_line_read){
+			usart1.new_line_found = FALSE;
 		}
-
 
 	}
 
-
 }
 
+/*USART2 Interrupt Handler - Only Rx is set to have interrupts*/
+void USART2_IRQHandler(void){
 
+	if(((USART2->SR) & 0x00000020) == 0x00000020){ //Check if RXNE=1, this means that Rx interrupt occurred (see RM 27.6.1)
 
-/*USART2 intterupt handler*/
-/*void USART2_IRQHandler(void){
+		c = USART2->DR; // clear RXNE bit
+		if((usart2.read_index + 1) >= BUFF_SIZE){
+			usart2.read_index = 0;
+		}
+		usart2.Rx[usart2.read_index] = (uint8_t)(c & 0xFF);
+		usart2.read_index++;
+		usart2.Rx_len++; // count total chars received
 
-	USART2->DR = (0x55 & 0xFF);//(uint8_t)('U' & 0xFF); //send data (see RM 27.6.2)
-	//USART2->CR1 &= ~(0x00000080); // reset TXEIE no interrupt (see RM 27.6.4)
+		if(c == (uint8_t)'\n' && usart2.new_line_read){
+			usart2.new_line_found = TRUE;
+			usart2.new_line_read = FALSE;
+		}
+		else if(c != (uint8_t)'\n' && usart2.new_line_read){
+			usart2.new_line_found = FALSE;
+		}
 
-}*/
+	}
+
+}
 
 
 

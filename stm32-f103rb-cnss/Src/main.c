@@ -36,6 +36,7 @@
 #include "i2c.h"
 #include "clock.h"
 #include "system_control.h"
+#include "configurations.h"
 
 
 /*FOR TESTING*/
@@ -50,11 +51,11 @@ int main(void)
 
 	USART2_init(); // for debugging
 
-	init_queue();
-	init_sensor_with_interrupt(); // sensor interrupts are not inabled
-
-	TIMER2_init(); // for monitoring switch state.
-	TIMER3_init(); // for sensor delay
+//	init_queue();
+//	init_sensor_with_interrupt(); // sensor interrupts are not inabled
+//
+//	TIMER2_init(); // for monitoring switch state.
+//	TIMER3_init(); // for sensor delay
 	TIMER4_init(); // for ESP8266 timeout
 
 	USART1_init(); // for ESP8266
@@ -69,8 +70,32 @@ int main(void)
 	while(1)
 	{
 
-		do_event();
-		monitor_switch_state(120); // every 2 minutes
+		USART2_write((uint8_t*)("\r\n_______________\r\n"));//For test
+
+	 	USART2_write((uint8_t*)("\r\nWord to the wise: if at some point nothing seems to be happening"));
+	 	USART2_write((uint8_t*)("\r\nplease disconnect the device from your computer, wait a few minutes, and then reconnect.\r\n"));
+
+
+		if(!SYSTEM_CONTROL_set_up()){
+		 	USART2_write((uint8_t*)("\r\nWe are sorry, but there seems to be a problem."));
+		 	USART2_write((uint8_t*)("\r\nIf you are sure you entered the correct network ssid and password\r\nplease do the following:"));
+		 	USART2_write((uint8_t*)("\r\nCheck your network's signal, is it strong enough?"));
+		 	USART2_write((uint8_t*)("\r\nIf it is not, please try again later."));
+		 	USART2_write((uint8_t*)("\r\nIf it is, please hit the reset button/disconnect your device from the computer, wait a few minutes, then reconnect and try again."));
+		 	while(1);
+		}
+
+ 		USART2_write((uint8_t*)("\r\nHooray, your device was successfully registered."));
+ 		USART2_write((uint8_t*)("\r\nThis is your device ID: '"));
+ 		USART2_write(device_id);
+ 		USART2_write((uint8_t*)("'\r\nPlease coppy it, you will need it later."));
+ 		USART2_write((uint8_t*)"\r\nIf you ever wish to reset your network details, all you need to do is,\r\nopen 'TeraTerm' on a coputer and cunnect your device.");
+ 		USART2_write((uint8_t*)("\r\n\r\nYou can now safely remove the  your device and connect it to an electric power supply."));
+
+
+
+//		do_event();
+//		SYSTEM_CONTROL_monitor_switch_state(120); // every 2 minutes
 
 	}
 }

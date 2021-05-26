@@ -34,6 +34,9 @@ static uint8_t image_path[PATH_SIZE];
 static BOOL connection_closed;
 static SWITCH_STATE state;
 
+uint8_t SSID[SIZE];
+uint8_t PWD[SIZE];
+
 
 void setImagePath(void){
 
@@ -87,6 +90,20 @@ void *control_Handler(void){
 
 }
 
+BOOL registeration_Handler(void){
+
+	uint32_t i  = 3;
+	while(i > 0  && !registerDeviceID() && connection_closed){
+		i--;
+	}
+
+	TIMER4_disable(); // timer 4 is used as timeout for AT commands
+
+	if(i == 0){
+		return FALSE;
+	}
+	return TRUE;
+}
 
 /*This function sends an alert to realtime DB in containing the time of the alert firebase
  * before using this function
@@ -231,6 +248,70 @@ BOOL checkSwitchState(void){
 
 
 
+BOOL registerDeviceID(void){
+
+	USART2_write((uint8_t*)"setDeviceID()\r\n"); // for debugging
+
+	connection_closed = TRUE;
+
+	// Reset ESP8266
+	 if(!reset(3,6)){
+		return FALSE;
+	 }
+	 TIMER4_delay(1);
+
+	USART2_write((uint8_t*)"0\r\n"); //with this it reaches AT+CWJAP
+
+
+	//Set client mode
+	if(!setClientMode(2,6)){
+		return FALSE;
+	}
+	USART2_write((uint8_t*)"1\r\n");
+
+	//Join access point
+	if(!joinAccessPoint(2,10)){
+		return FALSE;
+	}
+	USART2_write((uint8_t*)"2\r\n");
+
+	/*Default: AT+CIPMUX=0 (according to: AT instruction set- 5.2.15)*/
+
+	//Connect HOST IP
+	if(!connectFirebaseHost(2,2,6,30)){
+		return FALSE;
+	}
+	USART2_write((uint8_t*)"3\r\n");
+
+
+	//Create HTTP request
+	createPutMsg();
+	USART2_write((uint8_t*)"4\r\n");
+
+
+	//Send number of data bytes
+	if(!sendRequest(2,2,30,40)){
+		connection_closed = closeConnection(2,6);
+		return FALSE;
+	}
+	USART2_write((uint8_t*)"5\r\n");
+
+	//Read response
+	if(!readResponse(120)){ //timeout set t0 3 minutes
+		connection_closed = closeConnection(2,6);
+		return FALSE;
+	}
+
+	USART2_write((uint8_t*)"6\r\n");
+
+	//Close cunnection with firebase -  firebase already closes connection with "CLOSED" response
+	//closeConnection(3,3);
+	//USART2_write((uint8_t*)"7\r\n");
+
+	return TRUE;
+
+}
+
 
 /*This function pings ESP8266 modem with AT test command,
  * returns uppon success
@@ -327,7 +408,7 @@ BOOL setClientMode(uint32_t tries, uint32_t timeout){
 BOOL joinAccessPoint(uint32_t tries, uint32_t timeout){
 
 	memset((char*)command, '\0', COMMAND_SIZE*sizeof(uint8_t));
-	sprintf((char*)command, "AT+CWJAP=\"%s\",\"%s\"\r\n",SSID,PWD);
+	sprintf((char*)command, "AT+CWJAP=\"%s\",\"%s\"\r\n", SSID, PWD);
 
 	found = STANDBY;
 	USART1_write((uint8_t*)command);
@@ -424,7 +505,6 @@ void createPostMsg(void){
 
 	//Set HTTP body content
 	memset((char*)content, '\0', CONTENT_SIZE*sizeof(uint8_t));
-	//sprintf((char*)content,"{\"image_path\": \"%s\", \"notes\": \"alarm went off!\", \"timestamp\": {\".sv\": \"timestamp\"}}",(char*)image_path);
 	sprintf((char*)content,"{\"image_path\": \"image/path\", \"notes\": \"alarm went off!\", \"timestamp\": {\".sv\": \"timestamp\"}}");
 	content_len = strlen((char*)content);
 
@@ -445,6 +525,18 @@ void createGetMsg(void){
 
 }
 
+void createPutMsg(void){
+
+	//Set HTTP body content
+	memset((char*)content, '\0', CONTENT_SIZE*sizeof(uint8_t));
+	sprintf((char*)content,"{\"is_in_use\": true}");
+	content_len = strlen((char*)content);
+
+	//Set HTTP request
+	memset((char*)http, '\0', HTTP_SIZE*sizeof(uint8_t));
+	sprintf((char*)http,"PUT /device-list/%s.json?auth=%s HTTP/1.0\r\nHost: %s\r\nContent-Type: application/json\r\nContent-Length: %ld\r\n\r\n%s\r\n",(char*)device_id,(char*)firebase_auth_key,(char*)firebase_host,content_len,(char*)content); // HTTP/1.0- Allow only one request
+	http_len = strlen((char*)http)-strlen("\r\n"); // the last \r\n is for the AT command, and not included in the request's length
+}
 
 /*This function Sends request to firbase,
  * returns apun success.

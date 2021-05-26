@@ -21,9 +21,11 @@
  *This program works when TeraTerm speed is set to 9600*/
 void USART2_init();
 
-/*This function sets the Tx buffer up with chosen message.
- * One may choose to use the default MSG defined in usart.h*/
+/*This function sets the Tx buffer up with chosen message.*/
 void USART2_set_buffer_Tx(uint8_t *msg);
+
+/*This function inits Rx buffer variables*/
+void USART2_set_buffer_Rx(void);
 
 /*USART2 write function with no interrupt.
  *This function writes msg written in buffet_Tx to USART2_DR.*/
@@ -33,8 +35,32 @@ void USART2_write(uint8_t *msg);
  * param start and end are pointers to usart1.Rx buffer*/
 void USART2_write_line(uint8_t *start, uint8_t *end);
 
+/*returns TRUE if a new line was found in Rx buffer*/
+BOOL USART2_NEW_LINE_FOUND_get(void);
+
+/*sets flag NEW_LINE_READ - must be called after reading line*/
+void USART2_NEW_LINE_READ_set(void);
+
+/*this function coppies the content of buffer Rx in to dest
+ * returns TRUE if dest was succefuully set, otherwise returns FALSE*/
+BOOL USART2_read_buffer_Rx(uint32_t dest_size, uint8_t *dest);
+
+BOOL USART2_ok(void);
+
+/*Enable Rx only when user needs to write*/
+void USART2_enable_Rx(void);
+
+/*Disable Rx when user finished writing*/
+void USART2_disable_Rx(void);
+
+
+
+
+
 /* Usart1 will be use for communication with esp8266. */
 void USART1_init();
+
+/*This function sets the Tx buffer up with chosen command.*/
 void USART1_set_buffer_Tx(uint8_t *command);
 
 /*This function inits Rx buffer variables*/
@@ -63,16 +89,9 @@ void USART1_NEW_LINE_READ_set(void);
 
 
 
-typedef struct usart2{
-
-	uint8_t Tx[BUFF_SIZE];
-	uint32_t Tx_len;
-	uint32_t write_index;
-
-}USART_2;
 
 
-typedef struct usart1{
+typedef struct usart{
 
 	uint8_t Tx[BUFF_SIZE];
 	uint8_t Rx[BUFF_SIZE];
@@ -80,8 +99,10 @@ typedef struct usart1{
 	uint32_t Rx_len;
 	uint32_t write_index;
 	uint32_t read_index;
+	BOOL new_line_found; // This variable flags a new line in Rx
+	BOOL new_line_read; // This variable needs to be set when new line in Rx is read
 
-}USART_1;
+}USART;
 
 
 
