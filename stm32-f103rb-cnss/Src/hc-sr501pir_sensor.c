@@ -137,7 +137,7 @@ void EXTI4_IRQHandler(void)
 	EXTI->PR |= 0x00000010; //reset flag by writing 1 to bit 4 (reference manual 10.3.6)
 	if(TIMER3_timeout_done())
 	{
-		add_event(alert_Handler);
+		QUEUE_add_event(alert_Handler);
 		TIMER3_set_timeout(60); //60 seconds = 1 minute
 	}
 

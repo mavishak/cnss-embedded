@@ -13,6 +13,7 @@
 #include <stdio.h>
 #include "timers.h"
 #include "hc-sr501pir_sensor.h"
+#include "led.h"
 
 
 #define COMMAND_SIZE 256
@@ -34,8 +35,10 @@ static uint8_t image_path[PATH_SIZE];
 static BOOL connection_closed;
 static SWITCH_STATE state;
 
-uint8_t SSID[SIZE];
-uint8_t PWD[SIZE];
+uint8_t SSID[WiFi_SIZE]; // extern see configurations
+uint8_t PWD[WiFi_SIZE];  // extern see configurations
+uint8_t DEVICE_ID[ID_SIZE]; // extern see configurations
+
 
 
 void setImagePath(void){
@@ -71,16 +74,19 @@ void *control_Handler(void){
 	if(state == OFF || state == NO_PATH){
 		disable_sensor();
 		TIMER3_disable(); // otherwise the timer will keep going for ever and an overflow will occur
+		LED_off();
 		USART2_write((uint8_t*)("\r\nOFF/NO_PATH\r\n"));
 	}
 
 	else if(state == ON){
 		enable_sensor();
+		LED_on();
 		USART2_write((uint8_t*)("\r\nON\r\n"));
 	}
 	else{ //NON
 		disable_sensor(); // As there is no comunication with Firebase there is no sence for the sensor to be on and send alerts.
 		TIMER3_disable(); // otherwise the timer will keep going for ever and an overflow will occur
+		LED_off();
 		USART2_write((uint8_t*)("\r\nNON\r\n"));
 	}
 
@@ -115,25 +121,25 @@ BOOL recordAlert(void){
 	connection_closed = TRUE;
 
 	// Reset ESP8266
-	 if(!reset(3,6)){
-		return FALSE;
-	 }
-	 TIMER4_delay(1);
+//	 if(!reset(3,6)){
+//		return FALSE;
+//	 }
+//	 TIMER4_delay(1);
 
-	USART2_write((uint8_t*)"0\r\n"); //with this it reaches AT+CWJAP
+	//USART2_write((uint8_t*)"0\r\n"); //with this it reaches AT+CWJAP
 
 
 	//Set client mode
-	if(!setClientMode(2,6)){
-		return FALSE;
-	}
-	USART2_write((uint8_t*)"1\r\n");
+//	if(!setClientMode(2,6)){
+//		return FALSE;
+//	}
+//	USART2_write((uint8_t*)"1\r\n");
 
 	//Join access point
-	if(!joinAccessPoint(2,10)){
-		return FALSE;
-	}
-	USART2_write((uint8_t*)"2\r\n");
+//	if(!joinAccessPoint(2,10)){
+//		return FALSE;
+//	}
+//	USART2_write((uint8_t*)"2\r\n");
 
 	/*Default: AT+CIPMUX=0 (according to: AT instruction set- 5.2.15)*/
 
@@ -188,25 +194,25 @@ BOOL checkSwitchState(void){
 	connection_closed = TRUE;//added 30.4.21
 
 	//Reset ESP8266
-	if(!reset(3,6)){
-		return FALSE;
-	}
-	TIMER4_delay(1);
+//	if(!reset(3,6)){
+//		return FALSE;
+//	}
+//	TIMER4_delay(1);
 
-	USART2_write((uint8_t*)"0\r\n"); //with this it reaches AT+CWJAP
+	//USART2_write((uint8_t*)"0\r\n"); //with this it reaches AT+CWJAP
 
 
 	//Set client mode
-	if(!setClientMode(2,6)){
-		return FALSE;
-	}
-	USART2_write((uint8_t*)"1\r\n");
+//	if(!setClientMode(2,6)){
+//		return FALSE;
+//	}
+//	USART2_write((uint8_t*)"1\r\n");
 
 	//Join access point
-	if(!joinAccessPoint(2,10)){
-		return FALSE;
-	}
-	USART2_write((uint8_t*)"2\r\n");
+//	if(!joinAccessPoint(2,10)){
+//		return FALSE;
+//	}
+//	USART2_write((uint8_t*)"2\r\n");
 
 	/*Default: AT+CIPMUX=0 (according to: AT instruction set- 5.2.15)*/
 
@@ -250,15 +256,15 @@ BOOL checkSwitchState(void){
 
 BOOL registerDeviceID(void){
 
-	USART2_write((uint8_t*)"setDeviceID()\r\n"); // for debugging
+	USART2_write((uint8_t*)"registerDeviceID\r\n"); // for debugging
 
 	connection_closed = TRUE;
 
 	// Reset ESP8266
-	 if(!reset(3,6)){
-		return FALSE;
-	 }
-	 TIMER4_delay(1);
+//	 if(!reset(3,6)){
+//		return FALSE;
+//	 }
+//	 TIMER4_delay(1);
 
 	USART2_write((uint8_t*)"0\r\n"); //with this it reaches AT+CWJAP
 
@@ -510,8 +516,8 @@ void createPostMsg(void){
 
 	//Set HTTP request
 	memset((char*)http, '\0', HTTP_SIZE*sizeof(uint8_t));
-	sprintf((char*)http,"POST /devices/%s/history.json?auth=%s HTTP/1.0\r\nHost: %s\r\nContent-Type: application/json\r\nContent-Length: %ld\r\n\r\n%s\r\n",(char*)device_id,(char*)firebase_auth_key,(char*)firebase_host,content_len,(char*)content); // HTTP/1.0- Allow only one request
-	//sprintf((char*)http,"POST /devices/%s/history.json?auth=%s&print=silent HTTP/1.1\r\nHost: %s\r\nContent-Type: application/json\r\nContent-Length: %ld\r\n\r\n{\"image_path\": \"%s\", \"notes\": \"alarm went off\", \"timestamp\": {\".sv\": \"timestamp\"}}\r\n",(char*)device_id,(char*)firebase_auth_key,(char*)firebase_host,content_len,(char*)image_path); // HTTP/1.0- Allow only one request
+	sprintf((char*)http,"POST /devices/%s/history.json?auth=%s HTTP/1.0\r\nHost: %s\r\nContent-Type: application/json\r\nContent-Length: %ld\r\n\r\n%s\r\n",(char*)DEVICE_ID,(char*)firebase_auth_key,(char*)firebase_host,content_len,(char*)content); // HTTP/1.0- Allow only one request
+	//sprintf((char*)http,"POST /devices/%s/history.json?auth=%s&print=silent HTTP/1.1\r\nHost: %s\r\nContent-Type: application/json\r\nContent-Length: %ld\r\n\r\n{\"image_path\": \"%s\", \"notes\": \"alarm went off\", \"timestamp\": {\".sv\": \"timestamp\"}}\r\n",(char*)DEVICE_ID,(char*)firebase_auth_key,(char*)firebase_host,content_len,(char*)image_path); // HTTP/1.0- Allow only one request
 	http_len = strlen((char*)http)-strlen("\r\n"); // the last \r\n is for the AT command, and not included in the request's length
 
 }
@@ -520,7 +526,7 @@ void createGetMsg(void){
 
 	//Set HTTP request
 	memset((char*)http, '\0', HTTP_SIZE*sizeof(uint8_t));
-	sprintf((char*)http,"GET /devices/%s/control/state.json?auth=%s HTTP/1.0\r\nHost: %s\r\n\r\n\r\n",(char*)device_id,(char*)firebase_auth_key,(char*)firebase_host); // HTTP/1.0- Allow only one request
+	sprintf((char*)http,"GET /devices/%s/control/state.json?auth=%s HTTP/1.0\r\nHost: %s\r\n\r\n\r\n",(char*)DEVICE_ID,(char*)firebase_auth_key,(char*)firebase_host); // HTTP/1.0- Allow only one request
 	http_len = strlen((char*)http)-strlen("\r\n"); // the last \r\n is for the AT command, and not included in the request's length
 
 }
@@ -534,7 +540,7 @@ void createPutMsg(void){
 
 	//Set HTTP request
 	memset((char*)http, '\0', HTTP_SIZE*sizeof(uint8_t));
-	sprintf((char*)http,"PUT /device-list/%s.json?auth=%s HTTP/1.0\r\nHost: %s\r\nContent-Type: application/json\r\nContent-Length: %ld\r\n\r\n%s\r\n",(char*)device_id,(char*)firebase_auth_key,(char*)firebase_host,content_len,(char*)content); // HTTP/1.0- Allow only one request
+	sprintf((char*)http,"PUT /device-list/%s.json?auth=%s HTTP/1.0\r\nHost: %s\r\nContent-Type: application/json\r\nContent-Length: %ld\r\n\r\n%s\r\n",(char*)DEVICE_ID,(char*)firebase_auth_key,(char*)firebase_host,content_len,(char*)content); // HTTP/1.0- Allow only one request
 	http_len = strlen((char*)http)-strlen("\r\n"); // the last \r\n is for the AT command, and not included in the request's length
 }
 

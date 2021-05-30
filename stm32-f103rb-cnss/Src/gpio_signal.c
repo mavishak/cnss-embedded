@@ -155,7 +155,7 @@ void EXTI15_10_IRQHandler(void) //EXTI4_IRQHandler(void)
 	EXTI->PR = 0x00002000; //reset flag by writing 1 to bit 13 (reference manual 10.3.6)
 	EXTI->PR |= 0x00000400; //reset flag by writing 1 to bit 10 (reference manual 10.3.6)
 
-	add_event(interrupt_handler);
+	QUEUE_add_event(interrupt_handler);
 	//interrupt_handler();
 	//	if(state == OFF)
 	//	{

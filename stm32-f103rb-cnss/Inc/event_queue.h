@@ -36,14 +36,14 @@ typedef struct queue{
 } Queue;
 
 /*Initialize shared queue*/
-void init_queue();
+void QUEUE_init();
 
 /*This function receives and event and adds it to queue*/
-void add_event(Handler handler);
+void QUEUE_add_event(Handler handler);
 
 /*This function retrieves an event from queue and runs its handle.
  * If queue is empty return NULL. Upon success returns handler res */
-void *do_event();
+void *QUEUE_do_event();
 
 /*this function return true if queue is full*/
 BOOL queue_isFull();

@@ -15,16 +15,16 @@
 static Queue queue;
 
 
-void init_queue()
+void QUEUE_init()
 {
-	//write_usart2((uint8_t*)("<-init_queue->\r\n"));
+	//write_usart2((uint8_t*)("<-QUEUE_init->\r\n"));
 	queue.writeIndex = 0; // tail, holds next index to write in
 	queue.readIndex = 0; // head, holds next index to read from
 	queue.accept = GO;
 }
 
 
-void add_event(Handler handler)
+void QUEUE_add_event(Handler handler)
 {
 
 	if(queue_isFull()){
@@ -42,7 +42,7 @@ void add_event(Handler handler)
 
 
 
-void *do_event()
+void *QUEUE_do_event()
 {
 	void *res;
 
