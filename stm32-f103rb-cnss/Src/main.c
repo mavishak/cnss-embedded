@@ -40,10 +40,6 @@
 #include "led.h"
 
 
-uint8_t DEVICE_ID[ID_SIZE]; // extern see configurations
-
-
-
 /*FOR TESTING*/
 //#include "gpio_signal.h" /*for testing*/
 /*FOR TESTING*/
