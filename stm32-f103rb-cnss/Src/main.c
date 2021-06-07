@@ -56,14 +56,14 @@ int main(void)
 
 
 
+
 	USART1_init(); // for ESP8266
 	USART2_init(); // for debugging
 
+	QUEUE_init();
+
 	CONFIGURATIONS_set_device_id();
 
-
-
-	QUEUE_init();
 	init_sensor_with_interrupt(); // sensor interrupts are not inabled
 
 	LED_init();
@@ -72,11 +72,13 @@ int main(void)
 	TIMER3_init(); // for sensor delay
 	TIMER4_init(); // for ESP8266 timeout
 
+	USART2_enable_Rx(); // for ESC
+
 
 	//init_i2c1();
 	USART2_write((uint8_t*)("\r\n_______________\r\n"));//For test
 
-	CONFIGURATIONS_set_network(); // returns true or false
+	//CONFIGURATIONS_set_network(); // returns true or false
 
 
 	while(1)

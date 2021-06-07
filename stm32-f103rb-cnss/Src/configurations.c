@@ -12,6 +12,7 @@
 #include <string.h>
 
 static struct u_id ID;
+BOOL RESET_FLAG;
 
 void CONFIGURATIONS_uid_read(struct u_id *id){
 
@@ -56,6 +57,30 @@ BOOL CONFIGURATIONS_set_network(void){
 		return TRUE;
 	}
 
+}
+
+void* configuration_Handler(void){
+
+	CONFIGURATIONS_set_network(); // returns TRUE upon success
+
+	USART2_write((uint8_t*)"\r\nEnter 'ok' to continue: ");
+	USART2_enable_Rx();
+	while(!USART2_NEW_LINE_FOUND_get()); // wait for users input
+	USART2_disable_Rx();
+
+	while(!USART2_ok()){
+		USART2_NEW_LINE_READ_set();
+
+		USART2_write((uint8_t*)"\r\nEnter 'ok' to continue: ");
+		USART2_enable_Rx();
+		while(!USART2_NEW_LINE_FOUND_get()); // wait for users input
+		USART2_disable_Rx();
+	}
+	USART2_NEW_LINE_READ_set();
+
+	RESET_FLAG = TRUE; // allow another event just like this
+	USART2_enable_Rx();
+	return NULL;
 }
 
 

@@ -261,10 +261,10 @@ BOOL registerDeviceID(void){
 	connection_closed = TRUE;
 
 	// Reset ESP8266
-//	 if(!reset(3,6)){
-//		return FALSE;
-//	 }
-//	 TIMER4_delay(1);
+	 if(!reset(3,6)){
+		return FALSE;
+	 }
+	 TIMER4_delay(1);
 
 	USART2_write((uint8_t*)"0\r\n"); //with this it reaches AT+CWJAP
 
@@ -276,7 +276,7 @@ BOOL registerDeviceID(void){
 	USART2_write((uint8_t*)"1\r\n");
 
 	//Join access point
-	if(!joinAccessPoint(2,10)){
+	if(!joinAccessPoint(2,15)){
 		return FALSE;
 	}
 	USART2_write((uint8_t*)"2\r\n");

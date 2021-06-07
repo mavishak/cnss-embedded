@@ -13,8 +13,10 @@
 #include "core_cm3.h" /*for NVIC_enableIRQ() and NVIC_SetPriority()*/
 #include <string.h>
 #include <stdlib.h>
+#include "configurations.h"
 
 
+BOOL RESET_FLAG; // TRUE until user presses ESC
 
 static USART usart2;
 static USART usart1;
@@ -47,6 +49,8 @@ void USART2_NEW_LINE_READ_set(void){
 void USART2_init(){
 
 	/*This program works when TeraTerm speed is set to 9600 and USART_BRR is set to 0x34D.*/
+
+	RESET_FLAG = TRUE; // for ESC
 
 	/*Enabla RCC for GPIO Port A*/
 	RCC->APB2ENR |= 0x00000004; // (see RM 8.3.7)
@@ -435,19 +439,32 @@ void USART2_IRQHandler(void){
 	if(((USART2->SR) & 0x00000020) == 0x00000020){ //Check if RXNE=1, this means that Rx interrupt occurred (see RM 27.6.1)
 
 		c = USART2->DR; // clear RXNE bit
-		if((usart2.read_index + 1) >= BUFF_SIZE){
-			usart2.read_index = 0;
-		}
-		usart2.Rx[usart2.read_index] = (uint8_t)(c & 0xFF);
-		usart2.read_index++;
-		usart2.Rx_len++; // count total chars received
 
-		if(c == (uint8_t)'\n' && usart2.new_line_read){
-			usart2.new_line_found = TRUE;
-			usart2.new_line_read = FALSE;
+
+		if(c == 0x1B && RESET_FLAG){ // User entered ESC after reset
+
+			RESET_FLAG = FALSE;
+			QUEUE_add_event(configuration_Handler);
+			USART2_disable_Rx();
+
 		}
-		else if(c != (uint8_t)'\n' && usart2.new_line_read){
-			usart2.new_line_found = FALSE;
+		else{
+
+			if((usart2.read_index + 1) >= BUFF_SIZE){
+				usart2.read_index = 0;
+			}
+			usart2.Rx[usart2.read_index] = (uint8_t)(c & 0xFF);
+			usart2.read_index++;
+			usart2.Rx_len++; // count total chars received
+
+			if(c == (uint8_t)'\n' && usart2.new_line_read){
+				usart2.new_line_found = TRUE;
+				usart2.new_line_read = FALSE;
+			}
+			else if(c != (uint8_t)'\n' && usart2.new_line_read){
+				usart2.new_line_found = FALSE;
+			}
+
 		}
 
 	}
