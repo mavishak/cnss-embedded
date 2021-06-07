@@ -27,7 +27,7 @@ void QUEUE_init()
 void QUEUE_add_event(Handler handler)
 {
 
-	if(queue_isFull()){
+	if(QUEUE_isFull()){
 		return;
 	}
 
@@ -46,7 +46,7 @@ void *QUEUE_do_event()
 {
 	void *res;
 
-	if(queue_isEmpty()){
+	if(QUEUE_isEmpty()){
 		return NULL;
 	}
 
@@ -64,13 +64,13 @@ void *QUEUE_do_event()
 }
 
 
-BOOL queue_isFull()
+BOOL QUEUE_isFull()
 {
 	return (queue.readIndex == ((queue.writeIndex + 1) % QUEUE_SIZE));
 }
 
 
-BOOL queue_isEmpty()
+BOOL QUEUE_isEmpty()
 {
 	 return queue.readIndex == queue.writeIndex;
 }

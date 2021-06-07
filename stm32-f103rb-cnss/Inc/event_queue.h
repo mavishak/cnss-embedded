@@ -46,9 +46,9 @@ void QUEUE_add_event(Handler handler);
 void *QUEUE_do_event();
 
 /*this function return true if queue is full*/
-BOOL queue_isFull();
+BOOL QUEUE_isFull();
 
 /*This function returns true if queue is empty*/
-BOOL queue_isEmpty();
+BOOL QUEUE_isEmpty();
 
 #endif /* EVENT_QUEUE_H_ */

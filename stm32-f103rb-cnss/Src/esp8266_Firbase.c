@@ -160,7 +160,7 @@ BOOL recordAlert(void){
 
 
 	//Send number of data bytes
-	if(!sendRequest(2,2,30,40)){
+	if(!sendRequest(1,1,30,40)){
 		//closeConnection(3,3); // original line
 		connection_closed = closeConnection(2,6);
 		return FALSE;
@@ -168,7 +168,7 @@ BOOL recordAlert(void){
 	USART2_write((uint8_t*)"5\r\n");
 
 	//Read response
-	if(!readResponse(120)){ //timeout set t0 3 minutes
+	if(!readResponse(60)){ //timeout set t0 3 minutes
 		//closeConnection(3,3); //original line
 		connection_closed = closeConnection(2,6);
 		return FALSE;
@@ -229,14 +229,14 @@ BOOL checkSwitchState(void){
 
 
 	//Send number of data bytes
-	if(!sendRequest(2,2,30,40)){
+	if(!sendRequest(1,1,30,40)){
 		connection_closed = closeConnection(2,6);
 		return FALSE;
 	}
 	USART2_write((uint8_t*)"5\r\n");
 
 	//Read response
-	if(!parseResponse(120)){//timeout set t0 3 minutes
+	if(!parseResponse(60)){//timeout set t0 3 minutes
 		connection_closed = closeConnection(2,6);//added 30.4.21
 		return FALSE;
 	}
@@ -303,7 +303,7 @@ BOOL registerDeviceID(void){
 	USART2_write((uint8_t*)"5\r\n");
 
 	//Read response
-	if(!readResponse(120)){ //timeout set t0 3 minutes
+	if(!readResponse(120)){ //timeout set to 3 minutes
 		connection_closed = closeConnection(2,6);
 		return FALSE;
 	}

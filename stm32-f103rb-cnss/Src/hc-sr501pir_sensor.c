@@ -22,7 +22,7 @@
  * If motion is sensed an iterrupt occurs and triggers EXTI4_IRQHandler(void)
  * Inorder to enable sensor, one must call enable_sensor().
  */
-void init_sensor_with_interrupt(){
+void SENSOR_init(){
 
 //	/*~~~USING D6 (PB10) -> !!!NEED TO CHANGE AS IT IS USED FOR I2C !!!!~~~*/
 // ---WORKS--DO-NOT-ERASE!!! (keep to check that eventqueue is working and for later perpuses)---

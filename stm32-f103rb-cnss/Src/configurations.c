@@ -48,9 +48,9 @@ BOOL CONFIGURATIONS_set_network(void){
 	}
 	else{
 		USART2_write((uint8_t*)("\r\nYour device was successfully registered."));
-		USART2_write((uint8_t*)("\r\nThis is your device ID: '"));
+		USART2_write((uint8_t*)("\r\nThis is your device ID: "));
 		USART2_write(DEVICE_ID);
-		USART2_write((uint8_t*)("'\r\nPlease coppy it, you will need it later."));
+		USART2_write((uint8_t*)("\r\nPlease coppy it, you will need it later."));
 		USART2_write((uint8_t*)("\r\n\r\nYou can now safely disconnect the device and connect it to an electric power supply."));
 		USART2_write((uint8_t*)"\r\nIf you ever wish to reset your network details,\r\nconnect the device to the computer and open 'TeraTerm'.");
 		USART2_write((uint8_t*)"\r\n\r\n");
