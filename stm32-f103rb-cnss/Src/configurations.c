@@ -33,26 +33,26 @@ void CONFIGURATIONS_set_device_id(void){
 
 BOOL CONFIGURATIONS_set_network(void){
 
-	USART2_write((uint8_t*)("\r\nWord to the wise: if at some point nothing seems to be happening"));
-	USART2_write((uint8_t*)("\r\ndisconnect the device from your computer, wait a few minutes, and then reconnect.\r\n"));
+	USART2_write((uint8_t*)("\033[96m\r\nIf at some point nothing seems to be happening\033[0m"));
+	USART2_write((uint8_t*)("\033[96m\r\ndisconnect the device from your computer, wait a few minutes, and then reconnect.\r\n\033[0m"));
 
 
 	if(!SYSTEM_CONTROL_set_up()){
-		USART2_write((uint8_t*)("\r\nNetwok connection error."));
-		USART2_write((uint8_t*)("\r\nIf you are sure you entered the correct network name and password,\r\ndo the following:"));
-		USART2_write((uint8_t*)("\r\nCheck your network signal, is it strong enough?"));
-		USART2_write((uint8_t*)("\r\nIf it is not, try again later or from another physical location."));
-		USART2_write((uint8_t*)("\r\nIf it is, hit the reset button or disconnect the device from the computer, wait a few minutes, then reconnect and try again."));
+		USART2_write((uint8_t*)("\033[91m\r\nNetwok connection error.\033[0m"));
+		USART2_write((uint8_t*)("\033[96m\r\nIf you are sure you entered the correct network name and password,\r\ndo the following:\033[0m"));
+		USART2_write((uint8_t*)("\033[96m\r\nCheck your network signal, is it strong enough?\033[0m"));
+		USART2_write((uint8_t*)("\033[96m\r\nIf it is not, try again later or from another physical location.\033[0m"));
+		USART2_write((uint8_t*)("\033[96mIf it is, hit the reset button or disconnect the device from the computer, wait a few minutes, then reconnect and try again.\033[0m"));
 		USART2_write((uint8_t*)"\r\n\r\n");
 		return FALSE;
 	}
 	else{
-		USART2_write((uint8_t*)("\r\nYour device was successfully registered."));
-		USART2_write((uint8_t*)("\r\nThis is your device ID: "));
+		USART2_write((uint8_t*)("\033[96m\r\nYour device was successfully registered.\033[0m"));
+		USART2_write((uint8_t*)("\033[96m\r\nThis is your device ID: \033[0m"));
 		USART2_write(DEVICE_ID);
-		USART2_write((uint8_t*)("\r\nPlease coppy it, you will need it later."));
-		USART2_write((uint8_t*)("\r\n\r\nYou can now safely disconnect the device and connect it to an electric power supply."));
-		USART2_write((uint8_t*)"\r\nIf you ever wish to reset your network details,\r\nconnect the device to the computer and open 'TeraTerm'.");
+		USART2_write((uint8_t*)("\033[32m\r\nCoppy it, you will need it later.\033[0m"));
+		USART2_write((uint8_t*)("\033[96m\r\n\r\nYou can now safely disconnect the device and connect it to an electric power supply.\033[0m"));
+		USART2_write((uint8_t*)"\033[96m\r\nIf you ever wish to reset your network details,\r\nconnect the device to the computer and open 'TeraTerm'.\033[0m");
 		USART2_write((uint8_t*)"\r\n\r\n");
 		return TRUE;
 	}
@@ -63,7 +63,7 @@ void* configuration_Handler(void){
 
 	CONFIGURATIONS_set_network(); // returns TRUE upon success
 
-	USART2_write((uint8_t*)"\r\nEnter 'ok' to continue: ");
+	USART2_write((uint8_t*)"\033[32m\r\nEnter 'ok' to continue: \033[0m");
 	USART2_enable_Rx();
 	while(!USART2_NEW_LINE_FOUND_get()); // wait for users input
 	USART2_disable_Rx();
@@ -71,10 +71,11 @@ void* configuration_Handler(void){
 	while(!USART2_ok()){
 		USART2_NEW_LINE_READ_set();
 
-		USART2_write((uint8_t*)"\r\nEnter 'ok' to continue: ");
+		USART2_write((uint8_t*)"\033[32m\r\nEnter 'ok' to continue: \033[0m");
 		USART2_enable_Rx();
 		while(!USART2_NEW_LINE_FOUND_get()); // wait for users input
 		USART2_disable_Rx();
+
 	}
 	USART2_NEW_LINE_READ_set();
 

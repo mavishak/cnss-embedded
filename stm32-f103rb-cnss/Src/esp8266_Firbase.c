@@ -276,7 +276,7 @@ BOOL registerDeviceID(void){
 	USART2_write((uint8_t*)"1\r\n");
 
 	//Join access point
-	if(!joinAccessPoint(2,15)){
+	if(!joinAccessPoint(2,30)){
 		return FALSE;
 	}
 	USART2_write((uint8_t*)"2\r\n");
@@ -303,7 +303,7 @@ BOOL registerDeviceID(void){
 	USART2_write((uint8_t*)"5\r\n");
 
 	//Read response
-	if(!readResponse(120)){ //timeout set to 3 minutes
+	if(!readResponse(60)){ //timeout set to 3 minutes
 		connection_closed = closeConnection(2,6);
 		return FALSE;
 	}
@@ -341,6 +341,7 @@ BOOL ping(uint32_t tries, uint32_t timeout){
 		}
 		else{ // FAIL OR TIMEOUT
 			tries--;
+			found = STANDBY; // reset found
 			USART1_write((uint8_t*)AT_COMMAND);
 		}
 	}
@@ -371,6 +372,7 @@ BOOL reset(uint32_t tries, uint32_t timeout){
 		}
 		else{ // FAIL OR TIMEOUT
 			tries--;
+			found = STANDBY; // reset found
 			USART1_write((uint8_t*)AT_RST);
 		}
 	}
@@ -400,6 +402,7 @@ BOOL setClientMode(uint32_t tries, uint32_t timeout){
 		}
 		else{ // FAIL OR TIMEOUT
 			tries--;
+			found = STANDBY; // reset found
 			USART1_write((uint8_t*)AT_CWMODE);
 		}
 	}
@@ -431,6 +434,7 @@ BOOL joinAccessPoint(uint32_t tries, uint32_t timeout){
 		}
 		else{ // FAIL OR TIMEOUT
 			tries--;
+			found = STANDBY; // reset found
 			USART1_write((uint8_t*)command);
 		}
 	}
@@ -463,6 +467,7 @@ BOOL connectFirebaseHost(uint32_t _ssl_tries, uint32_t _cipstart_tries , uint32_
 		}
 		else{ // FAIL OR TIMEOUT
 			_ssl_tries--;
+			found = STANDBY; // reset found
 			USART1_write((uint8_t*)"AT+CIPSSLSIZE=4096\r\n");
 		}
 	}
@@ -495,6 +500,7 @@ BOOL connectFirebaseHost(uint32_t _ssl_tries, uint32_t _cipstart_tries , uint32_
 		}
 		else{ // FAIL OR TIMEOUT
 			_cipstart_tries--;
+			found = STANDBY; // reset found
 			USART1_write((uint8_t*)command);
 		}
 	}
@@ -574,6 +580,7 @@ BOOL sendRequest(uint32_t _CIPSEND_tries,uint32_t _SEND_OK_tries , uint32_t _CIP
 		}
 		else{ // FAIL OR TIMEOUT
 			_CIPSEND_tries--;
+			found = STANDBY; // reset found
 			USART1_write((uint8_t*)command);
 		}
 	}
@@ -600,6 +607,7 @@ BOOL sendRequest(uint32_t _CIPSEND_tries,uint32_t _SEND_OK_tries , uint32_t _CIP
 		}
 		else{
 			_SEND_OK_tries--;
+			found = STANDBY; // reset found
 			USART1_write((uint8_t*)http);
 		}
 	}
@@ -631,7 +639,6 @@ BOOL readResponse(uint32_t timeout){
 }
 
 
-// THIS NEEDS TO CHANGE NEED TO CHECK WETHER IT'S ON OR OFF for that we need to retreive the content.
 BOOL parseResponse(uint32_t timeout){
 
 	found = STANDBY;
@@ -676,6 +683,7 @@ BOOL closeConnection(uint32_t tries, uint32_t timeout){
 		}
 		else{ // FAIL OR TIMEOUT
 			tries--;
+			found = STANDBY; // reset found
 			USART1_write((uint8_t*)AT_CIPCLOSE);
 		}
 	}

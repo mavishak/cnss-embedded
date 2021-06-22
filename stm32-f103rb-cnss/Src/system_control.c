@@ -22,16 +22,18 @@ uint8_t DEVICE_ID[ID_SIZE]; // extern see configurations
 
 BOOL SYSTEM_CONTROL_set_up(void){
 
-	USART2_write((uint8_t*)("\r\n\r\nDear user, thank you for participating in our project!\r\n"));
-	USART2_write((uint8_t*)("Just a few more steps...\r\n\r\n"));
-	USART2_write((uint8_t*)("The security device needs to connect to your WiFi network, for that we need to set your network connection information.\r\n"));
-	USART2_write((uint8_t*)("For your assurance, this information will not be saved in any database!\r\n"));
+	USART2_write((uint8_t*)("\033[96m\r\n\r\nDear user, thank you for participating in our project!\r\n\033[0m"));
+	USART2_write((uint8_t*)("\033[96mJust a few more steps...\r\n\r\n\033[0m"));
+	USART2_write((uint8_t*)("\033[96mThe security device needs to connect to your WiFi network.\r\n\033[0m"));
+	USART2_write((uint8_t*)("\033[96mFor that, we need you to enter your network connection information.\r\n\033[0m"));
+	USART2_write((uint8_t*)("\033[96mFor your assurance, this information will not be saved in any database!\r\n\033[0m"));
 
 	// set network ssid
+	USART2_set_buffer_Rx(); // reset buffer
 	while(!USART2_ok()){
 		USART2_NEW_LINE_READ_set();
 
-		USART2_write((uint8_t*)"\r\nNetwork name: ");
+		USART2_write((uint8_t*)"\033[32m\r\nEnter network name (case-sensitive): \033[0m");
 		USART2_enable_Rx();
 		while(!USART2_NEW_LINE_FOUND_get()); // wait for users input
 		USART2_disable_Rx();
@@ -39,14 +41,14 @@ BOOL SYSTEM_CONTROL_set_up(void){
 		while(!USART2_read_buffer_Rx(WiFi_SIZE, SSID)){
 			USART2_NEW_LINE_READ_set();
 
-			USART2_write((uint8_t*)"\r\nThe network name is too long, try again: ");
+			USART2_write((uint8_t*)"\033[91m\r\nThe network name is too long, try again: \033[0m");
 			USART2_enable_Rx();
 			while(!USART2_NEW_LINE_FOUND_get()); // wait for users input
 			USART2_disable_Rx();
 		}
 		USART2_NEW_LINE_READ_set();
 
-		USART2_write((uint8_t*)"Enter 'ok' to continue or any other key to change network name: ");
+		USART2_write((uint8_t*)"\033[32mEnter 'ok' to continue or any other key to change network name: \033[0m");
 		USART2_enable_Rx();
 		while(!USART2_NEW_LINE_FOUND_get()); // wait for users input
 		USART2_disable_Rx();
@@ -59,7 +61,7 @@ BOOL SYSTEM_CONTROL_set_up(void){
 	while(!USART2_ok()){
 		USART2_NEW_LINE_READ_set();
 
-		USART2_write((uint8_t*)"\r\nNetwork access code (password): ");
+		USART2_write((uint8_t*)"\033[32m\r\nEnter network access code (password): \033[0m");
 		USART2_enable_Rx();
 		while(!USART2_NEW_LINE_FOUND_get()); // wait for users input
 		USART2_disable_Rx();
@@ -67,21 +69,21 @@ BOOL SYSTEM_CONTROL_set_up(void){
 		while(!USART2_read_buffer_Rx(WiFi_SIZE, PWD)){
 			USART2_NEW_LINE_READ_set();
 
-			USART2_write((uint8_t*)"\r\nThe access code is to long, please try again: ");
+			USART2_write((uint8_t*)"\033[91m\r\nThe access code is to long, try again: \033[0m");
 			USART2_enable_Rx();
 			while(!USART2_NEW_LINE_FOUND_get()); // wait for users input
 			USART2_disable_Rx();
 		}
 		USART2_NEW_LINE_READ_set();
 
-		USART2_write((uint8_t*)"Enter 'ok' to continue or any other key to change password: ");
+		USART2_write((uint8_t*)"\033[32mEnter 'ok' to continue or any other key to change password: \033[0m");
 		USART2_enable_Rx();
 		while(!USART2_NEW_LINE_FOUND_get()); // wait for users input
 		USART2_disable_Rx();
 	}
 	USART2_NEW_LINE_READ_set();
 
-	USART2_write((uint8_t*)"\r\nTrying to connect...\r\nPlease wait, this might take a few minutes.");
+	USART2_write((uint8_t*)"\033[96m\r\nTrying to connect...\r\nPlease wait, this might take a few minutes.\033[0m");
 	USART2_write((uint8_t*)"\r\n\r\n");
 	TIMER4_delay(5);
 	return registeration_Handler();

@@ -13,8 +13,6 @@
 #include "common.h"
 
 
-
-//void ESPinit(void);
 void TestWifiConnection(void); // for testing
 
 
