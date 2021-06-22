@@ -66,7 +66,7 @@ int main(void)
 
 	USART2_enable_Rx(); // for ESC
 
-	USART2_write((uint8_t*)("\033[32m\r\nPress ESC to  configure\033[0m"));
+	USART2_write((uint8_t*)("\033[32m\r\nPress ESC to configure\033[0m"));
 	TIMER4_set_timeout(60);
 	while(QUEUE_isEmpty() && !TIMER4_timeout_done());
 

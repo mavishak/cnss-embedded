@@ -42,7 +42,8 @@ BOOL CONFIGURATIONS_set_network(void){
 		USART2_write((uint8_t*)("\033[96m\r\nIf you are sure you entered the correct network name and password,\r\ndo the following:\033[0m"));
 		USART2_write((uint8_t*)("\033[96m\r\nCheck your network signal, is it strong enough?\033[0m"));
 		USART2_write((uint8_t*)("\033[96m\r\nIf it is not, try again later or from another physical location.\033[0m"));
-		USART2_write((uint8_t*)("\033[96mIf it is, hit the reset button or disconnect the device from the computer, wait a few minutes, then reconnect and try again.\033[0m"));
+		USART2_write((uint8_t*)("\033[96mIf it is, hit the reset button or disconnect the device from the computer,\033[0m"));
+		USART2_write((uint8_t*)("\033[96m\r\nwait a few minutes, then reconnect and try again\033[0m"));
 		USART2_write((uint8_t*)"\r\n\r\n");
 		return FALSE;
 	}
