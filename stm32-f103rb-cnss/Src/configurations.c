@@ -51,7 +51,13 @@ BOOL CONFIGURATIONS_set_network(void){
 		USART2_write((uint8_t*)("\033[96m\r\nYour device was successfully registered.\033[0m"));
 		USART2_write((uint8_t*)("\033[96m\r\nThis is your device ID: \033[0m"));
 		USART2_write(DEVICE_ID);
-		USART2_write((uint8_t*)("\033[32m\r\nCoppy it, you will need it later.\033[0m"));
+		USART2_write((uint8_t*)("\033[32m\r\nCopy it, you will need it later.\033[0m"));
+		USART2_write((uint8_t*)"\r\n\r\n");
+		USART2_write((uint8_t*)("\033[96m\r\nIf you have previously created a user on the CNSS website,\r\nyou can set your device ID on the 'CNSS Settings' page.\033[0m"));
+		USART2_write((uint8_t*)("\033[32m\r\nLog in here: https://project-cnss.web.app/login\033[0m"));
+		USART2_write((uint8_t*)"\r\n");
+		USART2_write((uint8_t*)("\033[96m\r\nIf you have not created a user on the CNSS website, create one.\033[0m"));
+		USART2_write((uint8_t*)("\033[32m\r\nRegister here: https://project-cnss.web.app/register\033[0m"));
 		USART2_write((uint8_t*)("\033[96m\r\n\r\nYou can now safely disconnect the device and connect it to an electric power supply.\033[0m"));
 		USART2_write((uint8_t*)"\033[96m\r\nIf you ever wish to reset your network details,\r\nconnect the device to the computer and open 'TeraTerm'.\033[0m");
 		USART2_write((uint8_t*)"\r\n\r\n");
