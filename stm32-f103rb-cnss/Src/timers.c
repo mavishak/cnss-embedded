@@ -268,7 +268,7 @@ void TIM2_IRQHandler(void)
 		timer2.countTicks++;
 
 		// avoid overflow
-		if(timer2.countTicks == MAX_COUNT){
+		if((timer2.countTicks == MAX_COUNT) || (timer2.countTicks < 0)){
 			timer2.countTicks = 0;
 		}
 
@@ -286,7 +286,7 @@ void TIM3_IRQHandler(void)
 		timer3.countTicks++;
 
 		// avoid overflow
-		if(timer3.countTicks == MAX_COUNT){
+		if((timer3.countTicks == MAX_COUNT) || (timer3.countTicks < 0)){
 			timer3.countTicks = 0;
 		}
 
@@ -304,7 +304,7 @@ void TIM4_IRQHandler(void)
 		timer4.countTicks++;
 
 		// avoid overflow
-		if(timer4.countTicks == MAX_COUNT){
+		if((timer4.countTicks == MAX_COUNT) || (timer4.countTicks < 0)){
 			timer4.countTicks = 0;
 		}
 

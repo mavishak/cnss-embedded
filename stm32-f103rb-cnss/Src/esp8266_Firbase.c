@@ -80,10 +80,11 @@ void *control_Handler(void){
 
 	else if(state == ON){
 		enable_sensor();
+		TIMER3_enable();
 		LED_on();
 		USART2_write((uint8_t*)("\r\nON\r\n"));
 	}
-	else{ //NON
+	else{ //NON - no comunication
 		disable_sensor(); // As there is no comunication with Firebase there is no sence for the sensor to be on and send alerts.
 		TIMER3_disable(); // otherwise the timer will keep going for ever and an overflow will occur
 		LED_off();
